@@ -11,7 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        Schema::create('order_details', function (Blueprint $table) {
+            $table->integer('order_detail_id')->primary()->autoIncrement();
+            $table->integer('order_id');
+            $table->integer('product_id');
+            $table->integer('day_rent');
+            $table->date('due_on');
+            $table->enum('status', ['disewakan','dikembalikan']);
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
+            $table->foreign('order_id')->references('order_id')->on('orders')->onDelete('restrict');
+            $table->foreign('product_id')->references('product_id')->on('products')->onDelete('restrict');
+        });
     }
 
     /**

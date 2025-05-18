@@ -11,7 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        Schema::create('stock_logs', function (Blueprint $table) {
+            $table->integer('stock_log_id')->primary()->autoIncrement();
+            $table->integer('stock_id');
+            $table->enum('action', ['create', 'update', 'delete']);
+            $table->date('date');
+        });
     }
 
     /**

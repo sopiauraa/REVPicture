@@ -126,6 +126,23 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
 }
 
+@media (prefers-color-scheme: dark) {
+  .input-field {
+    background-color: #1e1e1e;
+    color: #f1f1f1;
+    border: 1px solid #444;
+  }
+
+  .input-label {
+    color: #ccc;
+  }
+
+  .form-container {
+    background-color: #121212;
+    color: #f1f1f1;
+  }
+}
+
 /* BUTTON */
 .button {
   background: #000;

@@ -1,30 +1,36 @@
-import React, { useState } from "react";
-import "../../../css/register-style.css"; // tetap pakai file CSS yang sama
+import React from "react";
+import { useForm } from "@inertiajs/react";
+import "../../../css/register-style.css";
 
-const Input = ({ value, onChange, placeholder, label }: any) => (
+const Input = ({ value, onChange, placeholder, label, name, error }: any) => (
   <div className="input-container">
     <label className="input-label">{label}</label>
     <input
       className="input-field"
+      name={name}
       placeholder={placeholder}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={onChange}
     />
+    {error && <div className="text-red-500 text-sm mt-1">{error}</div>}
   </div>
 );
 
-const Button = ({ onClick, children }: any) => (
-  <button className="button" onClick={onClick}>
+const Button = ({ type = "button", children }: any) => (
+  <button className="button" type={type}>
     <span className="button-text">{children}</span>
   </button>
 );
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [sandi, setSandi] = useState("");
+  const { data, setData, post, processing, errors } = useForm({
+    email: "",
+    password: "",
+  });
 
-  const handleSubmit = () => {
-    alert("Login berhasil!");
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    post("/login"); // matches Laravel login route
   };
 
   return (
@@ -47,31 +53,36 @@ const Login = () => {
       </div>
 
       {/* Login Form */}
-    <div className="form-center-wrapper">
-      <div className="form-content">
-        <div className="logo-wrapper">
-          <img
-            src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/7Z7cWQJTXY/ek0s7xjv_expires_30_days.png"
-            alt="Login Icon"
-            className="profile-image"
-          />
-        </div>
+      <div className="form-center-wrapper">
+        <form onSubmit={handleSubmit} className="form-content">
+          <div className="logo-wrapper">
+            <img
+              src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/7Z7cWQJTXY/ek0s7xjv_expires_30_days.png"
+              alt="Login Icon"
+              className="profile-image"
+            />
+          </div>
 
-        <Input
-          value={email}
-          onChange={setEmail}
-          placeholder="Masukkan Email Anda"
-          label="Email"
-        />
-        <Input
-          value={sandi}
-          onChange={setSandi}
-          placeholder="Masukkan Kata Sandi"
-          label="Kata Sandi"
-        />
-        <Button onClick={handleSubmit}>Masuk</Button>
+          <Input
+            name="email"
+            value={data.email}
+            onChange={(e: any) => setData("email", e.target.value)}
+            placeholder="Masukkan Email Anda"
+            label="Email"
+            error={errors.email}
+          />
+          <Input
+            name="password"
+            value={data.password}
+            onChange={(e: any) => setData("password", e.target.value)}
+            placeholder="Masukkan Kata Sandi"
+            label="Kata Sandi"
+            error={errors.password}
+          />
+
+          <Button type="submit">{processing ? "Memproses..." : "Masuk"}</Button>
+        </form>
       </div>
-    </div>  
     </div>
   );
 };

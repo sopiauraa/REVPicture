@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -12,6 +14,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 });
+
+//Register
+Route::post('/register', [RegisteredUserController::class, 'store']);
+
+//Login
+Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+Route::get('/login', [AuthenticatedSessionController::class, 'index']);
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

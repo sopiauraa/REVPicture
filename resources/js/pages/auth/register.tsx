@@ -1,33 +1,40 @@
-import React, { useState } from "react";
+import React from "react";
+import { useForm } from "@inertiajs/react";
 import "../../../css/register-style.css";
 
 // Input Component
-const Input = ({ value, onChange, placeholder, label }: any) => (
+const Input = ({ value, onChange, placeholder, label, name, error }: any) => (
   <div className="input-container">
     <label className="input-label">{label}</label>
     <input
       className="input-field"
+      name={name}
       placeholder={placeholder}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={onChange}
     />
+    {error && <div className="text-red-500 text-sm mt-1">{error}</div>}
   </div>
 );
 
 // Button Component
-const Button = ({ onClick, children }: any) => (
-  <button className="button" onClick={onClick}>
+const Button = ({ type = "button", children }: any) => (
+  <button className="button" type={type}>
     <span className="button-text">{children}</span>
   </button>
 );
 
 const Register = () => {
-  const [nama, setNama] = useState("");
-  const [email, setEmail] = useState("");
-  const [sandi, setSandi] = useState("");
+  const { data, setData, post, processing, errors } = useForm({
+    name: "",
+    email: "",
+    password: "",
+    password_confirmation: "",
+  });
 
-  const handleSubmit = () => {
-    alert("Daftar berhasil!");
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    post("/register"); 
   };
 
   return (
@@ -50,37 +57,56 @@ const Register = () => {
       </div>
 
       {/* Form Content */}
-<div className="form-center-wrapper">
-  <div className="form-content">
-    <div className="logo-wrapper">
-      <img
-        src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/7Z7cWQJTXY/ek0s7xjv_expires_30_days.png"
-        alt="Profile"
-        className="profile-image"
-      />
-    </div>
+      <div className="form-center-wrapper">
+        <form onSubmit={handleSubmit} className="form-content">
+          <div className="logo-wrapper">
+            <img
+              src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/7Z7cWQJTXY/ek0s7xjv_expires_30_days.png"
+              alt="Profile"
+              className="profile-image"
+            />
+          </div>
 
-    <Input
-      value={nama}
-      onChange={setNama}
-      placeholder="Masukkan Nama Anda"
-      label="Nama"
-    />
-    <Input
-      value={email}
-      onChange={setEmail}
-      placeholder="Masukkan Email Anda"
-      label="Email"
-    />
-    <Input
-      value={sandi}
-      onChange={setSandi}
-      placeholder="Masukkan Kata Sandi"
-      label="Kata Sandi"
-    />
-    <Button onClick={handleSubmit}>Daftar</Button>
-  </div>
-</div>
+          <Input
+            name="name"
+            value={data.name}
+            onChange={(e: any) => setData("name", e.target.value)}
+            placeholder="Masukkan Nama Anda"
+            label="Nama"
+            error={errors.name}
+          />
+          <Input
+            name="email"
+            value={data.email}
+            onChange={(e: any) => setData("email", e.target.value)}
+            placeholder="Masukkan Email Anda"
+            label="Email"
+            error={errors.email}
+          />
+          <Input
+            name="password"
+            value={data.password}
+            onChange={(e: any) => setData("password", e.target.value)}
+            placeholder="Masukkan Kata Sandi"
+            label="Kata Sandi"
+            error={errors.password}
+          />
+          <Input
+            name="password_confirmation"
+            value={data.password_confirmation}
+            onChange={(e: any) =>
+              setData("password_confirmation", e.target.value)
+            }
+            placeholder="Konfirmasi Kata Sandi"
+            label="Konfirmasi Kata Sandi"
+            error={errors.password_confirmation}
+          />
+
+          <Button type="submit">
+            {processing ? "Memproses..." : "Daftar"}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 };

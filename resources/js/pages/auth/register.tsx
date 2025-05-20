@@ -1,119 +1,88 @@
-import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import React, { useState } from "react";
+import "../../../css/register-style.css";
 
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
+// Input Component
+const Input = ({ value, onChange, placeholder, label }: any) => (
+  <div className="input-container">
+    <label className="input-label">{label}</label>
+    <input
+      className="input-field"
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  </div>
+);
 
-type RegisterForm = {
-    name: string;
-    email: string;
-    password: string;
-    password_confirmation: string;
+// Button Component
+const Button = ({ onClick, children }: any) => (
+  <button className="button" onClick={onClick}>
+    <span className="button-text">{children}</span>
+  </button>
+);
+
+const Register = () => {
+  const [nama, setNama] = useState("");
+  const [email, setEmail] = useState("");
+  const [sandi, setSandi] = useState("");
+
+  const handleSubmit = () => {
+    alert("Daftar berhasil!");
+  };
+
+  return (
+    <div className="form-container">
+      {/* Header / Navbar */}
+      <div className="header">
+        <div className="nav-left">
+          <img
+            src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/7Z7cWQJTXY/12jj40if_expires_30_days.png"
+            alt="Logo"
+            className="header-logo"
+          />
+          <span className="header-title">REV PICTURE</span>
+        </div>
+        <div className="header-nav">
+          <span className="header-nav-item">HOME</span>
+          <span className="header-nav-item">AKUN</span>
+          <span className="header-nav-item">KERANJANG</span>
+        </div>
+      </div>
+
+      {/* Form Content */}
+<div className="form-center-wrapper">
+  <div className="form-content">
+    <div className="logo-wrapper">
+      <img
+        src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/7Z7cWQJTXY/ek0s7xjv_expires_30_days.png"
+        alt="Profile"
+        className="profile-image"
+      />
+    </div>
+
+    <Input
+      value={nama}
+      onChange={setNama}
+      placeholder="Masukkan Nama Anda"
+      label="Nama"
+    />
+    <Input
+      value={email}
+      onChange={setEmail}
+      placeholder="Masukkan Email Anda"
+      label="Email"
+    />
+    <Input
+      value={sandi}
+      onChange={setSandi}
+      placeholder="Masukkan Kata Sandi"
+      label="Kata Sandi"
+    />
+    <Button onClick={handleSubmit}>Daftar</Button>
+  </div>
+</div>
+    </div>
+  );
 };
 
-export default function Register() {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-    });
-
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
-    };
-
-    return (
-        <AuthLayout title="Create an account" description="Enter your details below to create your account">
-            <Head title="Register" />
-            <form className="flex flex-col gap-6" onSubmit={submit}>
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                            id="name"
-                            type="text"
-                            required
-                            autoFocus
-                            tabIndex={1}
-                            autoComplete="name"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            disabled={processing}
-                            placeholder="Full name"
-                        />
-                        <InputError message={errors.name} className="mt-2" />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email address</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            required
-                            tabIndex={2}
-                            autoComplete="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            disabled={processing}
-                            placeholder="email@example.com"
-                        />
-                        <InputError message={errors.email} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={3}
-                            autoComplete="new-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            disabled={processing}
-                            placeholder="Password"
-                        />
-                        <InputError message={errors.password} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="password_confirmation">Confirm password</Label>
-                        <Input
-                            id="password_confirmation"
-                            type="password"
-                            required
-                            tabIndex={4}
-                            autoComplete="new-password"
-                            value={data.password_confirmation}
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                            disabled={processing}
-                            placeholder="Confirm password"
-                        />
-                        <InputError message={errors.password_confirmation} />
-                    </div>
-
-                    <Button type="submit" className="mt-2 w-full" tabIndex={5} disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Create account
-                    </Button>
-                </div>
-
-                <div className="text-muted-foreground text-center text-sm">
-                    Already have an account?{' '}
-                    <TextLink href={route('login')} tabIndex={6}>
-                        Log in
-                    </TextLink>
-                </div>
-            </form>
-        </AuthLayout>
-    );
-}
+export default Register;

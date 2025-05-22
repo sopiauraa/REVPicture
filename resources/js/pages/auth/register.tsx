@@ -35,7 +35,7 @@ const Register = () => {
     return (
         <div className="form-container">
             {/* Header / Navbar */}
-            <div className="header">
+            {/* <div className="header">
                 <div className="nav-left">
                     <img
                         src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/7Z7cWQJTXY/12jj40if_expires_30_days.png"
@@ -49,7 +49,7 @@ const Register = () => {
                     <span className="header-nav-item">AKUN</span>
                     <span className="header-nav-item">KERANJANG</span>
                 </div>
-            </div>
+            </div> */}
 
             {/* Form Content */}
             <div className="form-center-wrapper">

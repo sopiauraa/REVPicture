@@ -21,7 +21,7 @@ body {
 }
 
 /* NAVBAR */
-.header {
+/* .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -61,7 +61,7 @@ body {
 
 .header-nav-item:hover {
   color: #d4af7f;
-}
+} */
 
 /* FORM CARD */
 
@@ -96,7 +96,7 @@ body {
 .profile-image {
   width: 130px;
   height: 130px;
-  margin-bottom: 24px;
+  /* margin-bottom: 24px; */
   border-radius: 100%;
   object-fit: contain;
 }
@@ -110,7 +110,7 @@ body {
 .input-label {
   display: block;
   margin-left: 8px;
-  margin-bottom: 6px;
+  /* margin-bottom: 6px; */
   font-size: 16px;
   color: #000;
   font-weight: 500;

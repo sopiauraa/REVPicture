@@ -22,6 +22,10 @@ Route::post('/register', [RegisteredUserController::class, 'store']);
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 Route::get('/login', [AuthenticatedSessionController::class, 'index']);
 
+// landing
+Route::get('/landing', function () { return Inertia::render('landing');});
+
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

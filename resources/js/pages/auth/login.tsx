@@ -30,7 +30,7 @@ const Login = () => {
     return (
         <div className="form-container">
             {/* Header */}
-            <div className="header">
+            {/* <div className="header">
                 <div className="nav-left">
                     <img
                         src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/7Z7cWQJTXY/12jj40if_expires_30_days.png"
@@ -44,7 +44,7 @@ const Login = () => {
                     <span className="header-nav-item">AKUN</span>
                     <span className="header-nav-item">KERANJANG</span>
                 </div>
-            </div>
+            </div> */}
 
             {/* Login Form */}
             <div className="form-center-wrapper">

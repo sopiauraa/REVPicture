@@ -59,6 +59,8 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still

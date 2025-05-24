@@ -1,162 +1,139 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import Slider from 'react-slick';
-import { motion, AnimatePresence } from 'framer-motion';
-import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import Navbar from '../components/navbar';
+import 'slick-carousel/slick/slick.css';
 import Footer from '../components/footer';
+import Navbar from '../components/navbar';
+import ErrorBoundary from '@/components/error-boundary';
 
-const Landing = () => {
-  const [cart, setCart] = useState<string[]>([]);
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupMsg, setPopupMsg] = useState('');
+type Product = {
+    product_id: number;
+    product_name: string;
+    product_description: string;
+    brand: string;
+    product_image: string;
+    eight_hour_rent_price: number;
+    twenty_four_hour_rent_price: number;
+};
 
-  const handleAddToCart = (name: string) => {
-    setCart([...cart, name]);
-    setPopupMsg(`${name} berhasil ditambahkan ke keranjang!`);
-    setShowPopup(true);
-    setTimeout(() => setShowPopup(false), 2000);
-  };
+type Props = {
+    cameraProducts: Product[];
+    lensProducts: Product[];
+};
 
-  const ProductCard = ({
-    imgSrc,
-    alt,
-    name,
-    price,
-  }: {
-    imgSrc: string;
-    alt: string;
-    name: string;
-    price: number;
-  }) => (
-    <motion.div
-      className="bg-white rounded-xl shadow-md w-[180px] min-w-[180px] p-4 flex flex-col items-center"
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      <img
-        src={imgSrc || 'https://via.placeholder.com/150'}
-        alt={alt}
-        className="w-full h-32 object-contain mb-3"
-      />
-      <div className="text-[#3a372f] text-sm font-bold text-center leading-tight">
-        {name}
-      </div>
-      <div className="text-[#7b5e3b] text-sm my-1">
-        Rp {price.toLocaleString('id-ID')}
-      </div>
-      <button
-        onClick={() => handleAddToCart(name)}
-        className="bg-black text-white text-sm font-bold py-1 px-4 rounded hover:bg-[#444] transition"
-      >
-        + Keranjang
-      </button>
-    </motion.div>
-  );
+const Landing = ({ cameraProducts, lensProducts }: Props) => {
+    const [cart, setCart] = useState<string[]>([]);
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMsg, setPopupMsg] = useState('');
 
-  const cameraProducts = [
-    {
-      imgSrc: 'https://storage.googleapis.com/a1aa/image/76626525-dd1a-4578-c804-d38d66ffb9c6.jpg',
-      alt: 'Sony A7 Mark III',
-      name: 'SONY A7 MARK III',
-      price: 250000,
-    },
-    {
-      imgSrc: 'https://storage.googleapis.com/a1aa/image/c829af28-b5f7-41c5-c6e2-33d18dfc9255.jpg',
-      alt: 'Canon EOS M50',
-      name: 'CANON EOS M50',
-      price: 200000,
-    },
-  ];
-  const cameraDisplay = [...cameraProducts, ...cameraProducts, ...cameraProducts].slice(0, 6);
+    const handleAddToCart = (name: string) => {
+        setCart([...cart, name]);
+        setPopupMsg(`${name} berhasil ditambahkan ke keranjang!`);
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 2000);
+    };
 
-  const lensProducts = [
-    {
-      imgSrc: 'https://storage.googleapis.com/a1aa/image/74c7a020-fb9f-4cf4-98ef-6cd5fa4ba4f3.jpg',
-      alt: 'Sony 24-70 GM F2.8',
-      name: 'Sony 24-70 GM F2.8',
-      price: 150000,
-    },
-  ];
-  const lensDisplay = Array(6).fill(lensProducts[0]);
+    const ProductCard = ({ product }: { product: Product }) => (
+        <motion.div
+            className="flex w-[180px] min-w-[180px] flex-col items-center rounded-xl bg-white p-4 shadow-md"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+        >
+            <img
+                src={product.product_image}
+                className="mb-3 h-32 w-full object-contain"
+            />
+            <div className="text-center text-sm leading-tight font-bold text-[#3a372f]">{product.product_name}</div>
+            <div className="my-1 text-sm text-[#7b5e3b]">8 Jam: Rp {product.eight_hour_rent_price.toLocaleString('id-ID')}</div>
+            <div className="my-1 text-sm text-[#7b5e3b]">24 Jam: Rp {product.twenty_four_hour_rent_price.toLocaleString('id-ID')}</div>
+            <button
+                onClick={() => handleAddToCart(product.product_name)}
+                className="rounded bg-black px-4 py-1 text-sm font-bold text-white transition hover:bg-[#444]"
+            >
+                + Keranjang
+            </button>
+        </motion.div>
+    );
 
-  const heroImages = [
-    'https://storage.googleapis.com/a1aa/image/c829af28-b5f7-41c5-c6e2-33d18dfc9255.jpg',
-    'https://storage.googleapis.com/a1aa/image/12d0fd21-cc11-49f1-a1cf-71220c4ea183.jpg',
-    'https://storage.googleapis.com/a1aa/image/a1680f8f-99e7-402e-bc8e-62cfe2ecb79f.jpg',
-  ];
+    const cameraDisplay = cameraProducts;
+    const lensDisplay = lensProducts;
 
-  const sliderSettings = {
-    autoplay: true,
-    autoplaySpeed: 3000,
-    infinite: true,
-    dots: true,
-    arrows: true,
-    slidesToShow: 1,
-    responsive: [{ breakpoint: 768, settings: { slidesToShow: 1 } }],
-  };
+    const heroImages = [
+        'https://storage.googleapis.com/a1aa/image/c829af28-b5f7-41c5-c6e2-33d18dfc9255.jpg',
+        'https://storage.googleapis.com/a1aa/image/12d0fd21-cc11-49f1-a1cf-71220c4ea183.jpg',
+        'https://storage.googleapis.com/a1aa/image/a1680f8f-99e7-402e-bc8e-62cfe2ecb79f.jpg',
+    ];
 
-  return (
-    <div className="min-h-screen flex flex-col bg-[#f6eee1]">
-      {/* Navbar */}
-      <div className="bg-black pb-16">
-        <Navbar />
+    const sliderSettings = {
+        autoplay: true,
+        autoplaySpeed: 3000,
+        infinite: true,
+        dots: true,
+        arrows: true,
+        slidesToShow: 1,
+        responsive: [{ breakpoint: 768, settings: { slidesToShow: 1 } }],
+    };
 
-        {/* Hero Slider */}
-        <div className="max-w-2xl mx-auto mt-6 px-4 w-full">
-          <Slider {...sliderSettings}>
-            {heroImages.map((src, i) => (
-              <motion.img
-                key={i}
-                src={src}
-                alt={`kamera ${i}`}
-                className="w-full h-auto rounded-md shadow-xl"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-              />
-            ))}
-          </Slider>
-        </div>
-      </div>
+    return (<ErrorBoundary>
+        <div className="flex min-h-screen flex-col bg-[#f6eee1]">
+            {/* Navbar */}
+            <div className="bg-black pb-16">
+                <Navbar />
 
-      {/* Produk Kamera */}
-      <section className="mt-10 px-6">
-        {/* <h3 className=" text-[#3a372f] font-bold text-xl mb-3">Kamera</h3> */}
-        <div className="justify-center flex overflow-x-auto gap-4 pb-4 scrollbar-hide">
-          {cameraDisplay.map((item, i) => (
-            <ProductCard key={i} {...item} />
-          ))}
-        </div>
-      </section>
+                {/* Hero Slider */}
+                <div className="mx-auto mt-6 w-full max-w-2xl px-4">
+                    <Slider {...sliderSettings}>
+                        {heroImages.map((src, i) => (
+                            <motion.img
+                                key={i}
+                                src={src}
+                                alt={`kamera ${i}`}
+                                className="h-auto w-full rounded-md shadow-xl"
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8 }}
+                            />
+                        ))}
+                    </Slider>
+                </div>
+            </div>
 
-      {/* Produk Lensa */}
-      <section className="mt-6 px-6 mb-10">
-        {/* <h3 className="text-[#3a372f] font-bold text-xl mb-3">Lensa</h3> */}
-        <div className="justify-center flex overflow-x-auto gap-4 pb-4 scrollbar-hide">
-          {lensDisplay.map((item, i) => (
-            <ProductCard key={i} {...item} />
-          ))}
-        </div>
-      </section>
+            {/* Produk Kamera */}
+            <section className="mt-10 px-6">
+                {/* <h3 className=" text-[#3a372f] font-bold text-xl mb-3">Kamera</h3> */}
+                <div className="scrollbar-hide flex justify-center gap-4 overflow-x-auto pb-4">
+                    {cameraDisplay.map((item, i) => (
+                        <ProductCard key={i} product={item} />
+                    ))}
+                </div>
+            </section>
 
-      {/* Popup Keranjang */}
-      <AnimatePresence>
-        {showPopup && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-10 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded shadow-lg z-50"
-          >
-            ✅ {popupMsg}
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <Footer />
-    </div>
-   
-  );
+            {/* Produk Lensa */}
+            <section className="mt-6 mb-10 px-6">
+                {/* <h3 className="text-[#3a372f] font-bold text-xl mb-3">Lensa</h3> */}
+                <div className="scrollbar-hide flex justify-center gap-4 overflow-x-auto pb-4">
+                    {lensDisplay.map((item, i) => (
+                        <ProductCard key={i} product={item} />
+                    ))}
+                </div>
+            </section>
+
+            {/* Popup Keranjang */}
+            <AnimatePresence>
+                {showPopup && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="fixed top-10 left-1/2 z-50 -translate-x-1/2 transform rounded bg-green-600 px-6 py-3 text-white shadow-lg"
+                    >
+                        ✅ {popupMsg}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            <Footer />
+        </div></ErrorBoundary>
+    );
 };
 export default Landing;
-

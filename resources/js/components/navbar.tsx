@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search } from "lucide-react";
+import { Link } from '@inertiajs/react';
 
 const Navbar = () => {
   const [brandOpen, setBrandOpen] = useState(false);
@@ -55,9 +56,9 @@ const Navbar = () => {
 
           {/* Menu atas kanan */}
           <div className={`flex-col md:flex md:flex-row items-center gap-5 text-sm ${menuOpen ? 'flex' : 'hidden'} md:flex`}>
-            <a href="#" className="flex items-center gap-1 hover:text-yellow-400 transition">
+            <Link href="/" className="flex items-center gap-1 hover:text-yellow-400 transition">
               <i className="fas fa-home" /> BERANDA
-            </a>
+            </Link>
 
             {/* Dropdown AKUN */}
             <div
@@ -71,8 +72,8 @@ const Navbar = () => {
 
               {akunOpen && (
                 <div className="absolute left-0 mt-2 w-32 bg-[#3a372f] rounded shadow-md text-left z-50 animate-fadeIn" onMouseLeave={() => setAkunOpen(false)}>
-                  <div className="px-4 py-2 hover:bg-[#2e2c27] cursor-pointer transition">Login</div>
-                  <div className="px-4 py-2 hover:bg-[#2e2c27] cursor-pointer transition">Register</div>
+                  <div className="px-4 py-2 hover:bg-[#2e2c27] cursor-pointer transition"><Link href="/login">Login</Link></div>
+                  <div className="px-4 py-2 hover:bg-[#2e2c27] cursor-pointer transition"><Link href="/register">Register</Link></div>
                 </div>
               )}
             </div>

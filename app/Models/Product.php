@@ -9,10 +9,10 @@ class Product extends Model
 {
     /** @use HasFactory<\Database\Factories\ProductFactory> */
     use HasFactory;
-
+    public $timestamps = false;
     protected $primaryKey = 'product_id';
 
-     protected $fillable = [
+    protected $fillable = [
         'product_type',
         'product_name',
         'product_description',
@@ -21,5 +21,12 @@ class Product extends Model
         'brand',
         'eight_hour_rent_price',
         'twenty_four_hour_rent_price',
+
     ];
+
+    public function stock()
+    {
+        return $this->hasOne(Stock::class, 'product_id');
+    }
 }
+

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->integer('stock_id')->primary()->autoIncrement();
             $table->integer('product_id');
             $table->integer('stock_available');
-            $table->integer('stock_on_rent');
+            $table->integer('stock_on_rent')->default(0)->change();
             $table->timestamp('last_updated')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
             $table->foreign('product_id')->references('product_id')->on('products')->onDelete('restrict'); 
         });

@@ -6,6 +6,10 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
 @custom-variant dark (&:is(.dark *));
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 
 @theme {
     --font-sans:
@@ -155,7 +159,17 @@
         @apply border-border;
     }
 
-    body {
-        @apply bg-background text-foreground;
+    html, body {
+        @apply bg-[#FCF6EF] text-[#1a1a1a];
     }
 }
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  10%, 90% { opacity: 1; }
+}
+
+.animate-fadeInOut {
+  animation: fadeInOut 3s ease forwards;
+}
+

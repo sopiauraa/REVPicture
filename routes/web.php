@@ -25,6 +25,11 @@ Route::get('/login', [AuthenticatedSessionController::class, 'index']);
 // landing
 Route::get('/landing', function () { return Inertia::render('landing');});
 
+// admin
+Route::get('/admin/Dashboard', function () { return Inertia::render('admin/Dashboard'); });
+Route::get('/admin/DataBarang', function () { return Inertia::render('admin/DataBarang'); });
+Route::get('/admin/BookingMasuk', function () { return Inertia::render('/admin/BookingMasuk'); });
+
 
 
 require __DIR__.'/settings.php';

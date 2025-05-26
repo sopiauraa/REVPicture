@@ -27,7 +27,8 @@
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
-                background-color: oklch(1 0 0);
+                overscroll-behavior: none;
+                background-color: #F2F2F2;
             }
 
             html.dark {
@@ -49,7 +50,8 @@
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
         @inertiaHead
     </head>
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased ">
+        
         @inertia
     </body>
 </html>

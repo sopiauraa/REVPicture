@@ -29,8 +29,13 @@ Route::get('/landing', function () { return Inertia::render('landing');});
 
 // admin
 Route::get('/admin/dashboard', function () { return Inertia::render('admin/dashboard'); });
-Route::get('/admin/databarang', function () { return Inertia::render('admin/databarang'); });
-Route::get('/admin/BookingMasuk', function () { return Inertia::render('/admin/BookingMasuk'); });
+//Route::get('/admin/databarang', function () { return Inertia::render('admin/databarang'); });
+Route::get('/admin/BookingMasuk', function () { return Inertia::render('admin/BookingMasuk'); });
+
+Route::prefix('admin')->group(function () {
+    Route::post('/products/store', [ProductController::class, 'store'])->name('admin.products.store');
+    Route::get('/databarang', [ProductController::class, 'admin'])->name('admin.databarang');
+});
 
 Route::get('/landing', function () {
     return Inertia::render('landing'); });

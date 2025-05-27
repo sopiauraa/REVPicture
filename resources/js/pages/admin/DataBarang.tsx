@@ -108,7 +108,7 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
                             <td>{prod.brand}</td>
                             <td>{prod.stock?.stock_available ?? 0}</td>
                             <td>
-                                {prod.eight_hour_rent_price} / {prod.twenty_four_hour_rent_price}
+                                {prod.eight_hour_rent_price}/8 ; {prod.twenty_four_hour_rent_price}/24
                             </td>
                         </tr>
                     ))}

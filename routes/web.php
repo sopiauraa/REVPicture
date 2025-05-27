@@ -13,20 +13,25 @@ use Inertia\Inertia;
 
 Route::get('/', [ProductController::class, 'showLanding'])->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-});
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     Route::get('dashboard', function () {
+//         return Inertia::render('dashboard');
+//     })->name('dashboard');
+// });
 
 
 Route::get('/login', [AuthenticatedSessionController::class, 'index']);
 
 
 // admin
-Route::get('/admin/Dashboard', function () { return Inertia::render('admin/Dashboard'); });
-Route::get('/admin/DataBarang', function () { return Inertia::render('admin/DataBarang'); });
-Route::get('/admin/BookingMasuk', function () { return Inertia::render('/admin/BookingMasuk'); });
+Route::get('/admin/dashboard', function () { return Inertia::render('admin/dashboard'); });
+//Route::get('/admin/databarang', function () { return Inertia::render('admin/databarang'); });
+Route::get('/admin/BookingMasuk', function () { return Inertia::render('admin/BookingMasuk'); });
+
+Route::prefix('admin')->group(function () {
+    Route::post('/products/store', [ProductController::class, 'store'])->name('admin.products.store');
+    Route::get('/databarang', [ProductController::class, 'admin'])->name('admin.databarang');
+});
 
 Route::get('/landing', function () {
     return Inertia::render('landing'); });

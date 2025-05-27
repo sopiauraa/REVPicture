@@ -14,6 +14,7 @@ Route::get('/login', [AuthenticatedSessionController::class, 'index']);
 
 // landing
 Route::get('/landing', function () { return Inertia::render('landing');});
+Route::get('brand', function () { return Inertia::render('brand');});
 Route::get('/landing', function () {
     return Inertia::render('landing'); });
 

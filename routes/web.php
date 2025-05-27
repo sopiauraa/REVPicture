@@ -15,11 +15,11 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-});
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     Route::get('dashboard', function () {
+//         return Inertia::render('dashboard');
+//     })->name('dashboard');
+// });
 
 
 Route::get('/login', [AuthenticatedSessionController::class, 'index']);
@@ -29,7 +29,7 @@ Route::get('/landing', function () { return Inertia::render('landing');});
 
 // admin
 Route::get('/admin/dashboard', function () { return Inertia::render('admin/dashboard'); });
-Route::get('/admin/DataBarang', function () { return Inertia::render('admin/DataBarang'); });
+Route::get('/admin/databarang', function () { return Inertia::render('admin/databarang'); });
 Route::get('/admin/BookingMasuk', function () { return Inertia::render('/admin/BookingMasuk'); });
 
 Route::get('/landing', function () {

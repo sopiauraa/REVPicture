@@ -2,8 +2,8 @@ import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
 
 const navItems = [
-  { label: "Dashboard", icon: "fa-home", href: "/admin/Dashboard" },
-  { label: "Data Barang", icon: "fa-box", href: "/admin/DataBarang" },
+  { label: "Dashboard", icon: "fa-home", href: "/admin/dashboard" },
+  { label: "Data Barang", icon: "fa-box", href: "/admin/databarang" },
   { label: "Booking Masuk", icon: "fa-envelope-open-text", href: "/admin/BookingMasuk" },
   { label: "Kalender Sewa", icon: "fa-calendar-alt", href: "/admin/kalender" },
   { label: "Data Penyewa", icon: "fa-users", href: "/admin/penyewa" },

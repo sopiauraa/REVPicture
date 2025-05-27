@@ -11,9 +11,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use Inertia\Inertia;
     
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+Route::get('/', [ProductController::class, 'showLanding'])->name('home');
 
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     Route::get('dashboard', function () {
@@ -24,8 +22,6 @@ Route::get('/', function () {
 
 Route::get('/login', [AuthenticatedSessionController::class, 'index']);
 
-// landing
-Route::get('/landing', function () { return Inertia::render('landing');});
 
 // admin
 Route::get('/admin/dashboard', function () { return Inertia::render('admin/dashboard'); });

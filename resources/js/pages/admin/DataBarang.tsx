@@ -26,7 +26,7 @@ interface Props {
     };
 }
 
-const DataBarang: React.FC<Props> = ({ products, filters }) => {
+const DataBarangAdmin: React.FC<Props> = ({ products, filters }) => {
     const [showModal, setShowModal] = useState(false);
     const { data, setData, post } = useForm({
         product_name: '',
@@ -203,7 +203,6 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
     );
 };
 
-
 // const DataBarang = () => {
 
 //     return (
@@ -313,4 +312,4 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
 //     );
 // };
 
-export default DataBarang;
+export default DataBarangAdmin;

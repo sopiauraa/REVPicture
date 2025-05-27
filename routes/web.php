@@ -1,5 +1,5 @@
 <?php
-
+use Illuminate\Support\Facades\Route;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Stock;
@@ -10,22 +10,27 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Inertia\Inertia;
     
-Route::get('/login', [AuthenticatedSessionController::class, 'index']);
 
-// landing
-Route::get('/landing', function () { return Inertia::render('landing');});
-Route::get('brand', function () { return Inertia::render('brand');});
-Route::get('/landing', function () {
-    return Inertia::render('landing'); });
+Route::get('/', [ProductController::class, 'showLanding'])->name('home');
 
-// Route::get('/data_barang', function () { 
-//     $products = Product::select('product_id', 'product_type', 'product_name', 'product_image', 'brand', 'eight_hour_rent_price', 'twenty_four_hour_rent_price')->get();
-//     return Inertia::render('staff/staff_data_barang', [
-//         'products' => $products,
-//     ]);
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     Route::get('dashboard', function () {
+//         return Inertia::render('dashboard');
+//     })->name('dashboard');
 // });
 
-//Route::get('/data_barang', [ProductController::class, 'index'])->name('staff.staff_data_barang');
+
+Route::get('/login', [AuthenticatedSessionController::class, 'index']);
+Route::get('/brand', function () { return Inertia::render('brand');});
+
+
+// admin
+Route::get('/admin/dashboard', function () { return Inertia::render('admin/dashboard'); });
+Route::get('/admin/databarang', function () { return Inertia::render('admin/databarang'); });
+Route::get('/admin/BookingMasuk', function () { return Inertia::render('/admin/BookingMasuk'); });
+
+Route::get('/landing', function () {
+    return Inertia::render('landing'); });
 
 Route::prefix('staff')->group(function () {
     Route::post('/products/store', [ProductController::class, 'store'])->name('staff.products.store');
@@ -47,6 +52,12 @@ Route::patch('/staff/data_sewa/{rental}', [SewaController::class, 'update']);
 Route::get('/data_barang', function () { return Inertia::render('StaffDataBarang');});
 //Display Product (Landing)
 Route::get('/shop', [ProductController::class, 'index']);
+
+
+// user
+
+Route::get('detailproduk', function () { return Inertia::render('detailproduk');});
+
 
 
 require __DIR__.'/settings.php';

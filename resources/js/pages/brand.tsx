@@ -1,9 +1,10 @@
 import ErrorBoundary from '@/components/error-boundary';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import 'slick-carousel/slick/slick-theme.css';
 import 'slick-carousel/slick/slick.css';
 import Footer from '../components/footer';
+import Navbar from '../components/navbar';
 
 type Product = {
     product_id: number;
@@ -47,30 +48,40 @@ const ProductCard = ({ product }: { product: Product }) => (
     </motion.div>
 );
 
-// Nav item with color toggle
-function NavItem({ label, href }: { label: string; href: string }) {
-    const [active, setActive] = useState(false);
-    const activeColor = '#9a9996';
-    const idleColor = '#7f7a73';
-
-    return (
-        <motion.a
-            href={href}
-            onClick={() => setActive(!active)}
-            animate={{ backgroundColor: active ? activeColor : idleColor }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: 0.15, ease: 'easeInOut' }}
-            className="rounded-md px-4 py-2 text-center text-sm font-bold whitespace-nowrap text-white"
-        >
-            {label}
-        </motion.a>
-    );
-}
-
 export default function SonyProductsPage({ cameraProducts = [], lensProducts = [] }: Props) {
+    // State filter: 'all', 'camera', atau 'lens'
+    const [filter, setFilter] = useState<'all' | 'camera' | 'lens'>('all');
+
+    // State untuk kontrol dropdown
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // close dropdown saat klik di luar
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     // Combine and fallback to mock
     const combined = [...cameraProducts, ...lensProducts];
-    const products = combined.length > 0 ? combined : mockProducts;
+    const allProducts = combined.length > 0 ? combined : mockProducts;
+
+    // Pilih produk berdasarkan filter
+    const products =
+        filter === 'camera'
+            ? cameraProducts.length > 0
+                ? cameraProducts
+                : []
+            : filter === 'lens'
+              ? lensProducts.length > 0
+                  ? lensProducts
+                  : []
+              : allProducts;
 
     // Slider settings for horizontal scrolling
     const sliderSettings = {
@@ -87,63 +98,81 @@ export default function SonyProductsPage({ cameraProducts = [], lensProducts = [
     };
     return (
         <div className="flex min-h-screen flex-col bg-[#f9f1e9]">
-            {/* Header */}
-            <header className="w-full bg-[#3f3a35] text-white">
-                <div className="mx-auto flex max-w-7xl flex-col items-center justify-between px-4 py-2 md:flex-row md:py-4">
-                    <img
-                        src="/images/revv.png" /* Ganti path dengan lokasi file logomu */
-                        alt="REV Picture Logo"
-                        className="mb-2 h-8 w-auto md:mb-0 md:h-10 lg:h-12" /* Atur tinggi sesuai kebutuhan */
-                    />
-                    <form className="relative mb-2 flex w-full items-center md:mb-0 md:w-auto">
-                        <input
-                            type="text"
-                            placeholder="Cari"
-                            className="w-full rounded-full border border-gray-200 bg-white px-4 py-1 pr-10 text-sm text-[#3f3a35] placeholder-gray-500 focus:ring-2 focus:ring-white/50 focus:outline-none md:w-80 lg:w-96"
-                        />
-                        <button type="submit" className="absolute top-1/2 right-4 -translate-y-1/2 transform text-[#3f3a35] hover:text-[#1f1d1a]">
-                            <i className="fas fa-search" />
-                        </button>
-                    </form>
-                    <nav className="flex space-x-4 text-xs md:space-x-6 md:text-sm">
-                        <a href="#" className="flex items-center space-x-1 hover:underline">
-                            <i className="fas fa-home" /> <span>BERANDA</span>
-                        </a>
-                        <a href="#" className="flex items-center space-x-1 hover:underline">
-                            <i className="fas fa-user" /> <span>AKUN</span>
-                        </a>
-                        <a href="#" className="flex items-center space-x-1 hover:underline">
-                            <i className="fas fa-shopping-cart" /> <span>KERANJANG</span>
-                        </a>
-                    </nav>
-                </div>
-                {/* NAV BAWAH */}
-                <div className="w-full bg-[#7f7a73]">
-                    <div className="mx-auto max-w-7xl px-4 py-3">
-                        <nav className="flex flex-wrap items-center justify-evenly gap-4 md:gap-8 lg:gap-12">
-                            <NavItem label="Brand" href="/" />
-                            <NavItem label="Kamera" href="/kamera" />
-                            <NavItem label="Lensa" href="/lensa" />
-                            <NavItem label="Paket Rev Picture" href="/paket" />
-                            <NavItem label="Penting Dibaca" href="/penting" />
-                        </nav>
-                    </div>
-                </div>
-            </header>
-
             {/* MAIN CONTENT */}
-            <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6 space-y-12">
-                <ErrorBoundary>
-                    <div className="mb-6 flex cursor-pointer items-center space-x-2 text-sm text-[#3f3a35] select-none">
-                        <i className="fas fa-arrow-left" />
-                        <h2 className="text-base font-bold">Sony</h2>
+            <ErrorBoundary>
+                <Navbar />
+            </ErrorBoundary>
+            <main className="w-full flex-1 bg-[#f9f1e9] py-6">
+                <div className="container mx-auto px-4 pb-20">
+                    <div className="mb-6 flex items-center justify-between">
+                        <div className="flex cursor-pointer items-center space-x-2 text-sm text-[#3f3a35] select-none" onClick={() => history.back()}>
+                            <i className="fas fa-arrow-left" />
+                            <h2 className="text-base font-bold">Sony</h2>
+                        </div>
+
+                        {/* Filter dropdown*/}
+                        <div className="relative inline-block text-right" ref={dropdownRef}>
+                            <button
+                                type="button"
+                                onClick={() => setIsDropdownOpen((v) => !v)}
+                                className="inline-flex items-center rounded-md bg-[#7f7a73] px-4 py-2 text-white hover:bg-[#3a372f] focus:outline-none"
+                            >
+                                {filter === 'all' ? 'Semua' : filter === 'camera' ? 'Kamera' : 'Lensa'}
+                                <svg
+                                    className="ml-2 h-4 w-4 text-white"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            {isDropdownOpen && (
+                                <div className="ring-opacity-5 absolute right-0 mt-2 w-40 origin-top-right rounded-md bg-[#7f7a73] shadow-lg ring-1 ring-black">
+                                    <div className="py-1">
+                                        <button
+                                            onClick={() => {
+                                                setFilter('all');
+                                                setIsDropdownOpen(false);
+                                            }}
+                                            className="block w-full px-4 py-2 text-left text-sm text-white hover:bg-[#3a372f]"
+                                        >
+                                            Semua
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setFilter('camera');
+                                                setIsDropdownOpen(false);
+                                            }}
+                                            className="block w-full px-4 py-2 text-left text-sm text-white hover:bg-[#3a372f]"
+                                        >
+                                            Kamera
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setFilter('lens');
+                                                setIsDropdownOpen(false);
+                                            }}
+                                            className="block w-full px-4 py-2 text-left text-sm text-white hover:bg-[#3a372f]"
+                                        >
+                                            Lensa
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                        {products.map((product) => (
-                            <ProductCard key={product.product_id} product={product} />
-                        ))}
-                    </div>
-                </ErrorBoundary>
+
+                    <ErrorBoundary>
+                        <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
+                            {products.map((product) => (
+                                <ProductCard key={product.product_id} product={product} />
+                            ))}
+                        </div>
+                    </ErrorBoundary>
+                </div>
             </main>
 
             {/* FOOTER */}

@@ -1,5 +1,5 @@
 <?php
-
+use Illuminate\Support\Facades\Route;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Stock;
@@ -10,6 +10,18 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Inertia\Inertia;
     
+
+Route::get('/', function () {
+    return Inertia::render('welcome');
+})->name('home');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('dashboard', function () {
+        return Inertia::render('dashboard');
+    })->name('dashboard');
+});
+
+
 Route::get('/login', [AuthenticatedSessionController::class, 'index']);
 
 // landing
@@ -22,15 +34,6 @@ Route::get('/admin/BookingMasuk', function () { return Inertia::render('/admin/B
 
 Route::get('/landing', function () {
     return Inertia::render('landing'); });
-
-// Route::get('/data_barang', function () { 
-//     $products = Product::select('product_id', 'product_type', 'product_name', 'product_image', 'brand', 'eight_hour_rent_price', 'twenty_four_hour_rent_price')->get();
-//     return Inertia::render('staff/staff_data_barang', [
-//         'products' => $products,
-//     ]);
-// });
-
-//Route::get('/data_barang', [ProductController::class, 'index'])->name('staff.staff_data_barang');
 
 Route::prefix('staff')->group(function () {
     Route::post('/products/store', [ProductController::class, 'store'])->name('staff.products.store');

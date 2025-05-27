@@ -53,6 +53,12 @@ Route::get('/data_barang', function () { return Inertia::render('StaffDataBarang
 Route::get('/shop', [ProductController::class, 'index']);
 
 
+// user
+
+Route::get('detailproduk', function () { return Inertia::render('detailproduk');});
+
+
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 require __DIR__ . '/settings.php';

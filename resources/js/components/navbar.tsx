@@ -1,123 +1,146 @@
-import { useState } from 'react';
-import { Search } from "lucide-react";
 import { Link } from '@inertiajs/react';
+import { Search } from 'lucide-react';
+import { useState } from 'react';
 
-const Navbar = () => {
-  const [brandOpen, setBrandOpen] = useState(false);
-  const [akunOpen, setAkunOpen] = useState(false);
-  const [jenisOpen, setJenisOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [menuOpen, setMenuOpen] = useState(false);
+type Product = {
+    product_id: number;
+    product_name: string;
+    product_description: string;
+    brand: string;
+    product_image: string;
+    eight_hour_rent_price: number;
+    twenty_four_hour_rent_price: number;
+};
 
-  const handleSearch = () => {
-    console.log("Mencari:", searchTerm);
-  };
+type CartItem = {
+    product: Product;
+    quantity: number;
+};
 
-  return (
-    <header className="shadow-md">
-      {/* Header atas */}
-      <div className="bg-[#3a372f] text-white px-5 py-5 text-sm font-bold uppercase">
-        <div className="flex justify-between items-center flex-wrap gap-4 max-w-7xl mx-auto">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <img
-              src="https://storage.googleapis.com/a1aa/image/4a12e656-92bc-4900-add9-ca7382b68109.jpg"
-              alt="Logo REV PICTURE"
-              className="w-10 h-10 object-contain rounded-md"
-            />
-            <span className="text-white font-semibold text-base">REV PICTURE</span>
-          </div>
+type Props = {
+  cartItems: CartItem[];
+  showCart: (show: boolean) => void; 
+};
 
-          {/* Search bar */}
-          <div className="relative w-full max-w-md mx-auto md:mr-9">
-            <input
-              type="search"
-              placeholder="Cari produk..."
-              className="w-full rounded-xl bg-white text-black py-2.5 pl-7 pr-9 text-sm outline-none shadow-md focus:ring-2 ring-black-400"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={handleSearch}
-              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-          </div>
 
-          {/* Hamburger menu */}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden text-white focus:outline-none"
-          >
-            <i className="fas fa-bars text-xl"></i>
-          </button>
+const Navbar = ({ cart = [], setShowCart = () => {} }: { cart: CartItem[]; setShowCart: (show: boolean) => void }) => {
+    const [brandOpen, setBrandOpen] = useState(false);
+    const [akunOpen, setAkunOpen] = useState(false);
+    const [jenisOpen, setJenisOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [menuOpen, setMenuOpen] = useState(false);
 
-          {/* Menu atas kanan */}
-          <div className={`flex-col md:flex md:flex-row items-center gap-5 text-sm ${menuOpen ? 'flex' : 'hidden'} md:flex`}>
-            <Link href="/" className="flex items-center gap-1 hover:text-yellow-400 transition">
-              <i className="fas fa-home" /> BERANDA
-            </Link>
+    const handleSearch = () => {
+        console.log('Mencari:', searchTerm);
+    };
 
-            {/* Dropdown AKUN */}
-            <div
-              className="relative"
-              onMouseEnter={() => setAkunOpen(true)}
-              
-            >
-              <div className="flex items-center gap-1 cursor-pointer hover:text-yellow-400 transition">
-                <i className="fas fa-user" /> AKUN
-              </div>
+    return (
+        <header className="shadow-md">
+            {/* Header atas */}
+            <div className="bg-[#3a372f] px-5 py-5 text-sm font-bold text-white uppercase">
+                <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
+                    {/* Logo */}
+                    <div className="flex items-center gap-3">
+                        <img
+                            src="https://storage.googleapis.com/a1aa/image/4a12e656-92bc-4900-add9-ca7382b68109.jpg"
+                            alt="Logo REV PICTURE"
+                            className="h-10 w-10 rounded-md object-contain"
+                        />
+                        <span className="text-base font-semibold text-white">REV PICTURE</span>
+                    </div>
 
-              {akunOpen && (
-                <div className="absolute left-0 mt-2 w-32 bg-[#3a372f] rounded shadow-md text-left z-50 animate-fadeIn" onMouseLeave={() => setAkunOpen(false)}>
-                  <div className="px-4 py-2 hover:bg-[#2e2c27] cursor-pointer transition"><Link href="/login">Login</Link></div>
-                  <div className="px-4 py-2 hover:bg-[#2e2c27] cursor-pointer transition"><Link href="/register">Register</Link></div>
+                    {/* Search bar */}
+                    <div className="relative mx-auto w-full max-w-md md:mr-9">
+                        <input
+                            type="search"
+                            placeholder="Cari produk..."
+                            className="ring-black-400 w-full rounded-xl bg-white py-2.5 pr-9 pl-7 text-sm text-black shadow-md outline-none focus:ring-2"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <button
+                            type="button"
+                            onClick={handleSearch}
+                            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black"
+                        >
+                            <Search className="h-5 w-5" />
+                        </button>
+                    </div>
+
+                    {/* Hamburger menu */}
+                    <button onClick={() => setMenuOpen(!menuOpen)} className="text-white focus:outline-none md:hidden">
+                        <i className="fas fa-bars text-xl"></i>
+                    </button>
+
+                    {/* Menu atas kanan */}
+                    <div className={`flex-col items-center gap-5 text-sm md:flex md:flex-row ${menuOpen ? 'flex' : 'hidden'} md:flex`}>
+                        <Link href="/" className="flex items-center gap-1 transition hover:text-yellow-400">
+                            <i className="fas fa-home" /> BERANDA
+                        </Link>
+
+                        {/* Dropdown AKUN */}
+                        <div className="relative" onMouseEnter={() => setAkunOpen(true)}>
+                            <div className="flex cursor-pointer items-center gap-1 transition hover:text-yellow-400">
+                                <i className="fas fa-user" /> AKUN
+                            </div>
+
+                            {akunOpen && (
+                                <div
+                                    className="animate-fadeIn absolute left-0 z-50 mt-2 w-32 rounded bg-[#3a372f] text-left shadow-md"
+                                    onMouseLeave={() => setAkunOpen(false)}
+                                >
+                                    <div className="cursor-pointer px-4 py-2 transition hover:bg-[#2e2c27]">
+                                        <Link href="/login">Login</Link>
+                                    </div>
+                                    <div className="cursor-pointer px-4 py-2 transition hover:bg-[#2e2c27]">
+                                        <Link href="/register">Register</Link>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <a href="#" className="flex items-center gap-1 transition hover:text-yellow-400">
+                            <i className="fas fa-shopping-cart" /> KERANJANG
+                        </a>
+                        <button onClick={() => setShowCart(true)} className="fixed top-4 right-4 z-50 rounded bg-black px-4 py-2 text-white">
+                            🛒 Keranjang ({cart.reduce((sum, item) => sum + item.quantity, 0)})
+                        </button>
+                    </div>
                 </div>
-              )}
             </div>
 
-            <a href="#" className="flex items-center gap-1 hover:text-yellow-400 transition">
-              <i className="fas fa-shopping-cart" /> KERANJANG
-            </a>
-          </div>
-        </div>
-      </div>
+            {/* Menu bawah */}
+            <nav className="relative z-10 bg-[#7f7a73] py-5 text-sm font-bold text-white">
+                <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-10">
+                    {/* Dropdown Brand */}
+                    <div className="relative" onMouseEnter={() => setBrandOpen(true)}>
+                        <div className="flex cursor-pointer items-center gap-1 transition hover:text-yellow-300">
+                            Brand <i className="fas fa-chevron-down text-xs"></i>
+                        </div>
+                        {brandOpen && (
+                            <div
+                                className="animate-fadeIn absolute z-20 mt-2 w-40 rounded-b-md bg-[#7f7a73] shadow-md"
+                                onMouseLeave={() => setBrandOpen(false)}
+                            >
+                                {['Sony', 'Canon', 'Lumix', 'Fujifilm', 'Nikon'].map((brand, i) => (
+                                    <div key={i} className="cursor-pointer px-4 py-2 transition hover:bg-[#6b675f]">
+                                        {brand}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
-      {/* Menu bawah */}
-      <nav className="bg-[#7f7a73] text-white font-bold text-sm py-5 z-10 relative">
-        <div className="flex justify-center gap-10 max-w-6xl mx-auto flex-wrap">
-          {/* Dropdown Brand */}
-          <div
-            className="relative"
-            onMouseEnter={() => setBrandOpen(true)}
-            
-          >
-            <div className="cursor-pointer flex items-center gap-1 hover:text-yellow-300 transition">
-              Brand <i className="fas fa-chevron-down text-xs"></i>
-            </div>
-            {brandOpen && (
-              <div className="absolute bg-[#7f7a73] rounded-b-md shadow-md w-40 mt-2 z-20 animate-fadeIn" onMouseLeave={() => setBrandOpen(false)}>
-                {['Sony', 'Canon', 'Lumix', 'Fujifilm', 'Nikon'].map((brand, i) => (
-                  <div key={i} className="px-4 py-2 hover:bg-[#6b675f] cursor-pointer transition">
-                    {brand}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Menu statis */}
-          {['Kamera', 'Lensa', 'Paket Rev Picture', 'Penting Dibaca'].map((item, i) => (
-            <div key={i} className="cursor-pointer hover:text-yellow-300 transition">
-              {item}
-            </div>
-          ))}
-        </div>
-      </nav>
-    </header>
-  );
+                    {/* Menu statis */}
+                    {['Kamera', 'Lensa', 'Paket Rev Picture', 'Penting Dibaca'].map((item, i) => (
+                        <div key={i} className="cursor-pointer transition hover:text-yellow-300">
+                            {item}
+                        </div>
+                    ))}
+                </div>
+            </nav>
+        </header>
+    );
 };
 
 export default Navbar;

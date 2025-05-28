@@ -100,7 +100,11 @@ export default function SonyProductsPage({ cameraProducts = [], lensProducts = [
         <div className="flex min-h-screen flex-col bg-[#f9f1e9]">
             {/* MAIN CONTENT */}
             <ErrorBoundary>
+<<<<<<< HEAD
                 <Navbar />
+=======
+                <Navbar cart={[]} setShowCart={() => {}} />
+>>>>>>> 64fbd834c62be2244d030d0eaa1ebdbee23dda79
             </ErrorBoundary>
             <main className="w-full flex-1 bg-[#f9f1e9] py-6">
                 <div className="container mx-auto px-4 pb-20">

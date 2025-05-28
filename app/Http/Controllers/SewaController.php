@@ -15,6 +15,13 @@ class SewaController extends Controller
 
     }
 
+    public function indexadmin()
+    {
+        $sewa = Sewa::where('status', 'disewakan')->get();
+        return Inertia::render('admin/datapenyewaan', ['rentals' => $sewa]);
+
+    }
+
     public function update(Request $request, Sewa $rental)
     {
         if ($request->status === 'dikembalikan') {

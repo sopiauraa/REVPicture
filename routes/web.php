@@ -1,5 +1,6 @@
 <?php
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Route;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Stock;
@@ -9,6 +10,17 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Inertia\Inertia;
+    
+
+Route::get('/', [ProductController::class, 'showLanding'])->name('home');
+
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     Route::get('dashboard', function () {
+//         return Inertia::render('dashboard');
+//     })->name('dashboard');
+// });
+
+
     
 
 Route::get('/', [ProductController::class, 'showLanding'])->name('home');
@@ -56,6 +68,12 @@ Route::patch('/staff/data_sewa/{rental}', [SewaController::class, 'update']);
 Route::get('/data_barang', function () { return Inertia::render('StaffDataBarang');});
 //Display Product (Landing)
 Route::get('/shop', [ProductController::class, 'index']);
+
+
+// user
+
+Route::get('detailproduk', function () { return Inertia::render('detailproduk');});
+
 
 
 require __DIR__.'/settings.php';

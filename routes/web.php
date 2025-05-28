@@ -22,17 +22,8 @@ Route::get('/', [ProductController::class, 'showLanding'])->name('home');
 
 Route::get('/login', [AuthenticatedSessionController::class, 'index']);
 
-
-// admin
-Route::get('/admin/dashboard', function () { return Inertia::render('admin/dashboard'); });
-//Route::get('/admin/databarang', function () { return Inertia::render('admin/databarang'); });
-Route::get('/admin/BookingMasuk', function () { return Inertia::render('admin/BookingMasuk'); });
-
-Route::prefix('admin')->group(function () {
-    Route::post('/products/store', [ProductController::class, 'store'])->name('admin.products.store');
-    Route::get('/databarang', [ProductController::class, 'admin'])->name('admin.databarang');
-});
-
+// landing
+Route::get('/landing', function () { return Inertia::render('landing'); })->name('landing');
 Route::get('/landing', function () {
     return Inertia::render('landing'); });
 

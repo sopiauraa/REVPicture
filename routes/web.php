@@ -20,9 +20,7 @@ Route::get('/', [ProductController::class, 'showLanding'])->name('home');
 //         return Inertia::render('dashboard');
 //     })->name('dashboard');
 // });
-
-
-    
+ 
 
 Route::get('/', [ProductController::class, 'showLanding'])->name('home');
 
@@ -37,7 +35,9 @@ Route::get('/login', [AuthenticatedSessionController::class, 'index']);
 
 // admin
 Route::get('/admin/dashboard', function () {
-    return Inertia::render('admin/dashboard'); });
+    return Inertia::render('admin/dashboard');
+})->name('admin.dashboard');
+
 //Route::get('/admin/databarang', function () { return Inertia::render('admin/databarang'); });
 // Route::get('/admin/BookingMasuk', function () {
 //     return Inertia::render('admin/BookingMasuk'); });
@@ -67,12 +67,8 @@ Route::get('/admin/datastaff', function () {
     ]);
 });
 // landing
-Route::get('/landing', function () {
-    return Inertia::render('landing');
-})->name('landing');
-Route::get('/landing', function () {
-    return Inertia::render('landing');
-});
+Route::get('/landing', function () { return Inertia::render('landing'); })->name('landing');
+
 
 Route::prefix('staff')->group(function () {
     Route::post('/products/store', [ProductController::class, 'store'])->name('staff.products.store');

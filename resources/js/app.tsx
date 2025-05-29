@@ -6,6 +6,8 @@ import ErrorBoundary from './components/error-boundary';
 import { initializeTheme } from './hooks/use-appearance';
 import React from 'react';
 
+import { CartProvider } from './components/CartContext'; // pastikan path ini sesuai
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -16,8 +18,10 @@ createInertiaApp({
 
         root.render(
             <ErrorBoundary>
-                <App {...props} />
-            </ErrorBoundary>,
+                <CartProvider>
+                    <App {...props} />
+                </CartProvider>
+            </ErrorBoundary>
         );
     },
     progress: {
@@ -25,7 +29,4 @@ createInertiaApp({
     },
 });
 
-
-
-// This will set light / dark mode on load...
 initializeTheme();

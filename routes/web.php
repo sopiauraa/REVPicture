@@ -7,6 +7,7 @@ use App\Http\Controllers\Ordercontroller;
 use App\Http\Controllers\SewaController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReactController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Inertia\Inertia;
     
@@ -54,8 +55,18 @@ Route::get('/shop', [ProductController::class, 'index']);
 
 
 // user
-
 Route::get('detailproduk', function () { return Inertia::render('detailproduk');});
+Route::get('/keranjang', function () { return Inertia::render('keranjang');});
+Route::get('/formdatadiri', function () { return Inertia::render('formdatadiri');});
+Route::get('/formdatadiri', function () {
+    return Inertia::render('FormDataDiri', [
+        'selectedItems' => request()->input('selectedItems', []),
+        'totalHarga' => request()->input('totalHarga', 0),
+    ]);
+});
+
+// Route::get('/keranjang', [ProductController::class, 'index'])->name('keranjang');   
+
 
 
 

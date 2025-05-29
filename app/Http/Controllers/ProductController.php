@@ -77,10 +77,29 @@ class ProductController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        //
-    }
+        public function admin(Request $request)
+        {
+            $query = Product::with('stock');
+
+            if ($request->filled('search_name')) {
+                $query->where('product_name', 'like', '%' . $request->search_name . '%');
+            }
+
+            if ($request->filled('search_type')) {
+                $query->where('product_type', 'like', '%' . $request->search_type . '%');
+            }
+
+            if ($request->filled('search_brand')) {
+                $query->where('brand', 'like', '%' . $request->search_brand . '%');
+            }
+
+            $products = $query->get();
+
+            return Inertia::render('admin/databarang', [
+                'products' => $products,
+                'filters' => $request->only(['search_name', 'search_type', 'search_brand']),
+            ]);
+        }
 
     /**
      * Store a newly created resource in storage.

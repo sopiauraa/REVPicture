@@ -4,11 +4,11 @@ import { Link, usePage } from '@inertiajs/react';
 const navItems = [
   { label: "Dashboard", icon: "fa-home", href: "/admin/dashboard" },
   { label: "Data Barang", icon: "fa-box", href: "/admin/databarang" },
-  { label: "Booking Masuk", icon: "fa-envelope-open-text", href: "/admin/BookingMasuk" },
+  { label: "Booking Masuk", icon: "fa-envelope-open-text", href: "/admin/bookingmasuk" },
   { label: "Kalender Sewa", icon: "fa-calendar-alt", href: "/admin/kalender" },
-  { label: "Data Penyewa", icon: "fa-users", href: "/admin/penyewa" },
-  { label: "Data Penyewaan", icon: "fa-file-alt", href: "/admin/penyewaan" },
-  { label: "Data Staff", icon: "fa-id-badge", href: "/admin/staff" },
+  { label: "Data Penyewa", icon: "fa-users", href: "/admin/datacustomer" },
+  { label: "Data Penyewaan", icon: "fa-file-alt", href: "/admin/datapenyewaan" },
+  { label: "Data Staff", icon: "fa-id-badge", href: "/admin/datastaff" },
   { label: "History penyewaan", icon: "fa-history", href: "/admin/history" },
 ];
 

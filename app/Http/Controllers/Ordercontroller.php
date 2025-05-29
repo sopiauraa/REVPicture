@@ -17,6 +17,12 @@ class ordercontroller extends Controller
         return Inertia::render('staff/staff_data_booking_masuk', ['order' => $orders]);
     }
 
+    public function indexadmin()
+    {
+                $orders = order::where('status_dp', 'belum_dibayar')->get();
+        return Inertia::render('admin/bookingmasuk', ['order' => $orders]);
+    }
+
     /**
      * Show the form for creating a new resource.
      */

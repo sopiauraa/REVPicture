@@ -99,7 +99,7 @@ Route::get('/shop', [ProductController::class, 'index']);
 
 
 // user
-<<<<<<< HEAD
+
 Route::get('detailproduk', function () { return Inertia::render('detailproduk');});
 Route::get('/keranjang', function () { return Inertia::render('keranjang');});
 Route::get('/formdatadiri', function () { return Inertia::render('formdatadiri');});
@@ -110,13 +110,9 @@ Route::get('/formdatadiri', function () {
     ]);
 });
 
-
-=======
-
 Route::get('detailproduk', function () {
     return Inertia::render('detailproduk');
 });
->>>>>>> c63ed5542c518db373b2d7922b57069fb0e9eb40
 
 
 

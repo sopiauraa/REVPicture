@@ -36,16 +36,12 @@ export const useCart = () => {
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
 
-    const addToCart = (newItem: CartItem) => {
+  const addToCart = (newItem: CartItem) => {
     setCart(prevCart => {
-      const existingItem = prevCart.find(
-        item => item.name === newItem.name // pakai `name` karena bisa beda durasi
-      );
+      const existingItem = prevCart.find(item => item.name === newItem.name);
       if (existingItem) {
         return prevCart.map(item =>
-          item.name === newItem.name
-            ? { ...item, quantity: item.quantity + newItem.quantity }
-            : item
+          item.name === newItem.name ? { ...item, quantity: item.quantity + newItem.quantity } : item
         );
       } else {
         return [...prevCart, newItem];
@@ -57,7 +53,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCart(prevCart =>
       prevCart.map(item =>
         item.product.product_id === product_id
-          ? { ...item, quantity: item.quantity + 1 } // buat salinan baru
+          ? { ...item, quantity: item.quantity + 1 }
           : item
       )
     );
@@ -67,19 +63,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCart(prevCart =>
       prevCart.map(item =>
         item.product.product_id === product_id
-          ? {
-              ...item,
-              quantity: item.quantity > 1 ? item.quantity - 1 : 1,
-            }
+          ? { ...item, quantity: item.quantity > 1 ? item.quantity - 1 : 1 }
           : item
       )
     );
   };
 
   const removeFromCart = (product_id: number) => {
-  setCart(prevCart => prevCart.filter(item => item.product.product_id !== product_id));
+    setCart(prevCart => prevCart.filter(item => item.product.product_id !== product_id));
   };
-
 
   return (
     <CartContext.Provider value={{ cart, addToCart, increaseQuantity, decreaseQuantity, removeFromCart }}>
@@ -87,3 +79,5 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     </CartContext.Provider>
   );
 };
+
+export type { Product, CartItem };

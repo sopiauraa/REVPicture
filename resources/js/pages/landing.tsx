@@ -7,23 +7,8 @@ import 'slick-carousel/slick/slick.css';
 import Footer from '../components/footer';
 import Navbar from '../components/navbar';
 import { useCart } from '../components/CartContext';  
+import type { Product } from '../components/CartContext';
 
-type Product = {
-  product_id: number;
-  product_name: string;
-  product_description: string;
-  brand: string;
-  product_image: string;
-  eight_hour_rent_price: number;
-  twenty_four_hour_rent_price: number;
-};
-
-type CartItem = {
-  product: Product;
-  name: string;
-  price: number;
-  quantity: number;
-};
 
 type Props = {
   cameraProducts: Product[];
@@ -36,15 +21,19 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
     const [showPopup, setShowPopup] = useState(false);
     const [popupMsg, setPopupMsg] = useState('');
 
-    const handleAddToCart = (product: Product) => {
-        addToCart(product); 
-        
+      const handleAddToCart = (product: Product) => {
+        addToCart({
+          product,
+          name: product.product_name,
+          price: product.eight_hour_rent_price,
+          quantity: 1,
+        });
         setPopupMsg(`${product.product_name} berhasil ditambahkan ke keranjang!`);
         setShowPopup(true);
         setTimeout(() => setShowPopup(false), 2000);
-    };
+      };
 
- const ProductCard = ({ product }: { product: Product }) => {
+  const ProductCard = ({ product }: { product: Product }) => {
   const [selectedDuration, setSelectedDuration] = useState<'8' | '24'>('8');
 
   const handleAddToCartWithDuration = () => {
@@ -67,54 +56,54 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
     setTimeout(() => setShowPopup(false), 2000);
   };
 
-  return (
-    <motion.div
-      className="flex w-[180px] min-w-[180px] flex-col items-center rounded-xl bg-white p-4 shadow-md"
-      whileTap={{ scale: 0.95 }}
-      whileHover={{ scale: 1.01 }}
-    >
-      <img
-        src={product.product_image}
-        className="mb-3 h-32 w-full object-contain"
-      />
-      <div className="text-center text-sm leading-tight font-bold text-[#3a372f]">
-        {product.product_name}
-      </div>
-      <div className="my-1 text-sm text-[#7b5e3b]">
-        8 Jam: Rp {product.eight_hour_rent_price.toLocaleString("id-ID")}
-      </div>
-      <div className="my-1 text-sm text-[#7b5e3b]">
-        24 Jam: Rp {product.twenty_four_hour_rent_price.toLocaleString("id-ID")}
-      </div>
-
-      <div className="mt-2 mb-2 flex gap-2">
-        <button
-          onClick={() => setSelectedDuration('8')}
-          className={`px-2 py-1 text-xs rounded border ${
-            selectedDuration === '8' ? 'bg-black text-white' : 'bg-white text-black'
-          }`}
-        >
-          8 Jam
-        </button>
-        <button
-          onClick={() => setSelectedDuration('24')}
-          className={`px-2 py-1 text-xs rounded border ${
-            selectedDuration === '24' ? 'bg-black text-white' : 'bg-white text-black'
-          }`}
-        >
-          24 Jam
-        </button>
-      </div>
-
-      <button
-        onClick={handleAddToCartWithDuration}
-        className="rounded bg-black px-4 py-1 text-sm font-bold text-white transition hover:bg-[#444]"
+    return (
+      <motion.div
+        className="flex w-[180px] min-w-[180px] flex-col items-center rounded-xl bg-white p-4 shadow-md"
+        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.01 }}
       >
-        + Keranjang
-      </button>
-    </motion.div>
-  );
-};
+        <img
+          src={product.product_image}
+          className="mb-3 h-32 w-full object-contain"
+        />
+        <div className="text-center text-sm leading-tight font-bold text-[#3a372f]">
+          {product.product_name}
+        </div>
+        <div className="my-1 text-sm text-[#7b5e3b]">
+          8 Jam: Rp {product.eight_hour_rent_price.toLocaleString("id-ID")}
+        </div>
+        <div className="my-1 text-sm text-[#7b5e3b]">
+          24 Jam: Rp {product.twenty_four_hour_rent_price.toLocaleString("id-ID")}
+        </div>
+
+        <div className="mt-2 mb-2 flex gap-2">
+          <button
+            onClick={() => setSelectedDuration('8')}
+            className={`px-2 py-1 text-xs rounded border ${
+              selectedDuration === '8' ? 'bg-black text-white' : 'bg-white text-black'
+            }`}
+          >
+            8 Jam
+          </button>
+          <button
+            onClick={() => setSelectedDuration('24')}
+            className={`px-2 py-1 text-xs rounded border ${
+              selectedDuration === '24' ? 'bg-black text-white' : 'bg-white text-black'
+            }`}
+          >
+            24 Jam
+          </button>
+        </div>
+
+        <button
+          onClick={handleAddToCartWithDuration}
+          className="rounded bg-black px-4 py-1 text-sm font-bold text-white transition hover:bg-[#444]"
+        >
+          + Keranjang
+        </button>
+      </motion.div>
+    );
+  };
 
 
     const cameraDisplay = cameraProducts;

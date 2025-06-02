@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { router } from '@inertiajs/react';
 import AdminLayout from '@/layouts/admin_layout';
 
 interface Order {
@@ -13,21 +12,7 @@ interface Order {
   status_dp: "belum_dibayar" | "sudah_dibayar";
 }
 
-interface Props {
-  order: Order[];
-}
-
-const dummyOrders = [
-  {
-    order_id: 1,
-    customer_name: "Iar",
-    item_name: "Kamera DSLR",
-    order_date: "2025-06-01",
-    duration: "8 jam",
-    price: 150000,
-    contact_wa: "081234567890",
-    status_dp: "belum_dibayar",
-  },
+const dummyOrders: Order[] = [
   {
     order_id: 2,
     customer_name: "Iar",
@@ -38,36 +23,26 @@ const dummyOrders = [
     contact_wa: "081234567890",
     status_dp: "sudah_dibayar",
   },
+  {
+    order_id: 3,
+    customer_name: "Rika",
+    item_name: "Drone",
+    order_date: "2025-06-01",
+    duration: "12 jam",
+    price: 350000,
+    contact_wa: "081245678901",
+    status_dp: "sudah_dibayar",
+  },
 ];
 
-const OrderIndex: React.FC<Props> = ({ order }) => {
-  // const [orderList, setOrderList] = useState(order);
+const HistoryPenyewaan: React.FC = () => {
   const [orderList, setOrderList] = useState(dummyOrders);
-  
-
-  const handleStatusChange = (orderId: number, newStatus: string) => {
-    if (newStatus === "sudah_dibayar") {
-      if (window.confirm("Yakin sudah dibayar?")) {
-        router.patch(
-          `/admin/bookingmasuk/${orderId}`,
-          { status_dp: newStatus },
-          {
-            onSuccess: () => {
-              setOrderList((prev) =>
-                prev.filter((order) => order.order_id !== orderId)
-              );
-            },
-          }
-        );
-      }
-    }
-  };
 
   return (
-    <AdminLayout title="Booking">
-      <section className=" mt-4 px-6 pb-12">
+    <AdminLayout title="Riwayat Penyewaan">
+      <section className="mt-4 px-6 pb-12">
         <div className="bg-white rounded-md shadow-md p-6 overflow-x-auto">
-          <h3 className="font-semibold text-[14px] mb-4">Booking Terbaru</h3>
+          <h3 className="font-semibold text-[14px] mb-4">Riwayat Penyewaan</h3>
           <table className="w-full text-[13px] text-[#1f1e29] border-separate border-spacing-y-2">
             <thead>
               <tr className="bg-[#d3d3d3] text-left">
@@ -78,8 +53,7 @@ const OrderIndex: React.FC<Props> = ({ order }) => {
                 <th className="py-3 px-4">Durasi</th>
                 <th className="py-3 px-4">Harga</th>
                 <th className="py-3 px-4">Kontak WA</th>
-                <th className="py-3 px-4">Status DP</th>
-                <th className="py-3 px-4 rounded-tr-md text-center">Aksi</th>
+                {/* <th className="py-3 px-4 rounded-tr-md">Status DP</th> */}
               </tr>
             </thead>
             <tbody className="text-[13px]">
@@ -97,23 +71,7 @@ const OrderIndex: React.FC<Props> = ({ order }) => {
                   <td className="py-3 px-4">{order.duration}</td>
                   <td className="py-3 px-4">Rp {order.price.toLocaleString()}</td>
                   <td className="py-3 px-4">{order.contact_wa}</td>
-                  <td className="py-3 px-4">
-                    {order.status_dp === "belum_dibayar" ? (
-                      <span className="text-red-600 font-semibold">Belum Dibayar</span>
-                    ) : (
-                      <span className="text-green-600 font-semibold">Sudah Dibayar</span>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <div className="flex justify-center gap-2">
-                      <button className="w-[80px] bg-[#0F63D4] hover:bg-[#0c54b3] text-white py-1 px-3 text-xs rounded text-center">
-                        Terima
-                      </button>
-                      <button className="w-[80px] bg-[#EF4444] hover:bg-[#dc2626] text-white py-1 px-3 text-xs rounded text-center">
-                        Tolak
-                      </button>
-                    </div>
-                  </td>
+                  {/* <td className="py-3 px-4 text-green-600 font-semibold">Sudah Dibayar</td> */}
                 </tr>
               ))}
             </tbody>
@@ -124,4 +82,4 @@ const OrderIndex: React.FC<Props> = ({ order }) => {
   );
 };
 
-export default OrderIndex;
+export default HistoryPenyewaan;

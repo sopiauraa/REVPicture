@@ -9,7 +9,7 @@ const navItems = [
   { label: "Data Penyewa", icon: "fa-users", href: "/admin/datacustomer" },
   { label: "Data Penyewaan", icon: "fa-file-alt", href: "/admin/datapenyewaan" },
   { label: "Data Staff", icon: "fa-id-badge", href: "/admin/datastaff" },
-  { label: "History penyewaan", icon: "fa-history", href: "/admin/history" },
+  { label: "Riwayat penyewaan", icon: "fa-history", href: "/admin/history" },
 ];
 
 interface AdminLayoutProps {

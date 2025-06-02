@@ -59,6 +59,8 @@ Route::get('/admin/bookingmasuk', [OrderController::class, 'indexadmin']);
 Route::patch('/admin/bookingmasuk/{order}', [OrderController::class, 'update']);
 Route::get('/admin/datapenyewaan', [SewaController::class, 'indexadmin']);
 Route::patch('/admin/datapenyewaan/{rental}', [SewaController::class, 'update']);
+
+Route::get('/admin/history', [OrderController::class, 'history']);
 Route::get('/admin/datastaff', function () {
     $staffUsers = User::where('role', 'staff')->select('user_id', 'name', 'email')->get();
     return Inertia::render('admin/datastaff', [

@@ -99,12 +99,11 @@ const Navbar = ({ cart = [], setShowCart = () => {} }: { cart: CartItem[]; setSh
                             )}
                         </div>
 
-                        <a href="#" className="flex items-center gap-1 transition hover:text-yellow-400">
-                            <i className="fas fa-shopping-cart" /> KERANJANG
-                        </a>
-                        <button onClick={() => setShowCart(true)} className="fixed top-4 right-4 z-50 rounded bg-black px-4 py-2 text-white">
+                        <Link
+                            href="/keranjang"
+                            className=" top-4 right-4 z-50 rounded bg-black px-4 py-2 text-white">
                             🛒 Keranjang ({cart.reduce((sum, item) => sum + item.quantity, 0)})
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

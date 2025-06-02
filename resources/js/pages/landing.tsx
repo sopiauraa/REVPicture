@@ -1,110 +1,103 @@
 import ErrorBoundary from '@/components/error-boundary';
+import { usePage } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick-theme.css';
 import 'slick-carousel/slick/slick.css';
+import type { Product } from '../components/CartContext';
+import { useCart } from '../components/CartContext';
 import Footer from '../components/footer';
 import Navbar from '../components/navbar';
-import { useCart } from '../components/CartContext';  
-import type { Product } from '../components/CartContext';
-
 
 type Props = {
-  cameraProducts: Product[];
-  lensProducts: Product[];
+    cameraProducts: Product[];
+    lensProducts: Product[];
 };
 
 const Landing = ({ cameraProducts, lensProducts }: Props) => {
+    const { user } = usePage().props.auth as { user?: { name: string } };
     const { cart, addToCart } = useCart(); // ambil dari context
     const [showCart, setShowCart] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
     const [popupMsg, setPopupMsg] = useState('');
+    const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-      const handleAddToCart = (product: Product) => {
+    const handleAddToCart = (product: Product) => {
+        if (!user) {
+            setShowLoginPrompt(true);
+            return;
+        }
         addToCart({
-          product,
-          name: product.product_name,
-          price: product.eight_hour_rent_price,
-          quantity: 1,
+            product,
+            name: product.product_name,
+            price: product.eight_hour_rent_price,
+            quantity: 1,
         });
         setPopupMsg(`${product.product_name} berhasil ditambahkan ke keranjang!`);
         setShowPopup(true);
         setTimeout(() => setShowPopup(false), 2000);
-      };
+    };
 
-  const ProductCard = ({ product }: { product: Product }) => {
-  const [selectedDuration, setSelectedDuration] = useState<'8' | '24'>('8');
+    const ProductCard = ({ product }: { product: Product }) => {
+        const [selectedDuration, setSelectedDuration] = useState<'8' | '24'>('8');
 
-  const handleAddToCartWithDuration = () => {
-    const selectedPrice =
-      selectedDuration === '8'
-        ? product.eight_hour_rent_price
-        : product.twenty_four_hour_rent_price;
+        const handleAddToCartWithDuration = () => {
+            if (!user) {
+                setShowLoginPrompt(true);
+                return;
+            }
+            const selectedPrice = selectedDuration === '8' ? product.eight_hour_rent_price : product.twenty_four_hour_rent_price;
 
-    const itemName = `${product.product_name} (${selectedDuration} Jam)`;
+            const itemName = `${product.product_name} (${selectedDuration} Jam)`;
 
-    addToCart({
-      product,
-      name: itemName,
-      price: selectedPrice,
-      quantity: 1,
-    });
+            addToCart({
+                product,
+                name: itemName,
+                price: selectedPrice,
+                quantity: 1,
+            });
 
-    setPopupMsg(`${itemName} berhasil ditambahkan ke keranjang!`);
-    setShowPopup(true);
-    setTimeout(() => setShowPopup(false), 2000);
-  };
+            setPopupMsg(`${itemName} berhasil ditambahkan ke keranjang!`);
+            setShowPopup(true);
+            setTimeout(() => setShowPopup(false), 2000);
+        };
 
-    return (
-      <motion.div
-        className="flex w-[180px] min-w-[180px] flex-col items-center rounded-xl bg-white p-4 shadow-md"
-        whileTap={{ scale: 0.95 }}
-        whileHover={{ scale: 1.01 }}
-      >
-        <img
-          src={product.product_image}
-          className="mb-3 h-32 w-full object-contain"
-        />
-        <div className="text-center text-sm leading-tight font-bold text-[#3a372f]">
-          {product.product_name}
-        </div>
-        <div className="my-1 text-sm text-[#7b5e3b]">
-          8 Jam: Rp {product.eight_hour_rent_price.toLocaleString("id-ID")}
-        </div>
-        <div className="my-1 text-sm text-[#7b5e3b]">
-          24 Jam: Rp {product.twenty_four_hour_rent_price.toLocaleString("id-ID")}
-        </div>
+        return (
+            <motion.div
+                className="flex w-[180px] min-w-[180px] flex-col items-center rounded-xl bg-white p-4 shadow-md"
+                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.01 }}
+            >
+                <img src={product.product_image} className="mb-3 h-32 w-full object-contain" />
+                <div className="text-center text-sm leading-tight font-bold text-[#3a372f]">{product.product_name}</div>
+                <div className="my-1 text-sm text-[#7b5e3b]">8 Jam: Rp {product.eight_hour_rent_price.toLocaleString('id-ID')}</div>
+                <div className="my-1 text-sm text-[#7b5e3b]">24 Jam: Rp {product.twenty_four_hour_rent_price.toLocaleString('id-ID')}</div>
 
-        <div className="mt-2 mb-2 flex gap-2">
-          <button
-            onClick={() => setSelectedDuration('8')}
-            className={`px-2 py-1 text-xs rounded border ${
-              selectedDuration === '8' ? 'bg-black text-white' : 'bg-white text-black'
-            }`}
-          >
-            8 Jam
-          </button>
-          <button
-            onClick={() => setSelectedDuration('24')}
-            className={`px-2 py-1 text-xs rounded border ${
-              selectedDuration === '24' ? 'bg-black text-white' : 'bg-white text-black'
-            }`}
-          >
-            24 Jam
-          </button>
-        </div>
+                <div className="mt-2 mb-2 flex gap-2">
+                    <button
+                        onClick={() => setSelectedDuration('8')}
+                        className={`rounded border px-2 py-1 text-xs ${selectedDuration === '8' ? 'bg-black text-white' : 'bg-white text-black'}`}
+                    >
+                        8 Jam
+                    </button>
+                    <button
+                        onClick={() => setSelectedDuration('24')}
+                        className={`rounded border px-2 py-1 text-xs ${selectedDuration === '24' ? 'bg-black text-white' : 'bg-white text-black'}`}
+                    >
+                        24 Jam
+                    </button>
+                </div>
 
-        <button
-          onClick={handleAddToCartWithDuration}
-          className="rounded bg-black px-4 py-1 text-sm font-bold text-white transition hover:bg-[#444]"
-        >
-          + Keranjang
-        </button>
-      </motion.div>
-    );
-  };
-
+                <button
+                    onClick={handleAddToCartWithDuration}
+                    className="rounded bg-black px-4 py-1 text-sm font-bold text-white transition hover:bg-[#444]"
+                >
+                    + Keranjang
+                </button>
+            </motion.div>
+        );
+    };
 
     const cameraDisplay = cameraProducts;
     const lensDisplay = lensProducts;
@@ -132,7 +125,7 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
             <div className="flex min-h-screen flex-col bg-[#f6eee1]">
                 {/* Navbar */}
                 <div className="bg-black pb-16">
-                    <Navbar cart={cart} setShowCart={setShowCart} />
+                    <Navbar cart={cart} setShowCart={setShowCart}/>
 
                     {/* Hero Slider */}
                     <div className="mx-auto mt-6 w-full max-w-2xl px-4">
@@ -184,6 +177,35 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
                         </motion.div>
                     )}
                 </AnimatePresence>
+                {showLoginPrompt && (
+                    <div
+                        className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black"
+                        onClick={() => setShowLoginPrompt(false)} 
+                    >
+                        <div
+                            className="w-full max-w-sm rounded bg-white p-6"
+                            onClick={(e) => e.stopPropagation()} 
+                        >
+                            <h2 className="mb-4 text-lg font-bold">Harap Login</h2>
+                            <p className="mb-6">Anda harus login terlebih dahulu untuk menambahkan produk ke keranjang.</p>
+                            <div className="flex justify-end gap-3">
+                                <button className="rounded border px-4 py-2 hover:bg-gray-100" onClick={() => setShowLoginPrompt(false)}>
+                                    Batal
+                                </button>
+                                <button
+                                    className="rounded bg-black px-4 py-2 text-white hover:bg-gray-800"
+                                    onClick={() => {
+                                        setShowLoginPrompt(false);
+                                        window.location.href = '/login'; 
+                                    }}
+                                >
+                                    Login
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <Footer />
             </div>
         </ErrorBoundary>

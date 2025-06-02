@@ -1,6 +1,7 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
+import { useCart } from './CartContext';
 
 type Product = {
     product_id: number;
@@ -18,20 +19,26 @@ type CartItem = {
 };
 
 type Props = {
-  cartItems: CartItem[];
-  showCart: (show: boolean) => void; 
+    cart: CartItem[];
+    setShowCart: (show: boolean) => void;
 };
 
-
-const Navbar = ({ cart = [], setShowCart = () => {} }: { cart: CartItem[]; setShowCart: (show: boolean) => void }) => {
+const Navbar = ({ cart, setShowCart }: Props) => {
+    const { user } = usePage().props.auth as { user?: { name: string } };
     const [brandOpen, setBrandOpen] = useState(false);
     const [akunOpen, setAkunOpen] = useState(false);
     const [jenisOpen, setJenisOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [menuOpen, setMenuOpen] = useState(false);
+    const { clearCart } = useCart();
 
     const handleSearch = () => {
         console.log('Mencari:', searchTerm);
+    };
+
+    const handleLogout = () => {
+        clearCart();
+        window.location.href = '/logout';
     };
 
     return (
@@ -79,29 +86,33 @@ const Navbar = ({ cart = [], setShowCart = () => {} }: { cart: CartItem[]; setSh
                         </Link>
 
                         {/* Dropdown AKUN */}
-                        <div className="relative" onMouseEnter={() => setAkunOpen(true)}>
+                        <div className="relative" onClick={() => setAkunOpen(!akunOpen)}>
                             <div className="flex cursor-pointer items-center gap-1 transition hover:text-yellow-400">
-                                <i className="fas fa-user" /> AKUN
+                                <i className="fas fa-user" />
+                                {user?.name ? user.name : 'AKUN'}
                             </div>
 
                             {akunOpen && (
-                                <div
-                                    className="animate-fadeIn absolute left-0 z-50 mt-2 w-32 rounded bg-[#3a372f] text-left shadow-md"
-                                    onMouseLeave={() => setAkunOpen(false)}
-                                >
-                                    <div className="cursor-pointer px-4 py-2 transition hover:bg-[#2e2c27]">
-                                        <Link href="/login">Login</Link>
-                                    </div>
-                                    <div className="cursor-pointer px-4 py-2 transition hover:bg-[#2e2c27]">
-                                        <Link href="/register">Register</Link>
-                                    </div>
+                                <div className="absolute left-0 z-50 mt-2 w-32 rounded bg-[#3a372f] text-left shadow-md">
+                                    {user ? (
+                                        <div className="cursor-pointer px-4 py-2 transition hover:bg-[#2e2c27]" onClick={handleLogout}>
+                                            Logout
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="cursor-pointer px-4 py-2 transition hover:bg-[#2e2c27]">
+                                                <Link href="/login">Login</Link>
+                                            </div>
+                                            <div className="cursor-pointer px-4 py-2 transition hover:bg-[#2e2c27]">
+                                                <Link href="/register">Register</Link>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             )}
                         </div>
 
-                        <Link
-                            href="/keranjang"
-                            className=" top-4 right-4 z-50 rounded bg-black px-4 py-2 text-white">
+                        <Link href="/keranjang" className="top-4 right-4 z-50 rounded bg-black px-4 py-2 text-white">
                             🛒 Keranjang ({cart.reduce((sum, item) => sum + item.quantity, 0)})
                         </Link>
                     </div>

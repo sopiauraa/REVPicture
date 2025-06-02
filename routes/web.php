@@ -20,18 +20,15 @@ Route::get('/', [ProductController::class, 'showLanding'])->name('home');
 //         return Inertia::render('dashboard');
 //     })->name('dashboard');
 // });
- 
-
-Route::get('/', [ProductController::class, 'showLanding'])->name('home');
-
-// Route::middleware(['auth', 'verified'])->group(function () {
-//     Route::get('dashboard', function () {
-//         return Inertia::render('dashboard');
-//     })->name('dashboard');
-// });
-
 
 Route::get('/login', [AuthenticatedSessionController::class, 'index']);
+Route::get('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+Route::get('/brand', function() {return Inertia::render('brand');});
+Route::get('/kamera', function() {return Inertia::render('kamera');});
+Route::get('/lensa', function() {return Inertia::render('lensa');});
+Route::get('/paket', function() {return Inertia::render('paket');});
+Route::get('/syarat', function() {return Inertia::render('syarat');});
+
 
 // admin
 Route::get('/admin/dashboard', function () {

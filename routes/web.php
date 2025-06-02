@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReactController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\KalenderController;
 use Inertia\Inertia;
 
 
@@ -56,18 +57,18 @@ Route::get('/admin/datacustomer', function () {
 
 Route::get('/admin/bookingmasuk', [OrderController::class, 'indexadmin']);
 Route::patch('/admin/bookingmasuk/{order}', [OrderController::class, 'update']);
-
 Route::get('/admin/datapenyewaan', [SewaController::class, 'indexadmin']);
 Route::patch('/admin/datapenyewaan/{rental}', [SewaController::class, 'update']);
-
 Route::get('/admin/datastaff', function () {
     $staffUsers = User::where('role', 'staff')->select('user_id', 'name', 'email')->get();
     return Inertia::render('admin/datastaff', [
         'users' => $staffUsers,
     ]);
 });
+Route::get('/admin/kalender', [KalenderController::class, 'index'])->name('kalender.index');
 // landing
 Route::get('/landing', function () { return Inertia::render('landing'); })->name('landing');
+
 
 
 Route::prefix('staff')->group(function () {
@@ -82,20 +83,14 @@ Route::get('/staff/data_customer', function () {
 });
 Route::get('/staff/data_booking', [OrderController::class, 'index']);
 Route::patch('/staff/data_booking/{order}', [OrderController::class, 'update']);
-
 Route::get('staff/data_sewa', [SewaController::class, 'index']);
 Route::patch('/staff/data_sewa/{rental}', [SewaController::class, 'update']);
-
-
-Route::get('/data_barang', function () {
-    return Inertia::render('StaffDataBarang');
-});
+Route::get('/data_barang', function () { return Inertia::render('StaffDataBarang');});
 //Display Product (Landing)
 Route::get('/shop', [ProductController::class, 'index']);
 
 
 // user
-
 Route::get('detailproduk', function () { return Inertia::render('detailproduk');});
 Route::get('/keranjang', function () { return Inertia::render('keranjang');});
 Route::get('/formdatadiri', function () { return Inertia::render('formdatadiri');});

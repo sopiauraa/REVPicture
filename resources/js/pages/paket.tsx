@@ -1,32 +1,35 @@
 import ErrorBoundary from '@/components/error-boundary';
-import Footer from '@/components/footer';
-import Navbar from '@/components/navbar';
 import { usePage } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
+import Slider from 'react-slick';
 import 'slick-carousel/slick/slick-theme.css';
 import 'slick-carousel/slick/slick.css';
+import { useCart } from '../components/CartContext';
+import Footer from '../components/footer';
+import Navbar from '../components/navbar';
 
 // Tipe data paket
-export type PackageProduct = {
+export type Product = {
     product_id: number;
     package_name: string;
     package_description: string;
-    package_items: string; // atau array jika ingin
+    package_items: string;
     package_image: string;
     package_price: number;
 };
 
+
 export default function PaketPage() {
     // Ambil packageProducts dari Inertia, default ke array kosong
     const page = usePage();
-    const packageProducts = (page.props as { packageProducts?: PackageProduct[] }).packageProducts ?? [];
+    const packageProducts = (page.props as { packageProducts?: Product[] }).packageProducts ?? [];
 
-    const [cart, setCart] = useState<PackageProduct[]>([]);
+    const [cart, setCart] = useState<Product[]>([]);
     const [showPopup, setShowPopup] = useState(false);
     const [popupMsg, setPopupMsg] = useState('');
 
-    const handleAddToCart = (p: PackageProduct) => {
+    const handleAddToCart = (p: Product) => {
         setCart((prev) => [...prev, p]);
         setPopupMsg(`"${p.package_name}" berhasil ditambahkan ke keranjang!`);
         setShowPopup(true);
@@ -36,7 +39,7 @@ export default function PaketPage() {
     return (
         <div className="flex min-h-screen flex-col bg-[#f9f1e9]">
             <ErrorBoundary>
-                <Navbar />
+                <Navbar cart={cart} setShowCart={() => {}} />
             </ErrorBoundary>
 
             <AnimatePresence>
@@ -55,9 +58,9 @@ export default function PaketPage() {
             <main className="flex-1 bg-[#f9f1e9] py-6">
                 <div className="container mx-auto px-4 pb-20">
                     {/* ← Back arrow + judul */}
-                    <div className="mb-6 flex items-center text-[#413C36] hover:text-[#7B7875] transition-colors" onClick={() => history.back()}>
+                    <div className="mb-6 flex items-center text-[#413C36] transition-colors hover:text-[#7B7875]" onClick={() => history.back()}>
                         <i className="fas fa-chevron-left mr-2 text-lg" />
-                        <h1 className="text-2xl font-extrabold leading-tight">Paket REV Picture</h1>
+                        <h1 className="text-2xl leading-tight font-extrabold">Paket REV Picture</h1>
                     </div>
 
                     <ErrorBoundary>

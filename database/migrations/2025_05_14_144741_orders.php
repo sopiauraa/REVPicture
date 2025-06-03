@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('customer_id');
             $table->date('order_date');
             $table->enum('status_dp', ['belum_dibayar', 'sudah_dibayar'])->default('belum_dibayar');
+            $table->enum('status', ['pending', 'terkonfirmasi', 'selesai'])->default('pending');
             $table->foreign('customer_id')->references('customer_id')->on('customers')->onDelete('restrict');
         });
     }

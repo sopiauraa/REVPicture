@@ -18,17 +18,33 @@ export type Product = {
     twenty_four_hour_rent_price: number;
 };
 
+// Tipe data CartItem
+export type CartItem = {
+    product: Product;
+    quantity: number;
+};
+
 export default function LensaPage() {
     // Ambil lensProducts dari Inertia, default ke array kosong
     const page = usePage();
     const lensProducts = (page.props as { lensProducts?: Product[] }).lensProducts ?? [];
 
-    const [cart, setCart] = useState<Product[]>([]);
+    const [cart, setCart] = useState<CartItem[]>([]);
     const [showPopup, setShowPopup] = useState(false);
     const [popupMsg, setPopupMsg] = useState('');
 
     const handleAddToCart = (p: Product) => {
-        setCart((prev) => [...prev, p]);
+        setCart((prev) => {
+            const existing = prev.find((item) => item.product.product_id === p.product_id);
+            if (existing) {
+                return prev.map((item) =>
+                    item.product.product_id === p.product_id
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
+                );
+            }
+            return [...prev, { product: p, quantity: 1 }];
+        });
         setPopupMsg(`\"${p.product_name}\" berhasil ditambahkan ke keranjang!`);
         setShowPopup(true);
         setTimeout(() => setShowPopup(false), 2000);
@@ -37,7 +53,7 @@ export default function LensaPage() {
     return (
         <div className="flex min-h-screen flex-col bg-[#f9f1e9]">
             <ErrorBoundary>
-                <Navbar />
+                <Navbar/>
             </ErrorBoundary>
 
             <AnimatePresence>

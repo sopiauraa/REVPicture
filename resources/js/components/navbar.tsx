@@ -23,9 +23,10 @@ type Props = {
     setShowCart: (show: boolean) => void;
     searchTerm: string;
     setSearchTerm: (term: string) => void;
+    setBrandFilter: (brand: string) => void;
 };
 
-const Navbar = ({ cart, setShowCart, searchTerm, setSearchTerm }: Props) => {
+const Navbar = ({ cart, setShowCart, searchTerm, setSearchTerm, setBrandFilter }: Props) => {
     const { user } = usePage().props.auth as { user?: { name: string } };
     const [brandOpen, setBrandOpen] = useState(false);
     const [akunOpen, setAkunOpen] = useState(false);
@@ -134,10 +135,26 @@ const Navbar = ({ cart, setShowCart, searchTerm, setSearchTerm }: Props) => {
                                 onMouseLeave={() => setBrandOpen(false)}
                             >
                                 {['Sony', 'Canon', 'Lumix', 'Fujifilm', 'Nikon'].map((brand, i) => (
-                                    <div key={i} className="cursor-pointer px-4 py-2 transition hover:bg-[#6b675f]">
+                                    <div
+                                        key={i}
+                                        className="cursor-pointer px-4 py-2 transition hover:bg-[#6b675f]"
+                                        onClick={() => {
+                                            setBrandFilter(brand);
+                                            setBrandOpen(false); //
+                                        }}
+                                    >
                                         {brand}
                                     </div>
                                 ))}
+                                <div
+                                    className="cursor-pointer px-4 py-2 transition hover:bg-[#6b675f]"
+                                    onClick={() => {
+                                        setBrandFilter('');
+                                        setBrandOpen(false);
+                                    }}
+                                >
+                                    Semua Brand
+                                </div>
                             </div>
                         )}
                     </div>

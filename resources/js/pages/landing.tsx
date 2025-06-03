@@ -23,6 +23,8 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
     const [popupMsg, setPopupMsg] = useState('');
     const [showLoginPrompt, setShowLoginPrompt] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [showConflictPopup, setShowConflictPopup] = useState(false);
+    const [conflictMsg, setConflictMsg] = useState('');
 
     const ProductCard = ({ product }: { product: Product }) => {
         const [selectedDuration, setSelectedDuration] = useState<'8' | '24'>('8');
@@ -35,6 +37,19 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
             const selectedPrice = selectedDuration === '8' ? product.eight_hour_rent_price : product.twenty_four_hour_rent_price;
 
             const itemName = `${product.product_name} (${selectedDuration} Jam)`;
+
+            const hasConflict = cart.some((item) => {
+                const is8Jam = item.name.includes('(8 Jam)');
+                const is24Jam = item.name.includes('(24 Jam)');
+                return (selectedDuration === '8' && is24Jam) || (selectedDuration === '24' && is8Jam);
+            });
+
+            if (hasConflict) {
+                setConflictMsg(`Anda hanya bisa menyewa produk dengan durasi yang sama.`);
+                setShowConflictPopup(true);
+                setTimeout(() => setShowConflictPopup(false), 2500);
+                return;
+            }
 
             addToCart({
                 product,
@@ -63,7 +78,7 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
                     <button
                         onClick={() => setSelectedDuration('8')}
                         className={`rounded border px-2 py-1 text-xs ${selectedDuration === '8' ? 'bg-black text-white' : 'bg-white text-black'}`}
-                    >
+                        >
                         8 Jam
                     </button>
                     <button
@@ -83,10 +98,11 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
             </motion.div>
         );
     };
-
+    
+    const [brandFilter, setBrandFilter] = useState('');
     const cameraDisplay = cameraProducts;
     const lensDisplay = lensProducts;
-
+    
     const randomHeroImages = [...cameraProducts, ...lensProducts]
         .sort(() => 0.5 - Math.random())
         .slice(0, 1)
@@ -105,16 +121,27 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
         responsive: [{ breakpoint: 768, settings: { slidesToShow: 1 } }],
     };
 
-    const filteredCamera = cameraProducts.filter((p) => p.product_name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredCamera = cameraProducts.filter(
+        (p) => p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) && (!brandFilter || p.brand === brandFilter),
+    );
 
-    const filteredLens = lensProducts.filter((p) => p.product_name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredLens = lensProducts.filter(
+        (p) => p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) && (!brandFilter || p.brand === brandFilter),
+    );
+
 
     return (
         <ErrorBoundary>
             <div className="flex min-h-screen flex-col bg-[#f6eee1]">
                 {/* Navbar */}
                 <div className="bg-black pb-16">
-                    <Navbar cart={cart} setShowCart={setShowCart} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+                    <Navbar
+                        cart={cart}
+                        setShowCart={setShowCart}
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        setBrandFilter={setBrandFilter}
+                    />
 
                     {/* Hero Slider */}
                     <div className="mx-auto mt-6 w-full max-w-2xl px-4">
@@ -166,6 +193,20 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
                         </motion.div>
                     )}
                 </AnimatePresence>
+
+                <AnimatePresence>
+                    {showConflictPopup && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="fixed top-10 left-1/2 z-50 -translate-x-1/2 transform rounded bg-red-600 px-6 py-3 text-white shadow-lg"
+                        >
+                            ❌ {conflictMsg}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 {showLoginPrompt && (
                     <div
                         className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black"

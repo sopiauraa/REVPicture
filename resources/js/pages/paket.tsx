@@ -19,6 +19,12 @@ export type Product = {
     package_price: number;
 };
 
+// Tipe data CartItem
+export type CartItem = {
+    product: Product;
+    quantity: number;
+};
+
 
 export default function PaketPage() {
     // Ambil packageProducts dari Inertia, default ke array kosong
@@ -39,7 +45,7 @@ export default function PaketPage() {
     return (
         <div className="flex min-h-screen flex-col bg-[#f9f1e9]">
             <ErrorBoundary>
-                <Navbar cart={cart} setShowCart={() => {}} />
+                <Navbar/>
             </ErrorBoundary>
 
             <AnimatePresence>

@@ -52,7 +52,6 @@ const TambahBarangModal: React.FC<TambahBarangModalProps> = ({ visible, onClose 
                 <option value="Nikon">Nikon</option>
                 <option value="Fujifilm">Fujifilm</option>
                 <option value="Lumix">Lumix</option>
-                <option value="DjiOsmoPOcket">Dji Osmo POcket 3</option>
                 </select>
             </div>
             <div className="flex-1">

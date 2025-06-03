@@ -22,22 +22,7 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
     const [showPopup, setShowPopup] = useState(false);
     const [popupMsg, setPopupMsg] = useState('');
     const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-
-    const handleAddToCart = (product: Product) => {
-        if (!user) {
-            setShowLoginPrompt(true);
-            return;
-        }
-        addToCart({
-            product,
-            name: product.product_name,
-            price: product.eight_hour_rent_price,
-            quantity: 1,
-        });
-        setPopupMsg(`${product.product_name} berhasil ditambahkan ke keranjang!`);
-        setShowPopup(true);
-        setTimeout(() => setShowPopup(false), 2000);
-    };
+    const [searchTerm, setSearchTerm] = useState('');
 
     const ProductCard = ({ product }: { product: Product }) => {
         const [selectedDuration, setSelectedDuration] = useState<'8' | '24'>('8');
@@ -120,12 +105,16 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
         responsive: [{ breakpoint: 768, settings: { slidesToShow: 1 } }],
     };
 
+    const filteredCamera = cameraProducts.filter((p) => p.product_name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const filteredLens = lensProducts.filter((p) => p.product_name.toLowerCase().includes(searchTerm.toLowerCase()));
+
     return (
         <ErrorBoundary>
             <div className="flex min-h-screen flex-col bg-[#f6eee1]">
                 {/* Navbar */}
                 <div className="bg-black pb-16">
-                    <Navbar cart={cart} setShowCart={setShowCart}/>
+                    <Navbar cart={cart} setShowCart={setShowCart} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
                     {/* Hero Slider */}
                     <div className="mx-auto mt-6 w-full max-w-2xl px-4">
@@ -149,7 +138,7 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
                 {/* Produk Kamera */}
                 <section className="mt-10 px-6">
                     <div className="scrollbar-hide flex justify-center gap-4 overflow-x-auto pb-4">
-                        {cameraDisplay.map((item, i) => (
+                        {filteredCamera.map((item, i) => (
                             <ProductCard key={i} product={item} />
                         ))}
                     </div>
@@ -158,7 +147,7 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
                 {/* Produk Lensa */}
                 <section className="mt-6 mb-10 px-6">
                     <div className="scrollbar-hide flex justify-center gap-4 overflow-x-auto pb-4">
-                        {lensDisplay.map((item, i) => (
+                        {filteredLens.map((item, i) => (
                             <ProductCard key={i} product={item} />
                         ))}
                     </div>
@@ -180,12 +169,9 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
                 {showLoginPrompt && (
                     <div
                         className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black"
-                        onClick={() => setShowLoginPrompt(false)} 
+                        onClick={() => setShowLoginPrompt(false)}
                     >
-                        <div
-                            className="w-full max-w-sm rounded bg-white p-6"
-                            onClick={(e) => e.stopPropagation()} 
-                        >
+                        <div className="w-full max-w-sm rounded bg-white p-6" onClick={(e) => e.stopPropagation()}>
                             <h2 className="mb-4 text-lg font-bold">Harap Login</h2>
                             <p className="mb-6">Anda harus login terlebih dahulu untuk menambahkan produk ke keranjang.</p>
                             <div className="flex justify-end gap-3">
@@ -196,7 +182,7 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
                                     className="rounded bg-black px-4 py-2 text-white hover:bg-gray-800"
                                     onClick={() => {
                                         setShowLoginPrompt(false);
-                                        window.location.href = '/login'; 
+                                        window.location.href = '/login';
                                     }}
                                 >
                                     Login

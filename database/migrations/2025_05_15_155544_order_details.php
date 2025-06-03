@@ -15,6 +15,7 @@ return new class extends Migration
             $table->integer('order_detail_id')->primary()->autoIncrement();
             $table->integer('order_id');
             $table->integer('product_id');
+            $table->enum('duration', ['eight_hour', 'twenty_four_hour']);
             $table->date('day_rent');
             $table->date('due_on');
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));

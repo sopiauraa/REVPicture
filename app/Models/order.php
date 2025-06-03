@@ -15,5 +15,21 @@ class Order extends Model
     {
         return $this->hasMany(sewa::class);
     }
+
+    public function customer()
+{
+    return $this->belongsTo(Customer::class, 'customer_id', 'customer_id');
+}
+
+public function product()
+{
+    return $this->belongsTo(Product::class, 'product_id', 'product_id');
+}
+public function orderDetail()
+{
+    return $this->hasOne(OrderDetail::class, 'order_id');
+}
+
+
 }
 

@@ -10,4 +10,10 @@ class KalenderController extends Controller
     {
         return Inertia::render('admin/Kalender');
     }
+
+    public function staffIndex()
+    {
+        // untuk staff
+        return Inertia::render('staff/Kalender');
+    }
 }

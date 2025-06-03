@@ -1,12 +1,30 @@
 import AdminLayout from '@/layouts/admin_layout';
 import Chart from 'chart.js/auto';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const Dashboard = () => {
     const barRef = useRef<HTMLCanvasElement>(null);
     const doughnutRef = useRef<HTMLCanvasElement>(null);
 
+    const [monthlyData, setMonthlyData] = useState<{labels: string[]; data: number[]} | null>(null);
+    const [brandData, setBrandData] = useState<{labels: string[]; data: number[]} | null>(null);
+
     useEffect(() => {
+        // Panggil API dari Laravel
+        fetch('/dashboard-stats')
+            .then(res => res.json())
+            .then(resData => {
+                setMonthlyData(resData.monthly);
+                setBrandData(resData.brands);
+            })
+            .catch(err => {
+                console.error('Gagal ambil data dashboard:', err);
+            });
+    }, []);
+
+    useEffect(() => {
+        if (!monthlyData || !brandData) return;
+
         const barCtx = barRef.current?.getContext('2d');
         const doughnutCtx = doughnutRef.current?.getContext('2d');
 
@@ -14,24 +32,11 @@ const Dashboard = () => {
             new Chart(barCtx, {
                 type: 'bar',
                 data: {
-                    labels: [
-                        'January',
-                        'February',
-                        'Maret',
-                        'April',
-                        'Mei',
-                        'Juni',
-                        'Juli',
-                        'Agustus',
-                        'September',
-                        'Oktober',
-                        'November',
-                        'Desember',
-                    ],
+                    labels: monthlyData.labels,
                     datasets: [
                         {
                             label: '2025',
-                            data: [90, 80, 50, 70, 40, 0, 0, 0, 0, 0, 0, 0],
+                            data: monthlyData.data,
                             backgroundColor: '#2F80ED',
                             borderRadius: 6,
                             barThickness: 35,
@@ -48,7 +53,7 @@ const Dashboard = () => {
                             beginAtZero: true,
                             max: 100,
                             ticks: { stepSize: 20, color: '#1a1a1a', font: { size: 10 } },
-                            grid: { color: '#e5e7eb', borderColor: '#F2F2F2' },
+                            grid: { color: '#e5e7eb' },
                         },
                         x: {
                             ticks: { color: '#1a1a1a', font: { size: 10 }, maxRotation: 45 },
@@ -72,11 +77,11 @@ const Dashboard = () => {
             new Chart(doughnutCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Sonny', 'Fujifilm', 'Canon', 'Nikon', 'Oji Osmo Pocket 3', 'Lumix'],
+                    labels: brandData.labels,
                     datasets: [
                         {
                             label: 'Berdasarkan Brand',
-                            data: [20, 10, 20, 15, 15, 20],
+                            data: brandData.data,
                             backgroundColor: ['#f9d56e', '#3fcf97', '#f87171', '#7f8ea3', '#3bb9f9', '#b78aff'],
                             cutout: '60%',
                             hoverOffset: 18,
@@ -119,7 +124,7 @@ const Dashboard = () => {
                 ],
             });
         }
-    }, []);
+    }, [monthlyData, brandData]);
 
     return (
         <AdminLayout title="Dashboard">

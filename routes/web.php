@@ -12,6 +12,8 @@ use App\Http\Controllers\ReactController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\KalenderController;
 use Inertia\Inertia;
+use App\Http\Controllers\DashboardController;
+
 
 
 Route::get('/', [ProductController::class, 'showLanding'])->name('home');
@@ -35,6 +37,10 @@ Route::get('/syarat', function() {return Inertia::render('syarat');});
 Route::get('/admin/dashboard', function () {
     return Inertia::render('admin/dashboard');
 })->name('admin.dashboard');
+Route::get('/dashboard-stats', [DashboardController::class, 'stats']);
+
+
+
 
 //Route::get('/admin/databarang', function () { return Inertia::render('admin/databarang'); });
 // Route::get('/admin/BookingMasuk', function () {
@@ -82,6 +88,7 @@ Route::get('/staff/data_customer', function () {
 });
 Route::get('/staff/data_booking', [OrderController::class, 'index']);
 Route::patch('/staff/data_booking/{order}', [OrderController::class, 'update']);
+Route::get('/staff/kalender', [KalenderController::class, 'staffIndex'])->name('kalender.staffIndex');
 Route::get('staff/data_sewa', [SewaController::class, 'index']);
 Route::patch('/staff/data_sewa/{rental}', [SewaController::class, 'update']);
 Route::get('/data_barang', function () { return Inertia::render('StaffDataBarang');});

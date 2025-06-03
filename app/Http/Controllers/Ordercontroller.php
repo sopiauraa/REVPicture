@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\order;
+use App\Models\sewa;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
@@ -21,6 +22,15 @@ class ordercontroller extends Controller
     {
                 $orders = order::where('status_dp', 'belum_dibayar')->get();
         return Inertia::render('admin/bookingmasuk', ['order' => $orders]);
+    }
+
+     public function history()
+    {
+        $history = sewa::where('status', 'selesai')->get();
+
+        return Inertia::render('admin/history', [
+            'history' => $history,
+        ]);
     }
 
     /**

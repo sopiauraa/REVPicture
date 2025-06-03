@@ -21,19 +21,20 @@ type CartItem = {
 type Props = {
     cart: CartItem[];
     setShowCart: (show: boolean) => void;
+    searchTerm: string;
+    setSearchTerm: (term: string) => void;
 };
 
-const Navbar = ({ cart, setShowCart }: Props) => {
+const Navbar = ({ cart, setShowCart, searchTerm, setSearchTerm }: Props) => {
     const { user } = usePage().props.auth as { user?: { name: string } };
     const [brandOpen, setBrandOpen] = useState(false);
     const [akunOpen, setAkunOpen] = useState(false);
     const [jenisOpen, setJenisOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
     const [menuOpen, setMenuOpen] = useState(false);
     const { clearCart } = useCart();
 
     const handleSearch = () => {
-        console.log('Mencari:', searchTerm);
+        console.log('Mencari:', searchTerm); // optional
     };
 
     const handleLogout = () => {

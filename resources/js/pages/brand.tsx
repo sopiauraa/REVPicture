@@ -82,7 +82,7 @@ export default function BrandPage({ cameraProducts = [], lensProducts = [] }: Pr
         <div className="flex min-h-screen flex-col bg-[#f9f1e9]">
             <ErrorBoundary>
 
-                <Navbar cart={[]} setShowCart={() => {}} />
+                <Navbar />
 
             </ErrorBoundary>
 

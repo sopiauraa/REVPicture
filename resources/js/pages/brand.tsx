@@ -81,14 +81,8 @@ export default function BrandPage({ cameraProducts = [], lensProducts = [] }: Pr
     return (
         <div className="flex min-h-screen flex-col bg-[#f9f1e9]">
             <ErrorBoundary>
-<<<<<<<<< Temporary merge branch 1
-<<<<<<< HEAD
-=========
-                {/* Jika Navbar punya prop onBrandSelect, pass di sini */}
->>>>>>>>> Temporary merge branch 2
+
                 <Navbar />
-=======
-                <Navbar cart={[]} setShowCart={() => {}} />
 
             </ErrorBoundary>
 

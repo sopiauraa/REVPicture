@@ -11,19 +11,9 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\KalenderController;
 use Inertia\Inertia;
+use App\Http\Controllers\DashboardController;
 
 
-Route::get('/', [ProductController::class, 'showLanding'])->name('home');
-
-// Route::middleware(['auth', 'verified'])->group(function () {
-//     Route::get('dashboard', function () {
-//         return Inertia::render('dashboard');
-//     })->name('dashboard');
-// });
-<<<<<<< HEAD
-
-
-    
 
 Route::get('/', [ProductController::class, 'showLanding'])->name('home');
 
@@ -32,7 +22,6 @@ Route::get('/', [ProductController::class, 'showLanding'])->name('home');
 //         return Inertia::render('dashboard');
 //     })->name('dashboard');
 // });
-
 
 Route::get('/login', [AuthenticatedSessionController::class, 'index']);
 Route::get('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
@@ -45,7 +34,13 @@ Route::get('/syarat', function() {return Inertia::render('syarat');});
 
 // admin
 Route::get('/admin/dashboard', function () {
-    return Inertia::render('admin/dashboard'); });
+    return Inertia::render('admin/dashboard');
+})->name('admin.dashboard');
+Route::get('/dashboard-stats', [DashboardController::class, 'stats']);
+
+
+
+
 //Route::get('/admin/databarang', function () { return Inertia::render('admin/databarang'); });
 // Route::get('/admin/BookingMasuk', function () {
 //     return Inertia::render('admin/BookingMasuk'); });
@@ -67,7 +62,7 @@ Route::patch('/admin/bookingmasuk/{order}', [OrderController::class, 'update']);
 Route::get('/admin/datapenyewaan', [SewaController::class, 'indexadmin']);
 Route::patch('/admin/datapenyewaan/{rental}', [SewaController::class, 'update']);
 
-Route::get('/admin/history', [OrderController::class, 'history']);
+Route::get('/admin/history', [OrderController::class, 'historyadmin']);
 Route::get('/admin/datastaff', function () {
     $staffUsers = User::where('role', 'staff')->select('user_id', 'name', 'email')->get();
     return Inertia::render('admin/datastaff', [
@@ -92,13 +87,14 @@ Route::get('/staff/data_customer', function () {
 });
 Route::get('/staff/data_booking', [OrderController::class, 'index']);
 Route::patch('/staff/data_booking/{order}', [OrderController::class, 'update']);
+Route::get('/staff/kalender', [KalenderController::class, 'staffIndex'])->name('kalender.staffIndex');
 Route::get('staff/data_sewa', [SewaController::class, 'index']);
 Route::patch('/staff/data_sewa/{rental}', [SewaController::class, 'update']);
 Route::get('/data_barang', function () { return Inertia::render('StaffDataBarang');});
 //Display Product (Landing)
 Route::get('/shop', [ProductController::class, 'index']);
 
-
+Route::get('/staff/history', [OrderController::class, 'history']);
 // user
 Route::get('detailproduk', function () { return Inertia::render('detailproduk');});
 Route::get('/keranjang', function () { return Inertia::render('keranjang');});

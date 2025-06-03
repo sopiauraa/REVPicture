@@ -1,5 +1,6 @@
-import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { router } from '@inertiajs/react';
 
 const navItems = [
   { label: "Dashboard", icon: "fa-home", href: "/admin/dashboard" },
@@ -20,6 +21,14 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
   const { url } = usePage();
 
+  const [search, setSearch] = useState('');
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (search.trim() !== '') {
+      router.get('/search', { q: search }); // ganti /search sesuai route kamu
+    }
+  };
   return (
     <div className="flex bg-[#F2F2F2] min-h-screen text-[13px] text-[#1a1a1a] font-[Inter,sans-serif]">
       {/* Sidebar */}
@@ -61,14 +70,25 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
             Admin<span className="font-normal italic">/{title}</span>
           </div>
           <div className="flex items-center gap-6">
-            <div className="relative">
-              <input
-                className="w-64 h-9 rounded-full border border-[#d9d9d9] bg-white pl-4 pr-10 text-[13px] placeholder:text-[#a3a3a3] focus:outline-none focus:ring-1 focus:ring-[#a3a3a3]"
-                placeholder="Cari ..."
-                type="text"
-              />
-              <i className="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-[#a3a3a3] text-[14px]"></i>
-            </div>
+           <form onSubmit={handleSearchSubmit}>
+          <div className="relative">
+            <input
+              className="w-64 h-9 rounded-full border border-[#d9d9d9] bg-white pl-4 pr-10 text-[13px] placeholder:text-[#a3a3a3] focus:outline-none focus:ring-1 focus:ring-[#a3a3a3]"
+              placeholder="Cari ..."
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a3a3a3] text-[14px]"
+              aria-label="Search"
+              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+            >
+              <i className="fas fa-search"></i>
+            </button>
+          </div>
+        </form>
             <i className="fas fa-cog text-[#1a1a1a] text-[18px] hover:text-[#6b6b6b] cursor-pointer"></i>
             <i className="fas fa-bell text-[#1a1a1a] text-[18px] hover:text-[#6b6b6b] cursor-pointer"></i>
           </div>

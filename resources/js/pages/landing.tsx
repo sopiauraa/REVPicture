@@ -25,6 +25,8 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showConflictPopup, setShowConflictPopup] = useState(false);
     const [conflictMsg, setConflictMsg] = useState('');
+    const [brandFilter, setBrandFilter] = useState('');
+    const [typeFilter, setTypeFilter] = useState<'camera' | 'lens' | ''>('');
 
     const ProductCard = ({ product }: { product: Product }) => {
         const [selectedDuration, setSelectedDuration] = useState<'8' | '24'>('8');
@@ -78,7 +80,7 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
                     <button
                         onClick={() => setSelectedDuration('8')}
                         className={`rounded border px-2 py-1 text-xs ${selectedDuration === '8' ? 'bg-black text-white' : 'bg-white text-black'}`}
-                        >
+                    >
                         8 Jam
                     </button>
                     <button
@@ -98,11 +100,10 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
             </motion.div>
         );
     };
-    
-    const [brandFilter, setBrandFilter] = useState('');
+
     const cameraDisplay = cameraProducts;
     const lensDisplay = lensProducts;
-    
+
     const randomHeroImages = [...cameraProducts, ...lensProducts]
         .sort(() => 0.5 - Math.random())
         .slice(0, 1)
@@ -122,13 +123,18 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
     };
 
     const filteredCamera = cameraProducts.filter(
-        (p) => p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) && (!brandFilter || p.brand === brandFilter),
+        (p) =>
+            p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            (!brandFilter || p.brand === brandFilter) &&
+            (typeFilter === '' || typeFilter === 'camera'),
     );
 
     const filteredLens = lensProducts.filter(
-        (p) => p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) && (!brandFilter || p.brand === brandFilter),
+        (p) =>
+            p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            (!brandFilter || p.brand === brandFilter) &&
+            (typeFilter === '' || typeFilter === 'lens'),
     );
-
 
     return (
         <ErrorBoundary>
@@ -141,6 +147,7 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
                         searchTerm={searchTerm}
                         setSearchTerm={setSearchTerm}
                         setBrandFilter={setBrandFilter}
+                        setTypeFilter={setTypeFilter}
                     />
 
                     {/* Hero Slider */}

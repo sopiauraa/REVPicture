@@ -23,9 +23,11 @@ type Props = {
     setShowCart: (show: boolean) => void;
     searchTerm: string;
     setSearchTerm: (term: string) => void;
+    setBrandFilter: (brand: string) => void;
+    setTypeFilter: (type: 'camera' | 'lens' | '') => void;
 };
 
-const Navbar = ({ cart, setShowCart, searchTerm, setSearchTerm }: Props) => {
+const Navbar = ({ cart, setShowCart, searchTerm, setSearchTerm, setBrandFilter, setTypeFilter }: Props) => {
     const { user } = usePage().props.auth as { user?: { name: string } };
     const [brandOpen, setBrandOpen] = useState(false);
     const [akunOpen, setAkunOpen] = useState(false);
@@ -134,20 +136,44 @@ const Navbar = ({ cart, setShowCart, searchTerm, setSearchTerm }: Props) => {
                                 onMouseLeave={() => setBrandOpen(false)}
                             >
                                 {['Sony', 'Canon', 'Lumix', 'Fujifilm', 'Nikon'].map((brand, i) => (
-                                    <div key={i} className="cursor-pointer px-4 py-2 transition hover:bg-[#6b675f]">
+                                    <div
+                                        key={i}
+                                        className="cursor-pointer px-4 py-2 transition hover:bg-[#6b675f]"
+                                        onClick={() => {
+                                            setBrandFilter(brand);
+                                            setBrandOpen(false); //
+                                        }}
+                                    >
                                         {brand}
                                     </div>
                                 ))}
+                                <div
+                                    className="cursor-pointer px-4 py-2 transition hover:bg-[#6b675f]"
+                                    onClick={() => {
+                                        setBrandFilter('');
+                                        setBrandOpen(false);
+                                    }}
+                                >
+                                    Semua Brand
+                                </div>
                             </div>
                         )}
                     </div>
 
                     {/* Menu statis */}
-                    {['Kamera', 'Lensa', 'Paket Rev Picture', 'Penting Dibaca'].map((item, i) => (
-                        <div key={i} className="cursor-pointer transition hover:text-yellow-300">
-                            {item}
+                    <>
+                        <div className="cursor-pointer transition hover:text-yellow-300" onClick={() => setTypeFilter('camera')}>
+                            Kamera
                         </div>
-                    ))}
+                        <div className="cursor-pointer transition hover:text-yellow-300" onClick={() => setTypeFilter('lens')}>
+                            Lensa
+                        </div>
+                        <div className="cursor-pointer transition hover:text-yellow-300" onClick={() => setTypeFilter('')}>
+                            Semua Produk
+                        </div>
+                        <div className="cursor-pointer transition hover:text-yellow-300">Paket Rev Picture</div>
+                        <div className="cursor-pointer transition hover:text-yellow-300">Penting Dibaca</div>
+                    </>
                 </div>
             </nav>
         </header>

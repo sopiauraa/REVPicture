@@ -63,7 +63,7 @@ Route::patch('/admin/bookingmasuk/{order}', [OrderController::class, 'update']);
 Route::get('/admin/datapenyewaan', [SewaController::class, 'indexadmin']);
 Route::patch('/admin/datapenyewaan/{rental}', [SewaController::class, 'update']);
 
-Route::get('/admin/history', [OrderController::class, 'history']);
+Route::get('/admin/history', [OrderController::class, 'historyadmin']);
 Route::get('/admin/datastaff', function () {
     $staffUsers = User::where('role', 'staff')->select('user_id', 'name', 'email')->get();
     return Inertia::render('admin/datastaff', [
@@ -95,7 +95,7 @@ Route::get('/data_barang', function () { return Inertia::render('StaffDataBarang
 //Display Product (Landing)
 Route::get('/shop', [ProductController::class, 'index']);
 
-
+Route::get('/staff/history', [OrderController::class, 'history']);
 // user
 Route::get('detailproduk', function () { return Inertia::render('detailproduk');});
 Route::get('/keranjang', function () { return Inertia::render('keranjang');});

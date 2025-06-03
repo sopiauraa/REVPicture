@@ -7,7 +7,7 @@ const staffNavItems = [
   { label: "Kalender Sewa", icon: "fa-calendar-alt", href: "/staff/kalender" },
   { label: "Data Penyewa", icon: "fa-users", href: "/staff/data_customer" },
   { label: "Data Penyewaan", icon: "fa-file-alt", href: "/staff/data_sewa" },
-  { label: "Riwayat penyewaan", icon: "fa-history", href: "/staff/riwayat_sewa" },
+  { label: "Riwayat penyewaan", icon: "fa-history", href: "/staff/history" },
 ];
 
 interface StaffLayoutProps {

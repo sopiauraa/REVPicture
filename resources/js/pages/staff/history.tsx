@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AdminLayout from '@/layouts/admin_layout';
+import Stafflayout from '@/layouts/staff_layout';
 import { usePage } from '@inertiajs/react';
 
 interface Order {
@@ -18,7 +18,7 @@ const HistoryPenyewaan: React.FC = () => {
 
   const history = page.props.history as Order[];
   return (
-    <AdminLayout title="Riwayat Penyewaan">
+    <Stafflayout title="Riwayat Penyewaan">
       <section className="mt-4 px-6 pb-12">
         <div className="bg-white rounded-md shadow-md p-6 overflow-x-auto">
           <h3 className="font-semibold text-[14px] mb-4">Riwayat Penyewaan</h3>
@@ -55,7 +55,7 @@ const HistoryPenyewaan: React.FC = () => {
           </table>
         </div>
       </section>
-    </AdminLayout>
+    </Stafflayout>
   );
 };
 

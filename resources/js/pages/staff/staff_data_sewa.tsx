@@ -41,7 +41,7 @@ const dummyRentals: Rental[] = [
 ];
 
 const PenyewaanIndex: React.FC<Props> = ({ rentals }) => {
-  const [rentalList, setRentalList] = useState(dummyRentals);
+  const [rentalList, setRentalList] = useState<Rental[]>(rentals);
 
   const handleReturn = (rentalId: number) => {
     if (window.confirm('Barang sudah dikembalikan?')) {

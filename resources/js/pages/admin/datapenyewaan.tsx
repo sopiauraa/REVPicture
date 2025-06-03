@@ -17,31 +17,9 @@ interface Props {
   rentals: Rental[];
 }
 
-const dummyRentals: Rental[] = [
-  {
-    rental_id: 1,
-    customer_name: 'Ilham',
-    item_name: 'Kamera DSLR',
-    pickup_date: '2025-06-01',
-    return_date: '2025-06-02',
-    duration: '24 jam',
-    contact_wa: '081234567890',
-    status_return: 'belum_dikembalikan',
-  },
-  {
-    rental_id: 2,
-    customer_name: 'Nadia',
-    item_name: 'Tripod',
-    pickup_date: '2025-06-03',
-    return_date: '2025-06-04',
-    duration: '1 hari',
-    contact_wa: '082345678901',
-    status_return: 'belum_dikembalikan',
-  },
-];
 
 const PenyewaanIndex: React.FC<Props> = ({ rentals }) => {
-  const [rentalList, setRentalList] = useState(dummyRentals);
+  const [rentalList, setRentalList] = useState<Rental[]>(rentals);
 
   const handleReturn = (rentalId: number) => {
     if (window.confirm('Barang sudah dikembalikan?')) {

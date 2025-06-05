@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use App\Models\order;
+use App\Models\Product;
+use App\Models\Customer;
 use App\Models\sewa;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -12,16 +14,77 @@ class ordercontroller extends Controller
     /**
      * Display a listing of the resource.
      */
+
     public function index()
     {
-                $orders = order::where('status_dp', 'belum_dibayar')->get();
-        return Inertia::render('staff/staff_data_booking_masuk', ['order' => $orders]);
+        $orders = Order::with(['orderDetail.product', 'customer'])
+            ->where('status_dp', 'belum_dibayar')
+            ->get()
+            ->map(function ($order) {
+                $orderDetail = $order->orderDetail;
+                $product = $orderDetail?->product;
+                $customer = $order->customer;
+
+                $duration = $orderDetail->duration ?? '-';
+                $price = match ($duration) {
+                    'eight_hour' => $product->eight_hour_rent_price ?? 0,
+                    'twenty_four_hour' => $product->twenty_four_hour_rent_price ?? 0,
+                    default => 0,
+                };
+
+                return [
+                    'order_id' => $order->order_id,
+                    'customer_name' => $customer->customer_name ?? '-',
+                    'phone_number' => $customer->phone_number ?? '-',
+                    'item_name' => $product->product_name ?? '-',
+                    'order_date' => $order->order_date,
+                    'duration' => $duration,
+                    'price' => $price,
+                    'contact_wa' => $customer->phone_number ?? '-',
+                    'status_dp' => $order->status_dp,
+                ];
+            });
+
+        return Inertia::render('staff/staff_data_booking_masuk', [
+            'orders' => $orders,
+        ]);
     }
 
-    public function indexadmin()
+
+
+    public function adminindex()
     {
-                $orders = order::where('status_dp', 'belum_dibayar')->get();
-        return Inertia::render('admin/bookingmasuk', ['order' => $orders]);
+        $orders = Order::with(['orderDetail.product', 'customer'])
+            ->where('status_dp', 'belum_dibayar')
+            ->get()
+            ->map(function ($order) {
+                $orderDetail = $order->orderDetail;
+                $product = $orderDetail?->product;
+                $customer = $order->customer;
+
+                $duration = $orderDetail->duration ?? '-';
+                $price = match ($duration) {
+                    'eight_hour' => $product->eight_hour_rent_price ?? 0,
+                    'twenty_four_hour' => $product->twenty_four_hour_rent_price ?? 0,
+                    default => 0,
+                };
+
+                return [
+                    'order_id' => $order->order_id,
+                    'customer_name' => $customer->customer_name ?? '-',
+                    'phone_number' => $customer->phone_number ?? '-',
+                    'item_name' => $product->product_name ?? '-',
+                    'order_date' => $order->order_date,
+                    'duration' => $duration,
+                    'price' => $price,
+                    'contact_wa' => $customer->phone_number ?? '-',
+                    'status_dp' => $order->status_dp,
+                ];
+            });
+
+        return Inertia::render('admin/bookingmasuk', [
+            'orders' => $orders,
+        ]);
     }
 
     public function historyadmin()
@@ -50,9 +113,9 @@ class ordercontroller extends Controller
             )
             ->get();
 
-            return Inertia::render('admin/history', [
-                'history' => $history,
-            ]);
+        return Inertia::render('admin/history', [
+            'history' => $history,
+        ]);
     }
     public function history()
     {
@@ -80,9 +143,9 @@ class ordercontroller extends Controller
             )
             ->get();
 
-            return Inertia::render('staff/history', [
-                'history' => $history,
-            ]);
+        return Inertia::render('staff/history', [
+            'history' => $history,
+        ]);
     }
 
     /**
@@ -120,21 +183,51 @@ class ordercontroller extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, order $order)
+    public function update(Request $request, $order_id)
     {
+        $order = Order::where('order_id', $order_id)->firstOrFail();
+
         if ($request->status_dp === 'sudah_dibayar') {
             $order->status_dp = 'sudah_dibayar';
             $order->save();
         }
 
-        return redirect()->back();
+        return response()->noContent();
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy($order_id)
     {
-        //
+        $order = Order::where('order_id', $order_id)->firstOrFail();
+
+        // Hapus order detail juga jika ada
+        $order->orderDetail()?->delete();
+
+        $order->delete();
+
+        return response()->noContent();
+    }
+
+public function adminupdate(Request $request, $order_id)
+    {
+        $order = Order::where('order_id', $order_id)->firstOrFail();
+
+        if ($request->status_dp === 'sudah_dibayar') {
+            $order->status_dp = 'sudah_dibayar';
+            $order->save();
+        }
+
+        return response()->noContent();
+    }
+
+    public function admindestroy($order_id)
+    {
+        $order = Order::where('order_id', $order_id)->firstOrFail();
+
+        // Hapus order detail juga jika ada
+        $order->orderDetail()?->delete();
+
+        $order->delete();
+
+        return response()->noContent();
     }
 }

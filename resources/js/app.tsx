@@ -8,8 +8,6 @@ import { initializeTheme } from './hooks/use-appearance';
 import Kalender from './pages/admin/kalender';
 
 
-import { CartProvider } from './components/CartContext'; // pastikan path ini sesuai
-
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -26,10 +24,8 @@ createInertiaApp({
 
         root.render(
             <ErrorBoundary>
-                <CartProvider>
-                    <App {...props} />
-                </CartProvider>
-            </ErrorBoundary>
+                <App {...props} />
+            </ErrorBoundary>,
         );
     },
     progress: {
@@ -37,4 +33,7 @@ createInertiaApp({
     },
 });
 
+
+
+// This will set light / dark mode on load...
 initializeTheme();

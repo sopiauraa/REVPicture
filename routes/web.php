@@ -8,7 +8,6 @@ use App\Http\Controllers\Ordercontroller;
 use App\Http\Controllers\SewaController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ReactController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\KalenderController;
 use Inertia\Inertia;
@@ -59,8 +58,13 @@ Route::get('/admin/datacustomer', function () {
     ]);
 });
 
-Route::get('/admin/bookingmasuk', [OrderController::class, 'indexadmin']);
-Route::patch('/admin/bookingmasuk/{order}', [OrderController::class, 'update']);
+// Route::get('/admin/bookingmasuk', [OrderController::class, 'indexadmin']);
+// Route::patch('/admin/bookingmasuk/{order}', [OrderController::class, 'update']);
+
+Route::get('/admin/data_booking', [OrderController::class, 'adminindex']);
+Route::patch('/admin/data_booking/{order_id}', [OrderController::class, 'adminupdate']);
+Route::delete('/admin/data_booking/{order_id}', [OrderController::class, 'admindestroy']);
+
 Route::get('/admin/datapenyewaan', [SewaController::class, 'indexadmin']);
 Route::patch('/admin/datapenyewaan/{rental}', [SewaController::class, 'update']);
 
@@ -88,7 +92,10 @@ Route::get('/staff/data_customer', function () {
     ]);
 });
 Route::get('/staff/data_booking', [OrderController::class, 'index']);
-Route::patch('/staff/data_booking/{order}', [OrderController::class, 'update']);
+Route::patch('/staff/data_booking/{order_id}', [OrderController::class, 'update']);
+Route::delete('/staff/data_booking/{order_id}', [OrderController::class, 'destroy']);
+
+
 Route::get('/staff/kalender', [KalenderController::class, 'staffIndex'])->name('kalender.staffIndex');
 Route::get('staff/data_sewa', [SewaController::class, 'index']);
 Route::patch('/staff/data_sewa/{rental}', [SewaController::class, 'update']);

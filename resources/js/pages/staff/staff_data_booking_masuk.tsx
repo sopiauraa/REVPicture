@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { router } from '@inertiajs/react';
 import StaffLayout from '@/layouts/staff_layout';
-
+import { router } from '@inertiajs/react';
+import React, { useState } from 'react';
 
 interface Order {
   order_id: number;
@@ -11,87 +10,106 @@ interface Order {
   duration: string;
   price: number;
   contact_wa: string;
-  status_dp: "belum_dibayar" | "sudah_dibayar";
+  status_dp: 'belum_dibayar' | 'sudah_dibayar';
 }
 
 interface Props {
-  order: Order[];
+  orders: Order[];
 }
 
-const OrderIndex: React.FC<Props> = ({ order }) => {
-  const [orderList, setorderList] = useState(order);
+const OrderIndex: React.FC<Props> = ({ orders }) => {
+  const [orderList, setOrderList] = useState(orders);
 
-  const handleStatusChange = (orderId: number, newStatus: string) => {
-    if (newStatus === 'sudah_dibayar') {
-      if (window.confirm('Yakin sudah dibayar?')) {
-        router.patch(`/staff/data_booking/${orderId}`, { status_dp: newStatus }, {
+  const handleStatusChange = (orderId: number) => {
+    if (window.confirm('Yakin sudah dibayar?')) {
+      router.patch(
+        `/staff/data_booking/${orderId}`,
+        { status_dp: 'sudah_dibayar' },
+        {
           onSuccess: () => {
-            setorderList(prev => prev.filter(order => order.order_id !== orderId));
+            setOrderList((prev) => prev.filter((order) => order.order_id !== orderId));
           },
-        });
-      }
+        },
+      );
+    }
+  };
+
+  const handleDelete = (orderId: number) => {
+    if (window.confirm('Yakin ingin menolak dan menghapus order ini?')) {
+      router.delete(`/staff/data_booking/${orderId}`, {
+        onSuccess: () => {
+          setOrderList((prev) => prev.filter((order) => order.order_id !== orderId));
+        },
+      });
     }
   };
 
   return (
     <StaffLayout title="Data Order">
       <section className="mt-4 px-6 pb-12">
-        <div className="bg-white rounded-md shadow-md p-6 overflow-x-auto">
-          <h3 className="font-semibold text-[14px] mb-4">Daftar Order</h3>
-          <table className="w-full text-[13px] text-[#1f1e29] border-separate border-spacing-y-2">
+        <div className="overflow-x-auto rounded-md bg-white p-6 shadow-md">
+          <h3 className="mb-4 text-[14px] font-semibold">Daftar Order</h3>
+          <table className="w-full border-separate border-spacing-y-2 text-[13px] text-[#1f1e29]">
             <thead>
               <tr className="bg-[#d3d3d3] text-left">
-                <th className="py-3 px-4 rounded-tl-md">No</th>
-                <th className="py-3 px-4">Nama Penyewa</th>
-                <th className="py-3 px-4">Barang Disewa</th>
-                <th className="py-3 px-4">Tanggal Sewa</th>
-                <th className="py-3 px-4">Durasi</th>
-                <th className="py-3 px-4">Harga</th>
-                <th className="py-3 px-4">Kontak WA</th>
-                <th className="py-3 px-4">Status DP</th>
-                <th className="py-3 px-4 rounded-tr-md text-center">Aksi</th>
+                <th className="rounded-tl-md px-4 py-3">No</th>
+                <th className="px-4 py-3">Nama Penyewa</th>
+                <th className="px-4 py-3">Barang Disewa</th>
+                <th className="px-4 py-3">Tanggal Sewa</th>
+                <th className="px-4 py-3">Durasi</th>
+                <th className="px-4 py-3">Harga</th>
+                <th className="px-4 py-3">Kontak WA</th>
+                <th className="px-4 py-3">Status DP</th>
+                <th className="rounded-tr-md px-4 py-3 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="text-[13px]">
               {orderList.map((order, idx) => (
-                <tr
-                  key={order.order_id}
-                  className={`${
-                    idx % 2 === 0 ? "bg-[#f5f5f5]" : "bg-white"
-                  } rounded-md`}
-                >
-                  <td className="py-3 px-4">{idx + 1}</td>
-                  <td className="py-3 px-4">{order.customer_name}</td>
-                  <td className="py-3 px-4">{order.item_name}</td>
-                  <td className="py-3 px-4">{order.order_date}</td>
-                  <td className="py-3 px-4">{order.duration}</td>
-                  <td className="py-3 px-4">Rp {order.price.toLocaleString()}</td>
-                  <td className="py-3 px-4">{order.contact_wa}</td>
-                  <td className="py-3 px-4">
-                    {order.status_dp === "belum_dibayar" ? (
-                      <span className="text-red-600 font-semibold">Belum Dibayar</span>
+                <tr key={order.order_id} className={`${idx % 2 === 0 ? 'bg-[#f5f5f5]' : 'bg-white'} rounded-md`}>
+                  <td className="px-4 py-3">{idx + 1}</td>
+                  <td className="px-4 py-3">{order.customer_name}</td>
+                  <td className="px-4 py-3">{order.item_name}</td>
+                  <td className="px-4 py-3">{order.order_date}</td>
+                  <td className="px-4 py-3">{order.duration}</td>
+                  <td className="px-4 py-3">Rp {order.price.toLocaleString()}</td>
+                  <td className="px-4 py-3">{order.contact_wa}</td>
+                  <td className="px-4 py-3">
+                    {order.status_dp === 'belum_dibayar' ? (
+                      <span className="font-semibold text-red-600">Belum Dibayar</span>
                     ) : (
-                      <span className="text-green-600 font-semibold">Sudah Dibayar</span>
+                      <span className="font-semibold text-green-600">Sudah Dibayar</span>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-center">
+                  <td className="px-4 py-3 text-center">
                     <div className="flex justify-center gap-2">
-                      <button className="w-[80px] bg-[#0F63D4] hover:bg-[#0c54b3] text-white py-1 px-3 text-xs rounded text-center">
+                      <button
+                        className="w-[80px] rounded bg-[#0F63D4] px-3 py-1 text-center text-xs text-white hover:bg-[#0c54b3]"
+                        onClick={() => handleStatusChange(order.order_id)}
+                      >
                         Terima
                       </button>
-                      <button className="w-[80px] bg-[#EF4444] hover:bg-[#dc2626] text-white py-1 px-3 text-xs rounded text-center">
+                      <button
+                        className="w-[80px] rounded bg-[#EF4444] px-3 py-1 text-center text-xs text-white hover:bg-[#dc2626]"
+                        onClick={() => handleDelete(order.order_id)}
+                      >
                         Tolak
                       </button>
                     </div>
                   </td>
                 </tr>
               ))}
+              {orderList.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="text-center py-4 text-gray-500">
+                    Tidak ada data order
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </section>
     </StaffLayout>
-
   );
 };
 

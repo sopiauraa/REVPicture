@@ -47,9 +47,10 @@ Route::get('/dashboard-stats', [DashboardController::class, 'stats']);
 //     return Inertia::render('admin/BookingMasuk'); });
 
 Route::prefix('admin')->group(function () {
-    Route::post('/products/store', [ProductController::class, 'store'])->name('admin.products.store');
+    Route::post('/product/store', [ProductController::class, 'store'])->name('admin.product.store');
     Route::get('/databarang', [ProductController::class, 'admin'])->name('admin.databarang');
 });
+// Route::post('/product', [ProductController::class, 'store'])->name('product.store');
 
 Route::get('/admin/datacustomer', function () {
     $customers = Customer::select('customer_id', 'customer_name', 'phone_number', 'address', 'social_media')->get();

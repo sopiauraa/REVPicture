@@ -3,8 +3,9 @@ import EditBarangModal from '@/components/EditBarangModal';
 import TambahBarangModal from '@/components/TambahBarangModal';
 import AdminLayout from '@/layouts/admin_layout';
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import { useForm } from '@inertiajs/react';
+import { useForm, router } from '@inertiajs/react';
 import React, { useState } from 'react';
+
 
 interface Product {
     product_id: number;
@@ -35,6 +36,10 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const [productIdToDelete, setProductIdToDelete] = useState<number | null>(null);
+    
+    // State untuk success alert tambah barang
+    const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+    
     const { data, setData, post } = useForm({
         product_name: '',
         product_type: '',
@@ -45,12 +50,12 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
         product_image: null as File | null,
         product_description: '',
     });
+    
     const [filtersState, setFiltersState] = useState({
         search_name: filters.search_name || '',
         search_type: filters.search_type || '',
         search_brand: filters.search_brand || '',
     });
-
 
     const filteredProducts = products.filter((product) => {
         const matchesName = product.product_name.toLowerCase().includes(filtersState.search_name.toLowerCase());
@@ -61,20 +66,31 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/staff/products/store', {
+        post('/product/store', { 
             forceFormData: true,
             onSuccess: () => {
                 setShowModal(false);
-                window.location.href = route('staff.staff_data_barang');
+                window.location.href = route('admin.databarang');
             },
         });
     };
     
-   const handleEdit = (prod: any) => {
+    // Callback setelah berhasil tambah barang baru
+    const handleTambahSuccess = () => {
+        // Refresh halaman untuk mendapatkan data terbaru
+        router.reload({ only: ['products'] });
+        
+        // Tampilkan alert success
+        setShowSuccessAlert(true);
+        setTimeout(() => {
+            setShowSuccessAlert(false);
+        }, 3000);
+    };
+    
+    const handleEdit = (prod: any) => {
         setSelectedBarang(prod);
         setShowEdit(true);
     };
-
 
     const handleDeleteClick = (id: number) => {
         setProductIdToDelete(id);
@@ -104,7 +120,7 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
                 <div className="mb-6 flex flex-wrap items-center gap-4">
                     <select
                         className="rounded-md border border-gray-300 bg-[#F9F9F9] px-6 py-3 text-sm font-medium transition duration-150 hover:bg-[#D9D9D9]"
-                        value={filters.search_brand}
+                        value={filtersState.search_brand}
                         onChange={(e) => setFiltersState({ ...filtersState, search_brand: e.target.value })}
                     >
                         <option value="">Filter berdasarkan brand</option>
@@ -117,7 +133,7 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
 
                     <select
                         className="rounded-md border border-gray-300 bg-[#eeeeee] px-6 py-3 text-sm font-medium transition duration-150 hover:bg-[#D9D9D9]"
-                        value={filters.search_type}
+                        value={filtersState.search_type}
                         onChange={(e) => setFiltersState({ ...filtersState, search_type: e.target.value })}
                     >
                         <option value="">Filter berdasarkan jenis</option>
@@ -151,8 +167,8 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
                         <tbody>
                             {products
                                 .filter((p) =>
-                                    (!filters.search_brand || p.brand === filters.search_brand) &&
-                                    (!filters.search_type || p.product_type === filters.search_type)
+                                    (!filtersState.search_brand || p.brand.toLowerCase().includes(filtersState.search_brand.toLowerCase())) &&
+                                    (!filtersState.search_type || p.product_type.toLowerCase().includes(filtersState.search_type.toLowerCase()))
                                 )
                                 .map((prod, idx) => (
                                     <tr key={prod.product_id} className={`${idx % 2 === 0 ? 'bg-[#F9F9F9]' : 'bg-[#eeeeee]'} rounded-md`}>
@@ -172,7 +188,7 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
                                                 <button className="text-[#0F63D4] hover:text-[#084fad]" onClick={() => handleEdit(prod)}>
                                                     <FaEdit size={14} />
                                                 </button>
-                                                <button className="text-[#EF4444] hover:text-[#dc2626]" onClick={() => handleDeleteClick (prod.product_id)}>
+                                                <button className="text-[#EF4444] hover:text-[#dc2626]" onClick={() => handleDeleteClick(prod.product_id)}>
                                                     <FaTrash size={14} />
                                                 </button>
                                             </div>
@@ -184,23 +200,46 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
                 </div>
             </div>
 
+            {/* Alert Success Tambah Barang */}
+            {showSuccessAlert && (
+                <div className="animate-fadeInDown fixed top-6 left-1/2 z-[60] flex -translate-x-1/2 transform items-center gap-2 rounded-lg border border-green-400 bg-green-100 px-6 py-4 text-green-700 shadow-lg">
+                    <div className="text-xl text-green-500">✓</div>
+                    <span className="font-medium">Data barang berhasil ditambahkan!</span>
+                </div>
+            )}
 
-            {/* Modal Tambah */}
-            <TambahBarangModal visible={showModal} onClose={() => setShowModal(false)} />
+            {/* Alert Success Delete */}
+            {showAlert && (
+                <div className="animate-fadeInDown fixed top-6 left-1/2 z-[60] flex -translate-x-1/2 transform items-center gap-2 rounded-lg border border-red-400 bg-red-100 px-6 py-4 text-red-700 shadow-lg">
+                    <FaTrash className="text-xl text-red-500" />
+                    <span className="font-medium">Data barang berhasil dihapus.</span>
+                </div>
+            )}
+
+            {/* Modal Tambah - dengan callback onSuccess */}
+            <TambahBarangModal 
+                visible={showModal} 
+                onClose={() => setShowModal(false)} 
+                onSuccess={handleTambahSuccess}
+            />
 
             {/* Modal Edit */}
-            {selectedBarang && <EditBarangModal visible={showEdit} onClose={() => setShowEdit(false)} data={selectedBarang} />}
+            {selectedBarang && (
+                <EditBarangModal 
+                    visible={showEdit} 
+                    onClose={() => setShowEdit(false)} 
+                    data={selectedBarang} 
+                />
+            )}
 
-        {showAlert && (
-            <div className="animate-fadeInDown fixed top-6 left-1/2 z-[60] flex -translate-x-1/2 transform items-center gap-2 rounded-lg border border-red-400 bg-red-100 px-6 py-4 text-red-700 shadow-lg">
-                <FaTrash className="text-xl text-red-500" />
-                <span className="font-medium">Data barang berhasil dihapus.</span>
-            </div>
-                )}
             {/* Modal Delete */}
-            <DeleteBarangModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onConfirm={handleDeleteConfirm} showAlert={showAlert} />
+            <DeleteBarangModal 
+                isOpen={modalOpen} 
+                onClose={() => setModalOpen(false)} 
+                onConfirm={handleDeleteConfirm} 
+                showAlert={showAlert} 
+            />
         </AdminLayout>
-
     );
 };
 

@@ -106,41 +106,60 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'product_name' => 'required|string|max:255',
-            'product_type' => 'required|string|max:255',
-            'brand' => 'required|string|max:255',
-            'product_description' => 'required|string',
-            'stock_available' => 'required|numeric',
-            'eight_hour_rent_price' => 'required|numeric',
-            'twenty_four_hour_rent_price' => 'required|numeric',
-            'product_image' => 'nullable|image|max:2048',
+            'namaBarang' => 'required|string|max:255',
+            'jenis' => 'required|in:camera,lens',
+            'brand' => 'required|string|max:255', // kalau mau brand baru
+            'stock' => 'required|integer|min:0',
+            'harga8jam' => 'required|numeric',
+            'harga24jam' => 'required|numeric',
+            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Simpan gambar ke public/products/{product_type}
-        $imagePath = null;
+       $imagePath = null;
         if ($request->hasFile('product_image')) {
-            $folder = strtolower($validated['product_type']); // ex: "camera"
             $file = $request->file('product_image');
+            $jenis = $request->jenis_produk; // misal 'camera' atau 'lens'
+            
             $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path("products/$folder"), $filename);
-            $imagePath = "products/$folder/$filename";
+
+            // Path tujuan di folder public/products/{jenis_produk}
+            $path = public_path("products/{$jenis}");
+
+            // Pastikan folder ada, kalau belum buat foldernya
+            if (!file_exists($path)) {
+                mkdir($path, 0755, true);
+            }
+
+            // Pindahkan file ke folder tersebut
+            $file->move($path, $filename);
+
+            // Simpan path relatifnya ke DB, contoh:
+            $imagePath = "products/{$jenis}/{$filename}";
         }
 
+
         $product = Product::create([
-            ...$validated,
-            'product_image' => $imagePath,
+            'product_name' => $validated['namaBarang'],
+            'product_type' => $validated['jenis'],
+            'brand' => $validated['brand'],
+            'product_description' => '-', // bisa dikembangkan nanti
+            'product_image' => $imagePath, // simpan path gambar
+            'eight_hour_rent_price' => $validated['harga8jam'],
+            'twenty_four_hour_rent_price' => $validated['harga24jam'],
         ]);
 
-        // Simpan stok dengan stock_on_rent = 0
         Stock::create([
             'product_id' => $product->product_id,
-            'stock_available' => $request->stock_available,
+            'stock_available' => $validated['stock'],
             'stock_on_rent' => 0,
         ]);
 
-
-        return redirect()->route('staff.staff_data_barang')->with('success', 'Produk berhasil disimpan');
+        return response()->json([
+            'message' => 'Produk berhasil disimpan',
+            'product' => $product,
+        ]);
     }
+
 
 
     /**

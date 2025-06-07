@@ -3,9 +3,8 @@ import EditBarangModal from '@/components/EditBarangModal';
 import TambahBarangModal from '@/components/TambahBarangModal';
 import AdminLayout from '@/layouts/admin_layout';
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import { useForm, router } from '@inertiajs/react';
-import React, { useState } from 'react';
-
+import { router } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
 
 interface Product {
     product_id: number;
@@ -25,31 +24,23 @@ interface Props {
         search_type: string;
         search_brand: string;
     };
+    flash?: {
+        success?: string;
+        error?: string;
+    };
 }
 
-const DataBarang: React.FC<Props> = ({ products, filters }) => {
+const DataBarang: React.FC<Props> = ({ products, filters, flash }) => {
     const [showModal, setShowModal] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
-    const [selectedBarang, setSelectedBarang] = useState(null);
-    const [filterBrand, setFilterBrand] = useState('');
-    const [filterJenis, setFilterJenis] = useState('');
+    const [selectedBarang, setSelectedBarang] = useState<Product | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const [productIdToDelete, setProductIdToDelete] = useState<number | null>(null);
     
     // State untuk success alert tambah barang
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-    
-    const { data, setData, post } = useForm({
-        product_name: '',
-        product_type: '',
-        brand: '',
-        stock_available: '',
-        eight_hour_rent_price: '',
-        twenty_four_hour_rent_price: '',
-        product_image: null as File | null,
-        product_description: '',
-    });
+    const [showEditSuccessAlert, setShowEditSuccessAlert] = useState(false);
     
     const [filtersState, setFiltersState] = useState({
         search_name: filters.search_name || '',
@@ -57,23 +48,22 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
         search_brand: filters.search_brand || '',
     });
 
+    // Handle flash messages
+    useEffect(() => {
+        if (flash?.success) {
+            setShowEditSuccessAlert(true);
+            setTimeout(() => {
+                setShowEditSuccessAlert(false);
+            }, 3000);
+        }
+    }, [flash]);
+
     const filteredProducts = products.filter((product) => {
         const matchesName = product.product_name.toLowerCase().includes(filtersState.search_name.toLowerCase());
         const matchesType = filtersState.search_type ? product.product_type.toLowerCase().includes(filtersState.search_type.toLowerCase()) : true;
         const matchesBrand = filtersState.search_brand ? product.brand.toLowerCase().includes(filtersState.search_brand.toLowerCase()) : true;
         return matchesName && matchesType && matchesBrand;
     });
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        post('/product/store', { 
-            forceFormData: true,
-            onSuccess: () => {
-                setShowModal(false);
-                window.location.href = route('admin.databarang');
-            },
-        });
-    };
     
     // Callback setelah berhasil tambah barang baru
     const handleTambahSuccess = () => {
@@ -86,8 +76,20 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
             setShowSuccessAlert(false);
         }, 3000);
     };
+
+    // Callback setelah berhasil edit barang
+    const handleEditSuccess = () => {
+        // Refresh halaman untuk mendapatkan data terbaru
+        router.reload({ only: ['products'] });
+        
+        // Tampilkan alert success
+        setShowEditSuccessAlert(true);
+        setTimeout(() => {
+            setShowEditSuccessAlert(false);
+        }, 3000);
+    };
     
-    const handleEdit = (prod: any) => {
+    const handleEdit = (prod: Product) => {
         setSelectedBarang(prod);
         setShowEdit(true);
     };
@@ -97,20 +99,47 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
         setModalOpen(true);  // buka modal konfirmasi delete
     };
 
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = async () => {
         if (productIdToDelete) {
-            // panggil API hapus barang pakai productIdToDelete
-            console.log('Delete confirmed for id:', productIdToDelete);
+            try {
+                // Panggil API hapus barang
+                const response = await fetch(`/admin/product/delete/${productIdToDelete}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (response.ok) {
+                    // Refresh data setelah berhasil hapus
+                    router.reload({ only: ['products'] });
+                    
+                    // Tampilkan alert success
+                    setTimeout(() => {
+                        setShowAlert(true);
+                        setTimeout(() => {
+                            setShowAlert(false);
+                        }, 3000);
+                    }, 300);
+                } else {
+                    console.error('Failed to delete product');
+                    // Show error message
+                    alert('Gagal menghapus produk. Silakan coba lagi.');
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                alert('Terjadi kesalahan saat menghapus produk.');
+            }
         }
-        setModalOpen(false); 
+        setModalOpen(false);
+        setProductIdToDelete(null);
+    };
 
-        setTimeout(() => {
-            setShowAlert(true); 
-
-            setTimeout(() => {
-                setShowAlert(false); 
-            }, 3000);
-        }, 300);
+    const handleCloseEditModal = () => {
+        setShowEdit(false);
+        setSelectedBarang(null);
     };
 
     return (
@@ -165,38 +194,56 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {products
-                                .filter((p) =>
-                                    (!filtersState.search_brand || p.brand.toLowerCase().includes(filtersState.search_brand.toLowerCase())) &&
-                                    (!filtersState.search_type || p.product_type.toLowerCase().includes(filtersState.search_type.toLowerCase()))
-                                )
-                                .map((prod, idx) => (
-                                    <tr key={prod.product_id} className={`${idx % 2 === 0 ? 'bg-[#F9F9F9]' : 'bg-[#eeeeee]'} rounded-md`}>
-                                        <td className="px-4 py-3">{prod.product_id}</td>
-                                        <td className="px-4 py-3">
-                                            <img src={`/${prod.product_image}`} alt={prod.product_name} className="h-12 w-12 rounded object-cover" />
-                                        </td>
-                                        <td className="px-4 py-3">{prod.product_name}</td>
-                                        <td className="px-4 py-3">{prod.product_type}</td>
-                                        <td className="px-4 py-3">{prod.brand}</td>
-                                        <td className="px-4 py-3">{prod.stock?.stock_available ?? 0}</td>
-                                        <td className="px-4 py-3">
-                                            {prod.eight_hour_rent_price}/8 ; {prod.twenty_four_hour_rent_price}/24
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center gap-2">
-                                                <button className="text-[#0F63D4] hover:text-[#084fad]" onClick={() => handleEdit(prod)}>
-                                                    <FaEdit size={14} />
-                                                </button>
-                                                <button className="text-[#EF4444] hover:text-[#dc2626]" onClick={() => handleDeleteClick(prod.product_id)}>
-                                                    <FaTrash size={14} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                            {filteredProducts.map((prod, idx) => (
+                                <tr key={prod.product_id} className={`${idx % 2 === 0 ? 'bg-[#F9F9F9]' : 'bg-[#eeeeee]'} rounded-md`}>
+                                    <td className="px-4 py-3">{prod.product_id}</td>
+                                    <td className="px-4 py-3">
+                                        <img 
+                                            src={prod.product_image.startsWith('/') ? prod.product_image : `/${prod.product_image}`} 
+                                            alt={prod.product_name} 
+                                            className="h-12 w-12 rounded object-cover" 
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement;
+                                                target.src = '/images/placeholder.jpg'; // fallback image
+                                            }}
+                                        />
+                                    </td>
+                                    <td className="px-4 py-3">{prod.product_name}</td>
+                                    <td className="px-4 py-3">{prod.product_type}</td>
+                                    <td className="px-4 py-3">{prod.brand}</td>
+                                    <td className="px-4 py-3">{prod.stock?.stock_available ?? 0}</td>
+                                    <td className="px-4 py-3">
+                                        Rp {prod.eight_hour_rent_price.toLocaleString()}/8j ; Rp {prod.twenty_four_hour_rent_price.toLocaleString()}/24j
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center gap-2">
+                                            <button 
+                                                className="text-[#0F63D4] hover:text-[#084fad] transition-colors" 
+                                                onClick={() => handleEdit(prod)}
+                                                title="Edit barang"
+                                            >
+                                                <FaEdit size={14} />
+                                            </button>
+                                            <button 
+                                                className="text-[#EF4444] hover:text-[#dc2626] transition-colors" 
+                                                onClick={() => handleDeleteClick(prod.product_id)}
+                                                title="Hapus barang"
+                                            >
+                                                <FaTrash size={14} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
+                    
+                    {/* Show message if no products found */}
+                    {filteredProducts.length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                            Tidak ada data barang yang ditemukan
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -205,6 +252,14 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
                 <div className="animate-fadeInDown fixed top-6 left-1/2 z-[60] flex -translate-x-1/2 transform items-center gap-2 rounded-lg border border-green-400 bg-green-100 px-6 py-4 text-green-700 shadow-lg">
                     <div className="text-xl text-green-500">✓</div>
                     <span className="font-medium">Data barang berhasil ditambahkan!</span>
+                </div>
+            )}
+
+            {/* Alert Success Edit Barang */}
+            {showEditSuccessAlert && (
+                <div className="animate-fadeInDown fixed top-6 left-1/2 z-[60] flex -translate-x-1/2 transform items-center gap-2 rounded-lg border border-blue-400 bg-blue-100 px-6 py-4 text-blue-700 shadow-lg">
+                    <div className="text-xl text-blue-500">✓</div>
+                    <span className="font-medium">Data barang berhasil diupdate!</span>
                 </div>
             )}
 
@@ -227,8 +282,9 @@ const DataBarang: React.FC<Props> = ({ products, filters }) => {
             {selectedBarang && (
                 <EditBarangModal 
                     visible={showEdit} 
-                    onClose={() => setShowEdit(false)} 
+                    onClose={handleCloseEditModal} 
                     data={selectedBarang} 
+                    onSuccess={handleEditSuccess}
                 />
             )}
 

@@ -8,6 +8,7 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -103,62 +104,63 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+   public function store(Request $request)
     {
-        $validated = $request->validate([
-            'namaBarang' => 'required|string|max:255',
-            'jenis' => 'required|in:camera,lens',
-            'brand' => 'required|string|max:255', // kalau mau brand baru
-            'stock' => 'required|integer|min:0',
-            'harga8jam' => 'required|numeric',
-            'harga24jam' => 'required|numeric',
-            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+    // Update validation rules sesuai dengan field yang dikirim frontend
+            $validated = $request->validate([
+                'product_name' => 'required|string|max:255',
+                'product_type' => 'required|in:Camera,Lens',
+                'brand' => 'required|string|max:255',
+                'stock_available' => 'required|integer|min:0',
+                'eight_hour_rent_price' => 'required|numeric|min:0',
+                'twenty_four_hour_rent_price' => 'required|numeric|min:0',
+                'product_description' => 'nullable|string|max:1000',
+                'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', 
+            ]);
 
-       $imagePath = null;
-        if ($request->hasFile('product_image')) {
-            $file = $request->file('product_image');
-            $jenis = $request->jenis_produk; // misal 'camera' atau 'lens'
-            
-            $filename = time() . '_' . $file->getClientOriginalName();
+    $imagePath = null;
+    if ($request->hasFile('product_image')) {
+        $file = $request->file('product_image');
+        $jenis = strtolower($validated['product_type']); // camera atau lens
+        
+        $filename = time() . '_' . $file->getClientOriginalName();
 
-            // Path tujuan di folder public/products/{jenis_produk}
-            $path = public_path("products/{$jenis}");
+        // Path tujuan di folder public/products/{jenis}
+        $path = public_path("products/{$jenis}");
 
-            // Pastikan folder ada, kalau belum buat foldernya
-            if (!file_exists($path)) {
-                mkdir($path, 0755, true);
-            }
-
-            // Pindahkan file ke folder tersebut
-            $file->move($path, $filename);
-
-            // Simpan path relatifnya ke DB, contoh:
-            $imagePath = "products/{$jenis}/{$filename}";
+        // Pastikan folder ada, kalau belum buat foldernya
+        if (!file_exists($path)) {
+            mkdir($path, 0755, true);
         }
 
+        // Pindahkan file ke folder tersebut
+        $file->move($path, $filename);
 
-        $product = Product::create([
-            'product_name' => $validated['namaBarang'],
-            'product_type' => $validated['jenis'],
-            'brand' => $validated['brand'],
-            'product_description' => '-', // bisa dikembangkan nanti
-            'product_image' => $imagePath, // simpan path gambar
-            'eight_hour_rent_price' => $validated['harga8jam'],
-            'twenty_four_hour_rent_price' => $validated['harga24jam'],
-        ]);
-
-        Stock::create([
-            'product_id' => $product->product_id,
-            'stock_available' => $validated['stock'],
-            'stock_on_rent' => 0,
-        ]);
-
-        return response()->json([
-            'message' => 'Produk berhasil disimpan',
-            'product' => $product,
-        ]);
+        // Simpan path relatifnya ke DB
+        $imagePath = "products/{$jenis}/{$filename}";
     }
+    $product = Product::create([
+        'product_name' => $validated['product_name'],                   
+        'product_type' => $validated['product_type'], 
+        'brand' => $validated['brand'],
+        'product_description' => $validated['product_description'] ?? '-',
+        'product_image' => $imagePath,
+        'eight_hour_rent_price' => $validated['eight_hour_rent_price'], 
+        'twenty_four_hour_rent_price' => $validated['twenty_four_hour_rent_price'],
+    ]);
+
+    // Update field mapping untuk Stock
+    Stock::create([
+        'product_id' => $product->product_id,
+        'stock_available' => $validated['stock_available'],              // ✅ Fixed
+        'stock_on_rent' => 0,
+    ]);
+
+    return response()->json([
+        'message' => 'Produk berhasil disimpan',
+        'product' => $product,
+    ], 201); // Tambahkan status code 201 untuk created
+}
 
 
 
@@ -181,16 +183,111 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProductRequest $request, Product $product)
-    {
-        //
-    }
+public function update(Request $request, $product_id)
+{
+    $validated = $request->validate([
+        'stock' => 'required|integer|min:0',
+        'eight_hour_rent_price' => 'required|integer|min:1', 
+        'twenty_four_hour_rent_price' => 'required|integer|min:1',
+        'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Product $product)
+    try {
+        $product = Product::findOrFail($product_id);
+        
+        // Update harga rental
+        $product->update([
+            'eight_hour_rent_price' => $validated['eight_hour_rent_price'],
+            'twenty_four_hour_rent_price' => $validated['twenty_four_hour_rent_price']
+        ]);
+
+        // Update stock - FIX relasi
+        $existingStock = DB::table('stocks')->where('product_id', $product->product_id)->first();
+        
+        if ($existingStock) {
+            DB::table('stocks')
+                ->where('product_id', $product->product_id)
+                ->update(['stock_available' => $validated['stock']]);
+        } else {
+            DB::table('stocks')->insert([
+                'product_id' => $product->product_id,
+                'stock_available' => $validated['stock'],
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+
+        // Handle upload gambar
+        if ($request->hasFile('product_image')) {
+            $image = $request->file('product_image');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            
+            // Pastikan folder ada
+            $uploadPath = public_path('storage/products');
+            if (!file_exists($uploadPath)) {
+                mkdir($uploadPath, 0755, true);
+            }
+            
+            // Upload file baru
+            $image->move($uploadPath, $imageName);
+            
+            // Hapus gambar lama
+            if ($product->product_image && file_exists(public_path('storage/products/' . $product->product_image))) {
+                unlink(public_path('storage/products/' . $product->product_image));
+            }
+            
+            // Update database
+            $product->update(['product_image' => $imageName]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product berhasil diupdate',
+            'product' => $product->load('stock')
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Product update error: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal update product: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+    public function destroy($id)
     {
-        //
+        try {
+            $product = Product::findOrFail($id);
+            
+            // Delete image file if exists
+            if ($product->product_image) {
+                $imagePath = public_path($product->product_image);
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+            
+            // Delete related stock first if exists
+            if ($product->stock) {
+                $product->stock->delete();
+            }
+            
+            // Delete product
+            $product->delete();
+            
+            return response()->json([
+                'message' => 'Product deleted successfully'
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Product delete error: ' . $e->getMessage());
+            
+            return response()->json([
+                'message' => 'Failed to delete product',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

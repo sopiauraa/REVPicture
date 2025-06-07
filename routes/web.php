@@ -40,7 +40,6 @@ Route::get('/dashboard-stats', [DashboardController::class, 'stats']);
 
 
 
-
 //Route::get('/admin/databarang', function () { return Inertia::render('admin/databarang'); });
 // Route::get('/admin/BookingMasuk', function () {
 //     return Inertia::render('admin/BookingMasuk'); });
@@ -49,7 +48,19 @@ Route::prefix('admin')->group(function () {
     Route::post('/product/store', [ProductController::class, 'store'])->name('admin.product.store');
     Route::get('/databarang', [ProductController::class, 'admin'])->name('admin.databarang');
 });
-// Route::post('/product', [ProductController::class, 'store'])->name('product.store');
+
+// Route::middleware(['auth', 'admin'])->group(function () {
+//     // Perbaiki route structure
+//     Route::match(['POST', 'PUT'], '/product/update/{product_id}', [ProductController::class, 'update'])
+//         ->name('admin.product.update');
+        
+//     // Delete product
+//     Route::delete('/product/delete/{id}', [ProductController::class, 'destroy'])
+//         ->name('admin.product.delete');
+// });
+
+Route::match(['POST', 'PUT'], '/admin/product/update/{product_id}', [ProductController::class, 'update'])
+    ->name('admin.product.update');
 
 Route::get('/admin/datacustomer', function () {
     $customers = Customer::select('customer_id', 'customer_name', 'phone_number', 'address', 'social_media')->get();
@@ -60,8 +71,7 @@ Route::get('/admin/datacustomer', function () {
 
 // Route::get('/admin/bookingmasuk', [OrderController::class, 'indexadmin']);
 // Route::patch('/admin/bookingmasuk/{order}', [OrderController::class, 'update']);
-
-Route::get('/admin/data_booking', [OrderController::class, 'adminindex']);
+Route::get('/admin/bookingmasuk', [OrderController::class, 'adminindex']);
 Route::patch('/admin/data_booking/{order_id}', [OrderController::class, 'adminupdate']);
 Route::delete('/admin/data_booking/{order_id}', [OrderController::class, 'admindestroy']);
 

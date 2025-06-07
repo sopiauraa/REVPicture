@@ -6,16 +6,16 @@ interface TambahBarangModalProps {
   onSuccess?: () => void; 
 }
 
-
 const TambahBarangModal: React.FC<TambahBarangModalProps> = ({ visible, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
-    namaBarang: '',
-    jenis: '',
+    product_name: '',
+    product_type: '',
     brand: '',
     brandBaru: '',
-    stock: '',
-    harga8jam: '',
-    harga24jam: ''
+    stock_available: '',
+    eight_hour_rent_price: '',
+    twenty_four_hour_rent_price: '',
+    product_description: ''
   });
   
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -32,102 +32,185 @@ const TambahBarangModal: React.FC<TambahBarangModalProps> = ({ visible, onClose,
     }));
   };
 
+  // Function untuk kompres gambar
+const compressImage = (file: File, maxSizeKB: number = 2000): Promise<File> => {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    const img = new Image();
+    
+    img.onload = () => {
+      // Hitung ukuran baru dengan mempertahankan aspect ratio
+      const MAX_WIDTH = 1200;
+      const MAX_HEIGHT = 1200;
+      
+      let { width, height } = img;
+      
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height = (height * MAX_WIDTH) / width;
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width = (width * MAX_HEIGHT) / height;
+          height = MAX_HEIGHT;
+        }
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      // Draw and compress
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Mulai dengan quality 0.8, turunkan sampai ukuran sesuai
+      let quality = 0.8;
+      
+      const tryCompress = () => {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const sizeKB = blob.size / 1024;
+            
+            if (sizeKB <= maxSizeKB || quality <= 0.1) {
+              // Buat File object baru dengan nama yang sama
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now()
+              });
+              resolve(compressedFile);
+            } else {
+              quality -= 0.1;
+              tryCompress();
+            }
+          }
+        }, 'image/jpeg', quality);
+      };
+      
+      tryCompress();
+    };
+    
+    img.src = URL.createObjectURL(file);
+  });
+};
+
   // Handle image upload
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setSelectedImage(file);
+      // Check file size
+      const fileSizeKB = file.size / 1024;
+      
+      let processedFile = file;
+      
+      // Jika file lebih dari 2MB, kompres
+      if (fileSizeKB > 2000) {
+        try {
+          setLoading(true);
+          processedFile = await compressImage(file, 1900); // Target 1.9MB untuk safety margin
+          console.log(`File compressed from ${fileSizeKB.toFixed(2)}KB to ${(processedFile.size / 1024).toFixed(2)}KB`);
+        } catch (error) {
+          console.error('Error compressing image:', error);
+          setError('Gagal mengkompres gambar. Silakan coba gambar lain.');
+          setLoading(false);
+          return;
+        } finally {
+          setLoading(false);
+        }
+      }
+      
+      setSelectedImage(processedFile);
       
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target?.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(processedFile);
     }
   };
 
   // Submit form
   const handleSubmit = async () => {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
     setLoading(true);
     setError(null);
 
     try {
       const submitData = new FormData();
       
-      // Append form data
-      submitData.append('namaBarang', formData.namaBarang);
-      submitData.append('jenis', formData.jenis);
+      // Append form data dengan nama field yang benar
+      submitData.append('product_name', formData.product_name);
+      submitData.append('product_type', formData.product_type);
       
       // Use brandBaru if filled, otherwise use selected brand
       const brandToUse = formData.brandBaru.trim() || formData.brand;
       submitData.append('brand', brandToUse);
       
-      submitData.append('stock', formData.stock);
-      submitData.append('harga8jam', formData.harga8jam);
-      submitData.append('harga24jam', formData.harga24jam);
+      submitData.append('stock_available', formData.stock_available);
+      submitData.append('eight_hour_rent_price', formData.eight_hour_rent_price);
+      submitData.append('twenty_four_hour_rent_price', formData.twenty_four_hour_rent_price);
+      submitData.append('product_description', formData.product_description);
       
       // Append image if selected
       if (selectedImage) {
         submitData.append('product_image', selectedImage);
       }
 
-      // Send to Laravel backend
+      // Get CSRF token
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+      // Send to Laravel backend - sesuaikan dengan route yang benar
       const response = await fetch('/admin/product/store', {
         method: 'POST',
         body: submitData,
         headers: {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          'X-CSRF-TOKEN': csrfToken || '',
+          'Accept': 'application/json',
         },
       });
 
       if (!response.ok) {
-        throw new Error('Gagal menyimpan produk');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
       
       // Reset form
-      setFormData({
-        namaBarang: '',
-        jenis: '',
-        brand: '',
-        brandBaru: '',
-        stock: '',
-        harga8jam: '',
-        harga24jam: ''
-      });
-      setSelectedImage(null);
-      setImagePreview(null);
+      resetForm();
       
       // Call success callback and close modal
       onSuccess?.();
       onClose();
       
-      
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
+      console.error('Submit error:', err);
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat menyimpan data');
     } finally {
       setLoading(false);
     }
   };
 
-  // Reset form when modal closes
-  const handleClose = () => {
+  // Reset form function
+  const resetForm = () => {
     setFormData({
-      namaBarang: '',
-      jenis: '',
+      product_name: '',
+      product_type: '',
       brand: '',
       brandBaru: '',
-      stock: '',
-      harga8jam: '',
-      harga24jam: ''
+      stock_available: '',
+      eight_hour_rent_price: '',
+      twenty_four_hour_rent_price: '',
+      product_description: ''
     });
     setSelectedImage(null);
     setImagePreview(null);
     setError(null);
+  };
+
+  // Reset form when modal closes
+  const handleClose = () => {
+    resetForm();
     onClose();
   };
 
@@ -188,8 +271,8 @@ const TambahBarangModal: React.FC<TambahBarangModalProps> = ({ visible, onClose,
               <label className="block mb-1 text-sm font-medium">Nama Barang *</label>
               <input 
                 type="text" 
-                name="namaBarang"
-                value={formData.namaBarang}
+                name="product_name"
+                value={formData.product_name}
                 onChange={handleInputChange}
                 className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F63D4]" 
                 required
@@ -199,15 +282,15 @@ const TambahBarangModal: React.FC<TambahBarangModalProps> = ({ visible, onClose,
             <div>
               <label className="block mb-1 text-sm font-medium">Jenis *</label>
               <select 
-                name="jenis"
-                value={formData.jenis}
+                name="product_type"
+                value={formData.product_type}
                 onChange={handleInputChange}
                 className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F63D4]"
                 required
               >
                 <option value="">Pilih Jenis</option>
-                <option value="camera">Kamera</option>
-                <option value="lens">Lensa</option>
+                <option value="Camera">Camera</option>
+                <option value="Lens">Lens</option>
               </select>
             </div>
 
@@ -246,8 +329,8 @@ const TambahBarangModal: React.FC<TambahBarangModalProps> = ({ visible, onClose,
               <label className="block mb-1 text-sm font-medium">Stock *</label>
               <input 
                 type="number" 
-                name="stock"
-                value={formData.stock}
+                name="stock_available"
+                value={formData.stock_available}
                 onChange={handleInputChange}
                 min="0"
                 className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F63D4]" 
@@ -260,8 +343,8 @@ const TambahBarangModal: React.FC<TambahBarangModalProps> = ({ visible, onClose,
                 <label className="block mb-1 text-sm font-medium">Harga Sewa /8 jam *</label>
                 <input 
                   type="number" 
-                  name="harga8jam"
-                  value={formData.harga8jam}
+                  name="eight_hour_rent_price"
+                  value={formData.eight_hour_rent_price}
                   onChange={handleInputChange}
                   min="0"
                   step="0.01"
@@ -273,8 +356,8 @@ const TambahBarangModal: React.FC<TambahBarangModalProps> = ({ visible, onClose,
                 <label className="block mb-1 text-sm font-medium">Harga /24 jam *</label>
                 <input 
                   type="number" 
-                  name="harga24jam"
-                  value={formData.harga24jam}
+                  name="twenty_four_hour_rent_price"
+                  value={formData.twenty_four_hour_rent_price}
                   onChange={handleInputChange}
                   min="0"
                   step="0.01"
@@ -284,10 +367,22 @@ const TambahBarangModal: React.FC<TambahBarangModalProps> = ({ visible, onClose,
               </div>
             </div>
 
+            <div>
+              <label className="block mb-1 text-sm font-medium">Deskripsi Produk</label>
+              <input 
+                type="text" 
+                name="product_description"
+                value={formData.product_description}
+                onChange={handleInputChange}
+                placeholder="Opsional"
+                className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F63D4]" 
+              />
+            </div>
+
             <button 
               type="button"
               onClick={handleSubmit}
-              disabled={loading || !formData.namaBarang || !formData.jenis || (!formData.brand && !formData.brandBaru) || !formData.stock || !formData.harga8jam || !formData.harga24jam}
+              disabled={loading || !formData.product_name || !formData.product_type || (!formData.brand && !formData.brandBaru) || !formData.stock_available || !formData.eight_hour_rent_price || !formData.twenty_four_hour_rent_price}
               className="bg-[#0F63D4] hover:bg-[#0c54b3] disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-5 py-2 mt-3 rounded text-sm font-medium w-full"
             >
               {loading ? 'Menyimpan...' : 'Simpan'}

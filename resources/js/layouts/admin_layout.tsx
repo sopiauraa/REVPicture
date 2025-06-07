@@ -13,6 +13,68 @@ const navItems = [
   { label: "Manajemen User", icon: "fa-id-badge", href: "/admin/usermanagement" },
 ];
 
+interface LogoutModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}
+
+function LogoutModal({ isOpen, onClose, onConfirm }: LogoutModalProps) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      ></div>
+      
+      {/* Modal */}
+      <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 mx-4 max-w-md w-full transform transition-all duration-300 scale-100">
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-rose-500 to-red-600 rounded-t-2xl"></div>
+        <div className="absolute -top-2 -right-2 w-16 h-16 bg-gradient-to-br from-red-50 to-rose-50 rounded-full opacity-60"></div>
+        
+        {/* Icon */}
+        <div className="flex justify-center mb-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center shadow-lg">
+            <i className="fas fa-sign-out-alt text-white text-2xl"></i>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="text-center mb-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-2">Konfirmasi Logout</h3>
+          <p className="text-gray-600 leading-relaxed">
+            Apakah Anda yakin ingin keluar dari sistem admin? 
+            <br />
+            <span className="text-sm text-gray-500 mt-1 block">Anda perlu login kembali untuk mengakses panel admin.</span>
+          </p>
+        </div>
+        
+        {/* Buttons */}
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-xl transition-all duration-200 hover:shadow-sm"
+          >
+            <i className="fas fa-times mr-2"></i>
+            Batal
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/30"
+          >
+            <i className="fas fa-sign-out-alt mr-2"></i>
+            Ya, Keluar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface AdminLayoutProps {
   title: string;
   children: React.ReactNode;
@@ -21,15 +83,30 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
   const { url } = usePage();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
-    if (window.confirm('Apakah Anda yakin ingin keluar?')) {
-      router.post('/logout');
-    }
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutModal(false);
+    router.post('/logout');
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutModal(false);
   };
 
   return (
     <div className="flex bg-gray-50/30 min-h-screen text-sm text-gray-800 font-['Inter',sans-serif]">
+      {/* Logout Modal */}
+      <LogoutModal 
+        isOpen={showLogoutModal}
+        onClose={cancelLogout}
+        onConfirm={confirmLogout}
+      />
+
       {/* Sidebar */}
       <aside className={`bg-white shadow-2xl border-r border-gray-100 ${sidebarCollapsed ? 'w-16' : 'w-64'} min-h-screen flex flex-col justify-between py-6 px-4 fixed top-0 left-0 bottom-0 transition-all duration-300 ease-in-out z-20 backdrop-blur-sm`}>
         {/* Decorative gradient line */}

@@ -176,8 +176,6 @@ export default function BookingCalendar() {
   const [selectedDateEvents, setSelectedDateEvents] = useState<any[]>([]);
   const [showListModal, setShowListModal] = useState(false);
 
-  
-
 
   const handleSelectSlot = (slotInfo: any) => {
     const clickedDate = moment(slotInfo.start).startOf('day');

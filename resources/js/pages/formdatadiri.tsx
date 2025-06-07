@@ -1,5 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { useEffect } from 'react';
+import { router } from '@inertiajs/react';
 
 type Product = {
     product_id: number;
@@ -11,17 +13,25 @@ type Item = {
     quantity: number;
     price: number;
     product?: Product;
-};
-
-type PageProps = {
-    items: Item[];
-    total: number;
+    day_rent?: number;
+    duration?: string;
 };
 
 const FormDataDiri = () => {
-    const { props } = usePage<PageProps>();
-    const selectedItems = props.items ?? [];
-    const totalHarga = props.total ?? 0;
+    const [selectedItems, setSelectedItems] = useState<Item[]>([]);
+    const [totalHarga, setTotalHarga] = useState(0);
+
+    useEffect(() => {
+        const itemsFromStorage = localStorage.getItem('checkoutItems');
+        const totalFromStorage = localStorage.getItem('checkoutTotal');
+
+        if (itemsFromStorage) {
+            setSelectedItems(JSON.parse(itemsFromStorage));
+        }
+        if (totalFromStorage) {
+            setTotalHarga(parseInt(totalFromStorage));
+        }
+    }, []);
 
     const [formData, setFormData] = useState({
         nama: '',
@@ -36,6 +46,38 @@ const FormDataDiri = () => {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Map items to ensure product_id and day_rent are present at the top level
+        const items = selectedItems.map((item) => ({
+            product_id: item.product?.product_id ?? item.product,
+            day_rent: item.day_rent ?? 1,
+            duration: item.duration ?? (item.name?.includes('8 Jam') ? 'eight_hour' : 'twenty_four_hour'),
+            // Optionally include other fields if needed
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+        }));
+
+        const payload = {
+            name: formData.nama,
+            phone: formData.noHp,
+            address: formData.alamat,
+            social_media: formData.sosialMedia,
+            tanggalSewa: formData.tanggalSewa,
+            items,
+            total: totalHarga,
+        };
+
+        router.post('/checkout', payload, {
+            onSuccess: () => {
+                localStorage.removeItem('checkoutItems');
+                localStorage.removeItem('checkoutTotal');
+            },
+        });
+    };
+
     const handleKirimWA = () => {
         const message = `Halo, saya ${formData.nama} ingin menyewa pada tanggal ${formData.tanggalSewa}
 No HP: ${formData.noHp}
@@ -47,11 +89,14 @@ ${selectedItems
     .map((item, i) => {
         const prefix = `${i + 1}. `;
         const spacing = ' '.repeat(prefix.length);
-        return `${prefix}${item.name}\n${spacing}Jumlah: ${item.quantity}, Total: Rp ${((item.price ?? 0) * (item.quantity ?? 0)).toLocaleString(
-            'id-ID',
-        )}`;
+        const total = (item.price ?? 0) * (item.quantity ?? 0) * (item.day_rent ?? 1);
+        return `${prefix}${item.name}
+${spacing}Jumlah: ${item.quantity}
+${spacing}Durasi: ${item.day_rent} hari
+${spacing}Total: Rp ${total.toLocaleString('id-ID')}`;
     })
     .join('\n')}
+
 
 Total Harga: Rp ${totalHarga.toLocaleString('id-ID')}
 
@@ -59,6 +104,7 @@ Terima kasih!`;
 
         const waUrl = `https://wa.me/+6282160502890?text=${encodeURIComponent(message)}`;
         window.open(waUrl, '_blank');
+        handleSubmit({ preventDefault: () => {} } as React.FormEvent);
     };
 
     return (
@@ -145,7 +191,8 @@ Terima kasih!`;
                                         <p className="font-semibold">{item.name}</p>
                                         <p>Harga: Rp {(item.price ?? 0).toLocaleString('id-ID')}</p>
                                         <p>Jumlah: {item.quantity ?? 0}</p>
-                                        <p>Total: Rp {((item.price ?? 0) * (item.quantity ?? 0)).toLocaleString('id-ID')}</p>
+                                        <p>Durasi: {item.day_rent ?? 1} hari</p>
+                                        <p>Total: Rp {((item.price ?? 0) * (item.quantity ?? 0) * (item.day_rent ?? 1)).toLocaleString('id-ID')}</p>
                                     </div>
                                 </>
                             ) : (
@@ -159,7 +206,7 @@ Terima kasih!`;
             {/* FOOTER TOTAL HARGA */}
             <div className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-between rounded-t-xl bg-gray-900 p-4 text-white">
                 <h3 className="text-lg font-semibold">Total Harga: Rp {totalHarga.toLocaleString('id-ID')}</h3>
-                <button onClick={handleKirimWA} className="mt-6 rounded bg-green-500 px-6 py-2 font-semibold text-black hover:bg-gray-100">
+                <button onClick={handleSubmit} className="mt-6 rounded bg-green-500 px-6 py-2 font-semibold text-black hover:bg-gray-100">
                     Sent to WhatsApp
                 </button>
             </div>

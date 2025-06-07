@@ -135,9 +135,7 @@ export default function SyaratKetentuanPage() {
 
     return (
         <div className="flex min-h-screen flex-col bg-[#FCF6EF]">
-            <ErrorBoundary>
-                <Navbar />
-            </ErrorBoundary>
+
 
             <main className="flex-1 px-6 py-12 sm:px-10 lg:px-20">
                 {/* Back Button & Title */}
@@ -167,9 +165,7 @@ export default function SyaratKetentuanPage() {
                 </div>
             </main>
 
-            <ErrorBoundary>
-                <Footer />
-            </ErrorBoundary>
+
         </div>
     );
 }

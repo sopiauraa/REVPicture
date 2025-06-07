@@ -23,18 +23,6 @@ const Keranjang = () => {
         }
     };
 
-    const handleIncrement = (index: number) => {
-        increaseQuantity(cart[index].product.product_id);
-    };
-
-    const handleDecrement = (index: number) => {
-        decreaseQuantity(cart[index].product.product_id);
-    };
-
-    const totalHarga = selectedItems.reduce((acc, i) => {
-        return acc + cart[i].price * cart[i].quantity;
-    }, 0);
-
     const handleCheckout = () => {
         if (selectedItems.length === 0) {
             alert('Pilih minimal satu barang ya bro');
@@ -42,13 +30,29 @@ const Keranjang = () => {
         }
 
         const selectedData = selectedItems.map((i) => ({
-            ...cart[i],
+            product: cart[i].product, // Save the full product object
+            product_id: cart[i].product.product_id,
+            product_image: cart[i].product.product_image,
+            name: cart[i].name,
+            price: cart[i].price,
+            quantity: cart[i].quantity,
             day_rent: rentalDays[i],
+            duration: cart[i].name.includes('8 Jam') ? 'eight_hour' : 'twenty_four_hour',
         }));
-        localStorage.setItem('selectedItems', JSON.stringify(selectedData));
-        localStorage.setItem('totalHarga', totalHarga.toString());
+
+        const totalHarga = selectedItems.reduce((acc, i) => acc + cart[i].price * cart[i].quantity * rentalDays[i], 0);
+
+        localStorage.setItem('checkoutItems', JSON.stringify(selectedData));
+        localStorage.setItem('checkoutTotal', totalHarga.toString());
 
         router.visit('/formdatadiri');
+    };
+    const handleIncrement = (index: number) => {
+        increaseQuantity(cart[index].product.product_id);
+    };
+
+    const handleDecrement = (index: number) => {
+        decreaseQuantity(cart[index].product.product_id);
     };
 
     const incrementRentalDay = (index: number) => {
@@ -62,6 +66,7 @@ const Keranjang = () => {
         }));
     };
 
+    const totalHarga = selectedItems.reduce((acc, i) => acc + cart[i].price * cart[i].quantity * rentalDays[i], 0);
     return (
         <div className="p-6">
             <h1 className="mb-6 text-2xl font-bold">KERANJANG SAYA</h1>

@@ -6,6 +6,7 @@ use App\Models\order;
 use App\Models\Product;
 use App\Models\Customer;
 use App\Models\sewa;
+use App\Models\OrderDetail;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
@@ -161,7 +162,52 @@ class ordercontroller extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string',
+            'social_media' => 'required|string',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|integer|exists:products,product_id',
+            'items.*.duration' => 'required|in:eight_hour,twenty_four_hour',
+            'items.*.day_rent' => 'required|integer|min:1',
+            'total' => 'required|numeric',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $customer = Customer::create([
+                'user_id' => auth()->user()->user_id,
+                'customer_name' => $request->name,
+                'phone_number' => $request->phone,
+                'address' => $request->address,
+                'social_media' => $request->social_media,
+            ]);
+
+            $order = Order::create([
+                'customer_id' => $customer->customer_id,
+                'order_date' => now(),
+                'total_price' => $request->total,
+                'status' => 'diproses',
+                'status_dp' => 'belum_dibayar',
+            ]);
+
+            foreach ($request->items as $item) {
+                OrderDetail::create([
+                    'order_id' => $order->order_id,
+                    'product_id' => $item['product_id'],
+                    'duration' => $item['duration'],
+                    'day_rent' => $item['day_rent'],
+                    'due_on' => now()->addDays($item['day_rent']),
+                ]);
+            }
+
+            DB::commit();
+            return redirect('/success')->with('message', 'Order berhasil dibuat!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Gagal menyimpan pesanan: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -207,7 +253,7 @@ class ordercontroller extends Controller
         return response()->noContent();
     }
 
-public function adminupdate(Request $request, $order_id)
+    public function adminupdate(Request $request, $order_id)
     {
         $order = Order::where('order_id', $order_id)->firstOrFail();
 

@@ -35,7 +35,6 @@ const DetailProduk = () => {
 
   return (
     <div className="min-h-screen bg-[#faf3eb] font-sans">
-      <Navbar cart={[]} setShowCart={() => {}} />
       <div className="px-4 py-8">
         <h1 className="text-center text-3xl font-bold mb-8 text-gray-800">SONY A7 MARK III</h1>
 

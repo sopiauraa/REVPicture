@@ -20,15 +20,7 @@ interface AdminLayoutProps {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
   const { url } = usePage();
-  const [search, setSearch] = useState('');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (search.trim() !== '') {
-      router.get('/search', { q: search });
-    }
-  };
 
   const handleLogout = () => {
     if (window.confirm('Apakah Anda yakin ingin keluar?')) {
@@ -118,26 +110,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Search */}
-            <form onSubmit={handleSearchSubmit} className="relative">
-              <div className="relative">
-                <input
-                  className="w-80 h-10 rounded-xl border border-gray-300 bg-white pl-4 pr-12 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm"
-                  placeholder="Cari data, booking, atau penyewa..."
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-                <button
-                  type="submit"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors p-1"
-                  aria-label="Search"
-                >
-                  <i className="fas fa-search text-sm"></i>
-                </button>
-              </div>
-            </form>
-
             {/* Action Buttons */}
             <div className="flex items-center gap-3">
               <button 

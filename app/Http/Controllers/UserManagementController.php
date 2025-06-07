@@ -95,9 +95,11 @@ class UserManagementController extends Controller
     /**
      * Display the specified user
      */
-    public function show(User $user)
+    public function show($userId)
     {
         try {
+            $user = User::where('user_id', $userId)->firstOrFail();
+            
             return response()->json([
                 'success' => true,
                 'data' => $user,
@@ -114,12 +116,14 @@ class UserManagementController extends Controller
     /**
      * Update the specified user
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, $userId)
     {
         try {
+            $user = User::where('user_id', $userId)->firstOrFail();
+            
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+                'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->user_id, 'user_id')],
                 'password' => 'nullable|string|min:8|confirmed',
                 'role' => 'required|in:customer,staff,admin'
             ]);
@@ -163,11 +167,10 @@ class UserManagementController extends Controller
                 'role' => 'required|in:customer,staff,admin'
             ]);
 
-            // Cari user berdasarkan primary key yang benar
             $user = User::where('user_id', $userId)->firstOrFail();
 
             // Prevent user from changing their own role to avoid lockout
-            if ($user->user_id === auth()->id()) {
+            if ($user->user_id === auth()->user()->user_id) {
                 return response()->json([
                     'success' => false,
                     'message' => 'You cannot change your own role'
@@ -197,11 +200,10 @@ class UserManagementController extends Controller
     public function destroy($userId)
     {
         try {
-            // Cari user berdasarkan primary key yang benar
             $user = User::where('user_id', $userId)->firstOrFail();
 
             // Prevent user from deleting themselves
-            if ($user->user_id === auth()->id()) {
+            if ($user->user_id === auth()->user()->user_id) {
                 return response()->json([
                     'success' => false,
                     'message' => 'You cannot delete your own account'

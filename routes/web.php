@@ -12,6 +12,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\KalenderController;
 use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserManagementController;
 
 
 
@@ -38,11 +39,6 @@ Route::get('/admin/dashboard', function () {
 })->name('admin.dashboard');
 Route::get('/dashboard-stats', [DashboardController::class, 'stats']);
 
-
-
-//Route::get('/admin/databarang', function () { return Inertia::render('admin/databarang'); });
-// Route::get('/admin/BookingMasuk', function () {
-//     return Inertia::render('admin/BookingMasuk'); });
 
 Route::prefix('admin')->group(function () {
     Route::post('/product/store', [ProductController::class, 'store'])->name('admin.product.store');
@@ -85,10 +81,26 @@ Route::get('/admin/datastaff', function () {
         'users' => $staffUsers,
     ]);
 });
+
 Route::get('/admin/kalender', [KalenderController::class, 'index'])->name('kalender.index');
 // landing
 Route::get('/landing', function () { return Inertia::render('landing'); })->name('landing');
 
+Route::prefix('admin')->group(function () {
+    // API routes untuk user management
+    Route::get('/users', [UserManagementController::class, 'index'])->name('admin.users.index');
+    Route::get('/users/{userId}', [UserManagementController::class, 'show'])->name('admin.users.show');
+    Route::put('/users/{userId}', [UserManagementController::class, 'update'])->name('admin.users.update');
+    Route::delete('/users/{userId}', [UserManagementController::class, 'destroy'])->name('admin.users.destroy');
+    Route::post('/users', [UserManagementController::class, 'store'])->name('admin.users.store');
+    Route::put('/users/{userId}/role', [UserManagementController::class, 'updateRole'])->name('admin.users.update-role');
+    Route::put('/users/{userId}/status', [UserManagementController::class, 'toggleStatus'])->name('admin.users.toggle-status');
+});
+
+// Route untuk halaman React
+Route::get('/admin/usermanagement', function () {
+    return Inertia::render('Admin/UserManagement');
+})->name('admin.usermanagement');
 
 
 Route::prefix('staff')->group(function () {

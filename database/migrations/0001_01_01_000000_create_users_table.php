@@ -1,8 +1,54 @@
 <?php
 
+// use Illuminate\Database\Migrations\Migration;
+// use Illuminate\Database\Schema\Blueprint;
+// use Illuminate\Support\Facades\Schema;
+
+// return new class extends Migration
+// {
+
+//     public function up(): void
+//     {
+//         Schema::create('users', function (Blueprint $table) {
+//             $table->integer('user_id')->primary()->autoIncrement();
+//             $table->string('name');
+//             $table->string('email')->unique();
+//             $table->string('password');
+//             $table->enum('role', ['customer', 'staff', 'admin'])->defaul('customer');
+//             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP')); 
+//             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
+//         });
+
+//         Schema::create('password_reset_tokens', function (Blueprint $table) {
+//             $table->string('email')->primary();
+//             $table->string('token');
+//             $table->timestamp('created_at')->nullable();
+//         });
+
+//         Schema::create('sessions', function (Blueprint $table) {
+//             $table->string('id')->primary();
+//             $table->foreignId('user_id')->nullable()->index();
+//             $table->string('ip_address', 45)->nullable();
+//             $table->text('user_agent')->nullable();
+//             $table->longText('payload');
+//             $table->integer('last_activity')->index();
+//         });
+//     }
+
+
+//     public function down(): void
+//     {
+//         Schema::dropIfExists('users');
+//         Schema::dropIfExists('password_reset_tokens');
+//         Schema::dropIfExists('sessions');
+//     }
+// };
+
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -12,12 +58,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->integer('user_id')->primary()->autoIncrement();
+            // Gunakan id() standar Laravel atau ubah ke user_id dengan benar
+            $table->id(); // Ini akan membuat kolom 'id' sebagai primary key auto increment
+            // ATAU jika tetap ingin user_id:
+            // $table->unsignedBigInteger('user_id')->autoIncrement()->primary();
+            
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->enum('role', ['customer', 'staff', 'admin'])->defaul('customer');
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP')); 
+            $table->enum('role', ['customer', 'staff', 'admin'])->default('customer'); // Fixed typo 'defaul'
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });
 
@@ -47,3 +97,5 @@ return new class extends Migration
         Schema::dropIfExists('sessions');
     }
 };
+
+

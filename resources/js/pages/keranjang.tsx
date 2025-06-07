@@ -23,32 +23,34 @@ const Keranjang = () => {
         }
     };
 
+    const handleCheckout = () => {
+        if (selectedItems.length === 0) {
+            alert('Pilih minimal satu barang ya bro');
+            return;
+        }
+        
+        const selectedData = selectedItems.map((i) => ({
+            product_id: cart[i].product.product_id,
+            product_name: cart[i].product.product_name,
+            price: cart[i].price,
+            quantity: cart[i].quantity,
+            day_rent: rentalDays[i],
+        }));
+        
+        router.visit('/formdatadiri', {
+            data: {
+                items: selectedData,
+                total: totalHarga,
+            },
+            preserveState: true,
+        });
+    };
     const handleIncrement = (index: number) => {
         increaseQuantity(cart[index].product.product_id);
     };
 
     const handleDecrement = (index: number) => {
         decreaseQuantity(cart[index].product.product_id);
-    };
-
-    const totalHarga = selectedItems.reduce((acc, i) => {
-        return acc + cart[i].price * cart[i].quantity;
-    }, 0);
-
-    const handleCheckout = () => {
-        if (selectedItems.length === 0) {
-            alert('Pilih minimal satu barang ya bro');
-            return;
-        }
-
-        const selectedData = selectedItems.map((i) => ({
-            ...cart[i],
-            day_rent: rentalDays[i],
-        }));
-        localStorage.setItem('selectedItems', JSON.stringify(selectedData));
-        localStorage.setItem('totalHarga', totalHarga.toString());
-
-        router.visit('/formdatadiri');
     };
 
     const incrementRentalDay = (index: number) => {
@@ -61,7 +63,8 @@ const Keranjang = () => {
             [index]: Math.max(1, prev[index] - 1),
         }));
     };
-
+    
+    const totalHarga = selectedItems.reduce((acc, i) => acc + cart[i].price * cart[i].quantity * rentalDays[i], 0);
     return (
         <div className="p-6">
             <h1 className="mb-6 text-2xl font-bold">KERANJANG SAYA</h1>

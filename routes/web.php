@@ -4,7 +4,7 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\User;
-use App\Http\Controllers\Ordercontroller;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SewaController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProductController;
@@ -25,11 +25,21 @@ Route::get('/', [ProductController::class, 'showLanding'])->name('home');
 
 Route::get('/login', [AuthenticatedSessionController::class, 'index']);
 Route::get('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-Route::get('/brand', function() {return Inertia::render('brand');});
-Route::get('/kamera', function() {return Inertia::render('kamera');});
-Route::get('/lensa', function() {return Inertia::render('lensa');});
-Route::get('/paket', function() {return Inertia::render('paket');});
-Route::get('/syarat', function() {return Inertia::render('syarat');});
+Route::get('/brand', function () {
+    return Inertia::render('brand');
+});
+Route::get('/kamera', function () {
+    return Inertia::render('kamera');
+});
+Route::get('/lensa', function () {
+    return Inertia::render('lensa');
+});
+Route::get('/paket', function () {
+    return Inertia::render('paket');
+});
+Route::get('/syarat', function () {
+    return Inertia::render('syarat');
+});
 
 
 // admin
@@ -87,7 +97,9 @@ Route::get('/admin/datastaff', function () {
 });
 Route::get('/admin/kalender', [KalenderController::class, 'index'])->name('kalender.index');
 // landing
-Route::get('/landing', function () { return Inertia::render('landing'); })->name('landing');
+Route::get('/landing', function () {
+    return Inertia::render('landing');
+})->name('landing');
 
 
 
@@ -109,21 +121,30 @@ Route::delete('/staff/data_booking/{order_id}', [OrderController::class, 'destro
 Route::get('/staff/kalender', [KalenderController::class, 'staffIndex'])->name('kalender.staffIndex');
 Route::get('staff/data_sewa', [SewaController::class, 'index']);
 Route::patch('/staff/data_sewa/{rental}', [SewaController::class, 'update']);
-Route::get('/data_barang', function () { return Inertia::render('StaffDataBarang');});
+Route::get('/data_barang', function () {
+    return Inertia::render('StaffDataBarang');
+});
 //Display Product (Landing)
 Route::get('/shop', [ProductController::class, 'index']);
 
 Route::get('/staff/history', [OrderController::class, 'history']);
 // user
-Route::get('detailproduk', function () { return Inertia::render('detailproduk');});
-Route::get('/keranjang', function () { return Inertia::render('keranjang');});
-Route::get('/formdatadiri', function () { return Inertia::render('formdatadiri');});
+Route::get('detailproduk', function () {
+    return Inertia::render('detailproduk');
+});
+Route::get('/keranjang', function () {
+    return Inertia::render('keranjang');
+});
+Route::get('/formdatadiri', function () {
+    return Inertia::render('formdatadiri');
+});
 Route::get('/formdatadiri', function () {
     return Inertia::render('FormDataDiri', [
         'selectedItems' => request()->input('selectedItems', []),
         'totalHarga' => request()->input('totalHarga', 0),
     ]);
 });
+Route::post('/checkout', [OrderController::class, 'store']);
 
 Route::get('detailproduk', function () {
     return Inertia::render('detailproduk');

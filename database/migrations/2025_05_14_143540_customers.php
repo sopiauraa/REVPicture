@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->integer('customer_id')->primary()->autoIncrement();
+            $table->integer('user_id');
             $table->string('customer_name');
             $table->string('phone_number');
             $table->text('address');
             $table->string('social_media');
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP')); 
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')); 
+            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
+            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('restrict');  
         });
     }
 

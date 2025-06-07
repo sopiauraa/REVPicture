@@ -6,9 +6,10 @@ import { createRoot } from 'react-dom/client';
 import ErrorBoundary from './components/error-boundary';
 import { initializeTheme } from './hooks/use-appearance';
 import Kalender from './pages/admin/kalender';
+import { CartProvider } from './components/CartContext';
 
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Rev Picture';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -24,7 +25,9 @@ createInertiaApp({
 
         root.render(
             <ErrorBoundary>
+                <CartProvider>
                 <App {...props} />
+                </CartProvider>
             </ErrorBoundary>,
         );
     },

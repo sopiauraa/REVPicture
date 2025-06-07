@@ -6,6 +6,7 @@ use App\Models\order;
 use App\Models\Product;
 use App\Models\Customer;
 use App\Models\sewa;
+use App\Models\OrderDetail;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
@@ -161,7 +162,37 @@ class ordercontroller extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'items' => 'required|array|min:1',
+            'total' => 'required|numeric',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $order = Order::create([
+                'customer_id' => auth()->id(),
+                'order_date' => $request->now(),
+                'total_price' => $request->total,
+            ]);
+
+            foreach ($request->items as $item) {
+                orderdetail::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'product_name' => $item['product_name'],
+                    'price' => $item['price'],
+                    'quantity' => $item['quantity'],
+                    'day_rent' => $item['day_rent'],
+                    'due_on' => now()->addDays($item['day_rent']),
+                ]);
+            }
+
+            DB::commit();
+            return redirect('/success')->with('message', 'Order berhasil dibuat!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Gagal menyimpan pesanan: ' . $e->getMessage()]);
+        }
     }
 
     /**

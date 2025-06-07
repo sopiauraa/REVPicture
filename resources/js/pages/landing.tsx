@@ -27,6 +27,8 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
     const [conflictMsg, setConflictMsg] = useState('');
     const [brandFilter, setBrandFilter] = useState('');
     const [typeFilter, setTypeFilter] = useState<'camera' | 'lens' | ''>('');
+    const [selectedItem, setSelectedItem] = useState<Product | null>(null);
+    
 
     const ProductCard = ({ product }: { product: Product }) => {
         const [selectedDuration, setSelectedDuration] = useState<'8' | '24'>('8');
@@ -36,6 +38,7 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
                 setShowLoginPrompt(true);
                 return;
             }
+
             const selectedPrice = selectedDuration === '8' ? product.eight_hour_rent_price : product.twenty_four_hour_rent_price;
 
             const itemName = `${product.product_name} (${selectedDuration} Jam)`;
@@ -135,6 +138,8 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
             (!brandFilter || p.brand === brandFilter) &&
             (typeFilter === '' || typeFilter === 'lens'),
     );
+
+    
 
     return (
         <ErrorBoundary>

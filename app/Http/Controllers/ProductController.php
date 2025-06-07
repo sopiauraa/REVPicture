@@ -183,83 +183,83 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-public function update(Request $request, $product_id)
-{
-    $validated = $request->validate([
-        'stock' => 'required|integer|min:0',
-        'eight_hour_rent_price' => 'required|integer|min:1', 
-        'twenty_four_hour_rent_price' => 'required|integer|min:1',
-        'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-
-    try {
-        $product = Product::findOrFail($product_id);
-        
-        // Update harga rental
-        $product->update([
-            'eight_hour_rent_price' => $validated['eight_hour_rent_price'],
-            'twenty_four_hour_rent_price' => $validated['twenty_four_hour_rent_price']
+    public function update(Request $request, $product_id)
+    {
+        $validated = $request->validate([
+            'stock' => 'required|integer|min:0',
+            'eight_hour_rent_price' => 'required|integer|min:1', 
+            'twenty_four_hour_rent_price' => 'required|integer|min:1',
+            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Update stock - FIX relasi
-        $existingStock = DB::table('stocks')->where('product_id', $product->product_id)->first();
-        
-        if ($existingStock) {
-            DB::table('stocks')
-                ->where('product_id', $product->product_id)
-                ->update(['stock_available' => $validated['stock']]);
-        } else {
-            DB::table('stocks')->insert([
-                'product_id' => $product->product_id,
-                'stock_available' => $validated['stock'],
-                'created_at' => now(),
-                'updated_at' => now()
+        try {
+            $product = Product::findOrFail($product_id);
+            
+            // Update harga rental
+            $product->update([
+                'eight_hour_rent_price' => $validated['eight_hour_rent_price'],
+                'twenty_four_hour_rent_price' => $validated['twenty_four_hour_rent_price']
             ]);
-        }
 
-        // Handle upload gambar
-        if ($request->hasFile('product_image')) {
-            $image = $request->file('product_image');
-            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            // Update stock - FIX relasi
+            $existingStock = DB::table('stocks')->where('product_id', $product->product_id)->first();
             
-            // Pastikan folder ada
-            $uploadPath = public_path('storage/products');
-            if (!file_exists($uploadPath)) {
-                mkdir($uploadPath, 0755, true);
+            if ($existingStock) {
+                DB::table('stocks')
+                    ->where('product_id', $product->product_id)
+                    ->update(['stock_available' => $validated['stock']]);
+            } else {
+                DB::table('stocks')->insert([
+                    'product_id' => $product->product_id,
+                    'stock_available' => $validated['stock'],
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
             }
-            
-            // Upload file baru
-            $image->move($uploadPath, $imageName);
-            
-            // Hapus gambar lama
-            if ($product->product_image && file_exists(public_path('storage/products/' . $product->product_image))) {
-                unlink(public_path('storage/products/' . $product->product_image));
+
+            // Handle upload gambar
+            if ($request->hasFile('product_image')) {
+                $image = $request->file('product_image');
+                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                
+                // Pastikan folder ada
+                $uploadPath = public_path('storage/products');
+                if (!file_exists($uploadPath)) {
+                    mkdir($uploadPath, 0755, true);
+                }
+                
+                // Upload file baru
+                $image->move($uploadPath, $imageName);
+                
+                // Hapus gambar lama
+                if ($product->product_image && file_exists(public_path('storage/products/' . $product->product_image))) {
+                    unlink(public_path('storage/products/' . $product->product_image));
+                }
+                
+                // Update database
+                $product->update(['product_image' => $imageName]);
             }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product berhasil diupdate',
+                'product' => $product->load('stock')
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Product update error: ' . $e->getMessage());
             
-            // Update database
-            $product->update(['product_image' => $imageName]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal update product: ' . $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Product berhasil diupdate',
-            'product' => $product->load('stock')
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error('Product update error: ' . $e->getMessage());
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal update product: ' . $e->getMessage()
-        ], 500);
     }
-}
 
-    public function destroy($id)
+    public function destroy($product_id)
     {
         try {
-            $product = Product::findOrFail($id);
+            $product = Product::findOrFail($product_id);
             
             // Delete image file if exists
             if ($product->product_image) {

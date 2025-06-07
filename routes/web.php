@@ -85,12 +85,12 @@ Route::get('/admin/datapenyewaan', [SewaController::class, 'indexadmin']);
 Route::patch('/admin/datapenyewaan/{rental}', [SewaController::class, 'update']);
 
 Route::get('/admin/history', [OrderController::class, 'historyadmin']);
-Route::get('/admin/datastaff', function () {
-    $staffUsers = User::where('role', 'staff')->select('user_id', 'name', 'email')->get();
-    return Inertia::render('admin/datastaff', [
-        'users' => $staffUsers,
-    ]);
-});
+// Route::get('/admin/datastaff', function () {
+//     $staffUsers = User::where('role', 'staff')->select('user_id', 'name', 'email')->get();
+//     return Inertia::render('admin/datastaff', [
+//         'users' => $staffUsers,
+//     ]);
+// });
 
 Route::get('/admin/kalender', [KalenderController::class, 'index'])->name('kalender.index');
 // landing
@@ -107,6 +107,7 @@ Route::prefix('admin')->group(function () {
     Route::post('/users', [UserManagementController::class, 'store'])->name('admin.users.store');
     Route::put('/users/{userId}/role', [UserManagementController::class, 'updateRole'])->name('admin.users.update-role');
     Route::put('/users/{userId}/status', [UserManagementController::class, 'toggleStatus'])->name('admin.users.toggle-status');
+    Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('products.destroy');
 });
 
 // Route untuk halaman React

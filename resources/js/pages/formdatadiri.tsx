@@ -113,7 +113,7 @@ Terima kasih!`;
             <h1 className="mb-6 text-2xl font-bold">Data Diri</h1>
 
             {/* FORM DATA DIRI */}
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleKirimWA}>
             <div className="grid grid-cols-1 gap-x-10 gap-y-6 rounded-lg bg-[#e8d5c0] p-6 md:grid-cols-2">
                 {/* Kolom Kiri */}
                 <div>

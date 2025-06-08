@@ -171,6 +171,7 @@ class ordercontroller extends Controller
             'items.*.product_id' => 'required|integer|exists:products,product_id',
             'items.*.duration' => 'required|in:eight_hour,twenty_four_hour',
             'items.*.day_rent' => 'required|integer|min:1',
+            'items.*.quantity' => 'required|integer|min:1',
             'total' => 'required|numeric',
         ]);
 
@@ -199,12 +200,13 @@ class ordercontroller extends Controller
                     'product_id' => $item['product_id'],
                     'duration' => $item['duration'],
                     'day_rent' => $item['day_rent'],
+                    'quantity' => $item['quantity'],
                     'due_on' => now()->addDays($item['day_rent']),
                 ]);
             }
 
             DB::commit();
-            // return redirect('/success')->with('message', 'Order berhasil dibuat!');
+            return redirect('/')->with('message', 'Order berhasil dibuat!');
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('OrderController@store error: ' . $e->getMessage());

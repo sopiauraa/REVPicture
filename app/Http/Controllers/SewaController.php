@@ -15,25 +15,29 @@ class SewaController extends Controller
 {
     public function index()
     {
-        $sewa = Sewa::with('order')->whereHas('order', function ($q) {
-            $q->where('status', 'disewakan');
-        })->get();
+        $orders = Order::with(['orderDetail.product', 'customer'])
+            ->where('status', 'terkonfirmasi') // hanya ambil penyewaan aktif
+            ->get()
+            ->map(function ($order) {
+                $orderDetail = $order->orderDetail;
+                $product = $orderDetail?->product;
+                $customer = $order->customer;
 
-        // Map data biar cocok sama props React
-        $mapped = $sewa->map(function ($s) {
-            return [
-                'order_id' => $s->order_id,
-                'customer_name' => $s->order->customer_name ?? '-',
-                'product_name' => $s->product->name ?? '-', // kalau ada relasi product
-                'day_rent' => $s->order->day_rent ?? '-',
-                'due_on' => $s->order->due_on ?? '-',
-                'duration' => $s->day_rent . ' hari',
-                'contact_wa' => $s->order->wa ?? '-',
-                'status' => $s->order->status === 'pending' ? 'terkonfirmasi' : 'selesai',
-            ];
-        });
+                return [
+                    'order_id' => $order->order_id,
+                    'customer_name' => $customer->customer_name ?? '-',
+                    'product_name' => $product->product_name ?? '-',
+                    'day_rent' => $orderDetail->day_rent ?? '-',
+                    'due_on' => $orderDetail->due_on ?? '-',
+                    'duration' => $orderDetail->duration ?? '-',
+                    'phone_number' => $customer->phone_number ?? '-',
+                    'status' => $order->status ?? 'terkonfirmasi',
+                ];
+            });
 
-        return Inertia::render('staff/staff_data_sewa', ['orders' => $sewa]);
+        return Inertia::render('staff/staff_data_sewa', [
+            'orders' => $orders,
+        ]);
     }
     public function adminindex()
     {
@@ -64,14 +68,27 @@ class SewaController extends Controller
 
 
 
-    public function update(Request $request, Sewa $rental)
+    public function update(Request $request, $order_id)
     {
-        if ($request->status === 'dikembalikan') {
-            $rental->status = 'dikembalikan';
-            $rental->save();
+        $order = Order::with('orderDetail.product.stock')->findOrFail($order_id);
+
+    if ($request->status === 'selesai') {
+        $order->status = 'selesai';
+
+        // Ambil stok dari relasi orderDetail → product → stock
+        $stock = $order->orderDetail?->product?->stock;
+
+        if ($stock && $stock->stock_available > 0) {
+            $stock->stock_available += 1;
+            $stock->save();
+        } else {
+            return redirect()->back()->with('error', 'Stok produk tidak tersedia.');
         }
 
-        return redirect()->back();
+        $order->save();
+    }
+
+    return redirect()->back()->with('success', 'Status DP diperbarui dan stok dikurangi.');
     }
 
     // public function adminupdate(Request $request, $order_id)

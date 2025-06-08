@@ -1,123 +1,111 @@
-import React, { useState } from 'react';
-import { router } from '@inertiajs/react';
 import StaffLayout from '@/layouts/staff_layout';
+import { router } from '@inertiajs/react';
+import React, { useState } from 'react';
 
-interface Rental {
-  rental_id: number;
-  customer_name: string;
-  item_name: string;
-  pickup_date: string;
-  return_date: string;
-  duration: string;
-  contact_wa: string;
-  status_return: 'belum_dikembalikan' | 'sudah_dikembalikan';
+interface Order {
+    order_id: number;
+    customer_name: string;
+    product_name: string;
+    day_rent: string;
+    due_on: string;
+    duration: string;
+    phone_number: string;
+    status: 'terkonfirmasi' | 'selesai';
 }
 
 interface Props {
-  rentals: Rental[];
+    orders: Order[];
 }
 
-const dummyRentals: Rental[] = [
-  {
-    rental_id: 1,
-    customer_name: 'Ilham',
-    item_name: 'Kamera DSLR',
-    pickup_date: '2025-06-01',
-    return_date: '2025-06-02',
-    duration: '24 jam',
-    contact_wa: '081234567890',
-    status_return: 'belum_dikembalikan',
-  },
-  {
-    rental_id: 2,
-    customer_name: 'Nadia',
-    item_name: 'Tripod',
-    pickup_date: '2025-06-03',
-    return_date: '2025-06-04',
-    duration: '1 hari',
-    contact_wa: '082345678901',
-    status_return: 'belum_dikembalikan',
-  },
-];
+const PenyewaanIndex: React.FC<Props> = ({ orders }) => {
+    const [orderList, setOrderList] = useState<Order[]>(orders);
 
-const PenyewaanIndex: React.FC<Props> = ({ rentals }) => {
-  const [rentalList, setRentalList] = useState<Rental[]>(rentals);
-
-  const handleReturn = (rentalId: number) => {
-    if (window.confirm('Barang sudah dikembalikan?')) {
-      router.patch(
-        `/admin/penyewaan/${rentalId}`,
-        { status_return: 'sudah_dikembalikan' },
-        {
-          onSuccess: () => {
-            setRentalList((prev) =>
-              prev.filter((rental) => rental.rental_id !== rentalId)
+    // Update status order menjadi 'selesai'
+    const handleStatusChange = (orderId: number) => {
+        if (window.confirm('Yakin sudah dikembalikan?')) {
+            router.patch(
+                `/admin/datapenyewaan/${orderId}`,
+                { status: 'selesai' },
+                {
+                    onSuccess: () => {
+                        setOrderList((prev) => prev.filter((order) => order.order_id !== orderId));
+                    },
+                },
             );
-          },
         }
-      );
-    }
-  };
+    };
 
-  return (
-    <StaffLayout title="Penyewaan">
-      <section className="mt-4 px-6 pb-12">
-        <div className="bg-white rounded-md shadow-md p-6 overflow-x-auto">
-          <h3 className="font-semibold text-[14px] mb-4">Data Penyewaan Aktif</h3>
-          <table className="w-full text-[13px] text-[#1f1e29] border-separate border-spacing-y-2">
-            <thead>
-              <tr className="bg-[#d3d3d3] text-left">
-                <th className="py-3 px-4 rounded-tl-md">No</th>
-                <th className="py-3 px-4">Nama Penyewa</th>
-                <th className="py-3 px-4">Barang Disewa</th>
-                <th className="py-3 px-4">Tgl Ambil</th>
-                <th className="py-3 px-4">Tgl Kembali</th>
-                <th className="py-3 px-4">Durasi</th>
-                <th className="py-3 px-4">Kontak WA</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 rounded-tr-md text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="text-[13px]">
-              {rentalList.map((rental, idx) => (
-                <tr
-                  key={rental.rental_id}
-                  className={`${
-                    idx % 2 === 0 ? 'bg-[#f5f5f5]' : 'bg-white'
-                  } rounded-md`}
-                >
-                  <td className="py-3 px-4">{idx + 1}</td>
-                  <td className="py-3 px-4">{rental.customer_name}</td>
-                  <td className="py-3 px-4">{rental.item_name}</td>
-                  <td className="py-3 px-4">{rental.pickup_date}</td>
-                  <td className="py-3 px-4">{rental.return_date}</td>
-                  <td className="py-3 px-4">{rental.duration}</td>
-                  <td className="py-3 px-4">{rental.contact_wa}</td>
-                  <td className="py-3 px-4">
-                    {rental.status_return === 'belum_dikembalikan' ? (
-                      <span className="text-red-600 font-semibold">Belum Dikembalikan</span>
-                    ) : (
-                      <span className="text-green-600 font-semibold">Sudah Dikembalikan</span>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    {rental.status_return === 'belum_dikembalikan' && (
-                      <button
-                        onClick={() => handleReturn(rental.rental_id)}
-                        className="w-[90px] bg-[#0F63D4] hover:bg-[#0c54b3] text-white py-1 px-3 text-xs rounded"
-                      >
-                        Selesai
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </StaffLayout>
-  );
+    // Hapus order
+    const handleDelete = (orderId: number) => {
+        if (window.confirm('Yakin ingin menolak dan menghapus order ini?')) {
+            router.delete(`/admin/datapenyewaan/${orderId}`, {
+                onSuccess: () => {
+                    setOrderList((prev) => prev.filter((order) => order.order_id !== orderId));
+                },
+            });
+        }
+    };
+
+    return (
+        <StaffLayout title="Penyewaan">
+            <section className="mt-4 px-6 pb-12">
+                <div className="overflow-x-auto rounded-md bg-white p-6 shadow-md">
+                    <h3 className="mb-4 text-[14px] font-semibold">Data Penyewaan Aktif</h3>
+                    <table className="w-full border-separate border-spacing-y-2 text-[13px] text-[#1f1e29]">
+                        <thead>
+                            <tr className="bg-[#d3d3d3] text-left">
+                                <th className="rounded-tl-md px-4 py-3">No</th>
+                                <th className="px-4 py-3">Nama Penyewa</th>
+                                <th className="px-4 py-3">Barang Disewa</th>
+                                <th className="px-4 py-3">Tgl Ambil</th>
+                                <th className="px-4 py-3">Tgl Kembali</th>
+                                <th className="px-4 py-3">Durasi</th>
+                                <th className="px-4 py-3">Kontak WA</th>
+                                <th className="px-4 py-3">Status</th>
+                                <th className="rounded-tr-md px-4 py-3 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody className="text-[13px]">
+                            {orderList.map((order, idx) => (
+                                <tr key={order.order_id} className={`${idx % 2 === 0 ? 'bg-[#f5f5f5]' : 'bg-white'} rounded-md`}>
+                                    <td className="px-4 py-3">{idx + 1}</td>
+                                    <td className="px-4 py-3">{order.customer_name}</td>
+                                    <td className="px-4 py-3">{order.product_name}</td>
+                                    <td className="px-4 py-3">{order.day_rent}</td>
+                                    <td className="px-4 py-3">{order.due_on}</td>
+                                    <td className="px-4 py-3">{order.duration}</td>
+                                    <td className="px-4 py-3">{order.phone_number}</td>
+                                    <td className="px-4 py-3">
+                                        {order.status === 'terkonfirmasi' ? (
+                                            <span className="font-semibold text-red-600">Belum Dikembalikan</span>
+                                        ) : (
+                                            <span className="font-semibold text-green-600">Sudah Dikembalikan</span>
+                                        )}
+                                    </td>
+                                    <td className="px-4 py-3 text-center">
+                                        <div className="flex justify-center gap-2">
+                                            <button
+                                                className="w-[80px] rounded bg-[#0F63D4] px-3 py-1 text-center text-xs text-white hover:bg-[#0c54b3]"
+                                                onClick={() => handleStatusChange(order.order_id)}
+                                            >
+                                                Terima
+                                            </button>
+                                            <button
+                                                className="w-[80px] rounded bg-[#EF4444] px-3 py-1 text-center text-xs text-white hover:bg-[#dc2626]"
+                                                onClick={() => handleDelete(order.order_id)}
+                                            >
+                                                Tolak
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </StaffLayout>
+    );
 };
 
 export default PenyewaanIndex;

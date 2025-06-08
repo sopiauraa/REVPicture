@@ -3,34 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sewa;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\Customer;
+use App\Models\OrderDetail;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class SewaController extends Controller
 {
     public function index()
-    {
-       $sewa = Sewa::with('order')->whereHas('order', function ($q) {
-            $q->where('status', 'disewakan');
-        })->get();
-
-        // Map data biar cocok sama props React
-        $mapped = $sewa->map(function ($s) {
-            return [
-                'rental_id' => $s->order_detail_id,
-                'customer_name' => $s->order->customer_name ?? '-',
-                'item_name' => $s->product->name ?? '-', // kalau ada relasi product
-                'pickup_date' => $s->order->pickup_date ?? '-',
-                'return_date' => $s->order->return_date ?? '-',
-                'duration' => $s->day_rent . ' hari',
-                'contact_wa' => $s->order->wa ?? '-',
-                'status_return' => $s->order->status === 'pending' ? 'terkonfirmasi' : 'selesai',
-            ];
-        });
-
-        return Inertia::render('staff/staff_data_sewa', ['rentals' => $sewa]);
-    }
-    public function indexadmin()
     {
         $sewa = Sewa::with('order')->whereHas('order', function ($q) {
             $q->where('status', 'disewakan');
@@ -39,19 +22,46 @@ class SewaController extends Controller
         // Map data biar cocok sama props React
         $mapped = $sewa->map(function ($s) {
             return [
-                'rental_id' => $s->order_detail_id,
+                'order_id' => $s->order_id,
                 'customer_name' => $s->order->customer_name ?? '-',
-                'item_name' => $s->product->name ?? '-', // kalau ada relasi product
-                'pickup_date' => $s->order->pickup_date ?? '-',
-                'return_date' => $s->order->return_date ?? '-',
+                'product_name' => $s->product->name ?? '-', // kalau ada relasi product
+                'day_rent' => $s->order->day_rent ?? '-',
+                'due_on' => $s->order->due_on ?? '-',
                 'duration' => $s->day_rent . ' hari',
                 'contact_wa' => $s->order->wa ?? '-',
-                'status_return' => $s->order->status === 'pending' ? 'terkonfirmasi' : 'selesai',
+                'status' => $s->order->status === 'pending' ? 'terkonfirmasi' : 'selesai',
             ];
         });
 
-        return Inertia::render('admin/datapenyewaan', ['rentals' => $mapped]);
+        return Inertia::render('staff/staff_data_sewa', ['orders' => $sewa]);
     }
+    public function adminindex()
+    {
+        $orders = Order::with(['orderDetail.product', 'customer'])
+            ->where('status', 'terkonfirmasi') // hanya ambil penyewaan aktif
+            ->get()
+            ->map(function ($order) {
+                $orderDetail = $order->orderDetail;
+                $product = $orderDetail?->product;
+                $customer = $order->customer;
+
+                return [
+                    'order_id' => $order->order_id,
+                    'customer_name' => $customer->customer_name ?? '-',
+                    'product_name' => $product->product_name ?? '-',
+                    'day_rent' => $orderDetail->day_rent ?? '-',
+                    'due_on' => $orderDetail->due_on ?? '-',
+                    'duration' => $orderDetail->duration ?? '-',
+                    'phone_number' => $customer->phone_number ?? '-',
+                    'status' => $order->status ?? 'terkonfirmasi',
+                ];
+            });
+
+        return Inertia::render('admin/datapenyewaan', [
+            'orders' => $orders,
+        ]);
+    }
+
 
 
     public function update(Request $request, Sewa $rental)
@@ -60,6 +70,54 @@ class SewaController extends Controller
             $rental->status = 'dikembalikan';
             $rental->save();
         }
+
+        return redirect()->back();
+    }
+
+    // public function adminupdate(Request $request, $order_id)
+    // {
+    //     $order = Order::findOrFail($order_id);
+
+    //     if ($request->has('status')) {
+    //         $order->status = $request->status;
+    //         $order->save();
+    //     }
+
+    //     return redirect()->back();
+    // }
+
+    public function adminupdate(Request $request, $order_id)
+{
+    $order = Order::with('orderDetail.product.stock')->findOrFail($order_id);
+
+    if ($request->status === 'selesai') {
+        $order->status = 'selesai';
+
+        // Ambil stok dari relasi orderDetail → product → stock
+        $stock = $order->orderDetail?->product?->stock;
+
+        if ($stock && $stock->stock_available > 0) {
+            $stock->stock_available += 1;
+            $stock->save();
+        } else {
+            return redirect()->back()->with('error', 'Stok produk tidak tersedia.');
+        }
+
+        $order->save();
+    }
+
+    return redirect()->back()->with('success', 'Status DP diperbarui dan stok dikurangi.');
+}
+
+
+    public function admindestroy($order_id)
+    {
+        $order = Order::where('order_id', $order_id)->firstOrFail();
+
+        // Hapus order detail juga jika ada
+        $order->orderDetail()?->delete();
+
+        $order->delete();
 
         return redirect()->back();
     }

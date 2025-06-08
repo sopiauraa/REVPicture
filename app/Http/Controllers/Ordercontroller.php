@@ -231,14 +231,26 @@ class ordercontroller extends Controller
      */
     public function update(Request $request, $order_id)
     {
-        $order = Order::where('order_id', $order_id)->firstOrFail();
+        $order = Order::with('orderDetail.product.stock')->findOrFail($order_id);
 
-        if ($request->status_dp === 'sudah_dibayar') {
-            $order->status_dp = 'sudah_dibayar';
-            $order->save();
+    if ($request->status_dp === 'sudah_dibayar') {
+        $order->status_dp = 'sudah_dibayar';
+        $order->status = 'terkonfirmasi';
+
+        // Ambil stok dari relasi orderDetail → product → stock
+        $stock = $order->orderDetail?->product?->stock;
+
+        if ($stock && $stock->stock_available > 0) {
+            $stock->stock_available -= 1;
+            $stock->save();
+        } else {
+            return redirect()->back()->with('error', 'Stok produk tidak tersedia.');
         }
 
-        return response()->noContent();
+        $order->save();
+    }
+
+    return redirect()->back()->with('success', 'Status DP diperbarui dan stok dikurangi.');
     }
 
     public function destroy($order_id)
@@ -250,20 +262,34 @@ class ordercontroller extends Controller
 
         $order->delete();
 
-        return response()->noContent();
+        return redirect()->back();
     }
 
-    public function adminupdate(Request $request, $order_id)
-    {
-        $order = Order::where('order_id', $order_id)->firstOrFail();
+public function adminupdate(Request $request, $order_id)
+{
+    $order = Order::with('orderDetail.product.stock')->findOrFail($order_id);
 
-        if ($request->status_dp === 'sudah_dibayar') {
-            $order->status_dp = 'sudah_dibayar';
-            $order->save();
+    if ($request->status_dp === 'sudah_dibayar') {
+        $order->status_dp = 'sudah_dibayar';
+        $order->status = 'terkonfirmasi';
+
+        // Ambil stok dari relasi orderDetail → product → stock
+        $stock = $order->orderDetail?->product?->stock;
+
+        if ($stock && $stock->stock_available > 0) {
+            $stock->stock_available -= 1;
+            $stock->save();
+        } else {
+            return redirect()->back()->with('error', 'Stok produk tidak tersedia.');
         }
 
-        return response()->noContent();
+        $order->save();
     }
+
+    return redirect()->back()->with('success', 'Status DP diperbarui dan stok dikurangi.');
+}
+
+
 
     public function admindestroy($order_id)
     {
@@ -274,6 +300,6 @@ class ordercontroller extends Controller
 
         $order->delete();
 
-        return response()->noContent();
+        return redirect()->back();
     }
 }

@@ -17,7 +17,6 @@ class Product extends Model
         'product_name',
         'product_description',
         'product_image',
-        'product_image',
         'brand',
         'eight_hour_rent_price',
         'twenty_four_hour_rent_price',

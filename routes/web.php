@@ -81,8 +81,9 @@ Route::get('/admin/bookingmasuk', [OrderController::class, 'adminindex']);
 Route::patch('/admin/data_booking/{order_id}', [OrderController::class, 'adminupdate']);
 Route::delete('/admin/data_booking/{order_id}', [OrderController::class, 'admindestroy']);
 
-Route::get('/admin/datapenyewaan', [SewaController::class, 'indexadmin']);
-Route::patch('/admin/datapenyewaan/{rental}', [SewaController::class, 'update']);
+Route::get('/admin/datapenyewaan', [SewaController::class, 'adminindex']);
+Route::patch('/admin/datapenyewaan/{order_id}', [SewaController::class, 'adminupdate']);
+Route::delete('/admin/datapenyewaan/{order_id}', [SewaController::class, 'admindestroy']);
 
 Route::get('/admin/history', [OrderController::class, 'historyadmin']);
 // Route::get('/admin/datastaff', function () {

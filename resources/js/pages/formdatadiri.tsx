@@ -48,6 +48,7 @@ const FormDataDiri = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        console.log('Submitting!'); // Add this line
 
         // Map items to ensure product_id and day_rent are present at the top level
         const items = selectedItems.map((item) => ({
@@ -112,6 +113,7 @@ Terima kasih!`;
             <h1 className="mb-6 text-2xl font-bold">Data Diri</h1>
 
             {/* FORM DATA DIRI */}
+            <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 gap-x-10 gap-y-6 rounded-lg bg-[#e8d5c0] p-6 md:grid-cols-2">
                 {/* Kolom Kiri */}
                 <div>
@@ -206,10 +208,11 @@ Terima kasih!`;
             {/* FOOTER TOTAL HARGA */}
             <div className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-between rounded-t-xl bg-gray-900 p-4 text-white">
                 <h3 className="text-lg font-semibold">Total Harga: Rp {totalHarga.toLocaleString('id-ID')}</h3>
-                <button onClick={handleSubmit} className="mt-6 rounded bg-green-500 px-6 py-2 font-semibold text-black hover:bg-gray-100">
+                <button type="submit" className="mt-6 rounded bg-green-500 px-6 py-2 font-semibold text-black hover:bg-gray-100">
                     Sent to WhatsApp
                 </button>
             </div>
+            </form>
         </div>
     );
 };

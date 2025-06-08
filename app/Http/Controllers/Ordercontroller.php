@@ -175,6 +175,7 @@ class ordercontroller extends Controller
         ]);
 
         DB::beginTransaction();
+        \Log::info('OrderController@store payload', $request->all());
         try {
             $customer = Customer::create([
                 'user_id' => auth()->user()->user_id,
@@ -188,7 +189,7 @@ class ordercontroller extends Controller
                 'customer_id' => $customer->customer_id,
                 'order_date' => now(),
                 'total_price' => $request->total,
-                'status' => 'diproses',
+                'status' => 'pending',
                 'status_dp' => 'belum_dibayar',
             ]);
 
@@ -203,10 +204,11 @@ class ordercontroller extends Controller
             }
 
             DB::commit();
-            return redirect('/success')->with('message', 'Order berhasil dibuat!');
+            // return redirect('/success')->with('message', 'Order berhasil dibuat!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => 'Gagal menyimpan pesanan: ' . $e->getMessage()]);
+            \Log::error('OrderController@store error: ' . $e->getMessage());
+            return back()->withErrors(provider: ['error' => 'Gagal menyimpan pesanan: ' . $e->getMessage()]);
         }
     }
 

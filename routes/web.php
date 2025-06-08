@@ -158,7 +158,7 @@ Route::get('/formdatadiri', function () {
         'totalHarga' => request()->input('totalHarga', 0),
     ]);
 });
-Route::post('/checkout', [OrderController::class, 'store']);
+Route::post('/checkout', [OrderController::class, 'store'])->middleware('auth')->name('checkout');
 
 Route::get('detailproduk', function () {
     return Inertia::render('detailproduk');

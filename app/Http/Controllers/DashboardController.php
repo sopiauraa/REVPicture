@@ -54,7 +54,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function getDashboardStats()
+public function getDashboardStats()
     {
         // 1. Jumlah Barang (dari tabel products)
         $totalProducts = DB::table('products')->count();
@@ -147,14 +147,14 @@ class DashboardController extends Controller
     {
         $recentBookings = DB::table('orders')
             ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
-            ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
-            ->join('products', 'order_details.product_id', '=', 'products.product_id')
             ->select(
+                'orders.order_id',
                 'customers.customer_name',
-                'products.product_name',
-                'order_details.duration',
                 'orders.order_date',
-                'orders.order_id'
+                'orders.status',
+                DB::raw('(SELECT COUNT(*) FROM order_details WHERE order_details.order_id = orders.order_id) as total_items'),
+                DB::raw('(SELECT GROUP_CONCAT(products.product_name SEPARATOR ", ") FROM order_details JOIN products ON order_details.product_id = products.product_id WHERE order_details.order_id = orders.order_id LIMIT 3) as product_names'),
+                DB::raw('(SELECT order_details.duration FROM order_details WHERE order_details.order_id = orders.order_id LIMIT 1) as duration')
             )
             ->where('orders.status', 'pending')
             ->orderBy('orders.order_date', 'desc')

@@ -308,7 +308,7 @@ const Dashboard = () => {
                             <thead>
                                 <tr className="bg-gradient-to-r from-indigo-500 to-violet-500 text-white text-left">
                                     <th className="rounded-tl-lg px-4 py-4 font-semibold">Nama Customer</th>
-                                    <th className="px-4 py-4 font-semibold">Kamera</th>
+                                    <th className="px-4 py-4 font-semibold">Items</th>
                                     <th className="px-4 py-4 font-semibold">Durasi</th>
                                     <th className="px-4 py-4 font-semibold">Tanggal Booking</th>
                                     <th className="rounded-tr-lg px-4 py-4 text-center font-semibold">Action</th>
@@ -325,7 +325,18 @@ const Dashboard = () => {
                                                 <span className="font-medium">{booking.customer_name}</span>
                                             </div>
                                         </td>
-                                        <td className="px-4 py-4 font-semibold text-indigo-600">{booking.product_name}</td>
+                                        <td className="px-4 py-4 font-semibold text-indigo-600">
+                                            <div className="flex flex-col">
+                                                <span className="text-sm">
+                                                    {booking.product_names?.length > 50 
+                                                        ? booking.product_names.substring(0, 50) + '...' 
+                                                        : booking.product_names}
+                                                </span>
+                                                <span className="text-xs text-gray-500 mt-1">
+                                                    {booking.total_items} item{booking.total_items > 1 ? 's' : ''}
+                                                </span>
+                                            </div>
+                                        </td>
                                         <td className="px-4 py-4">
                                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-800">
                                                 {booking.duration === 'eight_hour' ? '8 jam' : '24 jam'}

@@ -36,7 +36,10 @@ const DataBarang: React.FC<Props> = ({ products, filters, flash }) => {
     const [selectedBarang, setSelectedBarang] = useState<Product | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
-    const [productIdToDelete, setProductIdToDelete] = useState<number | null>(null);
+    
+    // Ubah ini - simpan data produk lengkap, bukan hanya ID
+    const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false); // Tambahkan state loading
     
     // State untuk success alert tambah barang
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
@@ -88,47 +91,65 @@ const DataBarang: React.FC<Props> = ({ products, filters, flash }) => {
         setShowEdit(true);
     };
 
-    const handleDeleteClick = (id: number) => {
-        setProductIdToDelete(id);
+    // Perbaiki fungsi ini - simpan data produk lengkap
+    const handleDeleteClick = (product: Product) => {
+        setProductToDelete(product);
         setModalOpen(true);
     };
 
-    const handleDeleteConfirm = async () => {
-        if (productIdToDelete) {
-            try {
-                const response = await fetch(`/admin/product/delete/${productIdToDelete}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                });
+    // Perbaiki fungsi ini - terima data produk dari modal
+    const handleDeleteConfirm = async (productData: { product_id: number; product_name?: string }) => {
+        setIsDeleting(true);
+        
+        try {
+            const response = await fetch(`/admin/product/delete/${productData.product_id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            });
 
-                if (response.ok) {
-                    router.reload({ only: ['products'] });
-                    setTimeout(() => {
-                        setShowAlert(true);
-                        setTimeout(() => {
-                            setShowAlert(false);
-                        }, 3000);
-                    }, 300);
-                } else {
-                    console.error('Failed to delete product');
-                    alert('Gagal menghapus produk. Silakan coba lagi.');
-                }
-            } catch (error) {
-                console.error('Error deleting product:', error);
-                alert('Terjadi kesalahan saat menghapus produk.');
+            if (!response.ok) {
+                throw new Error('Gagal menghapus produk. Silakan coba lagi.');
             }
+
+            // Tutup modal terlebih dahulu
+            setModalOpen(false);
+            setProductToDelete(null);
+            
+            // Reload data
+            router.reload({ only: ['products'] });
+            
+            // Tampilkan alert sukses setelah reload selesai
+            setTimeout(() => {
+                setShowAlert(true);
+                setTimeout(() => {
+                    setShowAlert(false);
+                }, 3000);
+            }, 300);
+
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            // Jangan tutup modal jika error, biar user bisa coba lagi
+            throw error; // Re-throw error agar modal bisa handle
+        } finally {
+            setIsDeleting(false);
         }
-        setModalOpen(false);
-        setProductIdToDelete(null);
     };
 
     const handleCloseEditModal = () => {
         setShowEdit(false);
         setSelectedBarang(null);
+    };
+
+    // Tambahkan fungsi untuk close delete modal
+    const handleCloseDeleteModal = () => {
+        if (!isDeleting) { // Hanya bisa close jika tidak sedang loading
+            setModalOpen(false);
+            setProductToDelete(null);
+        }
     };
 
     // Reset filters function
@@ -308,7 +329,7 @@ const DataBarang: React.FC<Props> = ({ products, filters, flash }) => {
                                                         </button>
                                                         <button 
                                                             className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200" 
-                                                            onClick={() => handleDeleteClick(prod.product_id)}
+                                                            onClick={() => handleDeleteClick(prod)} // Kirim data produk lengkap
                                                             title="Hapus barang"
                                                         >
                                                             <FaTrash size={16} />
@@ -410,11 +431,16 @@ const DataBarang: React.FC<Props> = ({ products, filters, flash }) => {
                 />
             )}
 
+            {/* Perbaiki props DeleteBarangModal */}
             <DeleteBarangModal 
                 isOpen={modalOpen} 
-                onClose={() => setModalOpen(false)} 
-                onConfirm={handleDeleteConfirm} 
-                showAlert={showAlert} 
+                onClose={handleCloseDeleteModal}
+                onConfirm={handleDeleteConfirm}
+                productData={productToDelete ? {
+                    product_id: productToDelete.product_id,
+                    product_name: productToDelete.product_name
+                } : null}
+                isLoading={isDeleting}
             />
         </AdminLayout>
     );

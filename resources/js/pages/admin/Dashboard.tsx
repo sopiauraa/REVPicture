@@ -12,18 +12,31 @@ const Dashboard = () => {
 
     const [monthlyData, setMonthlyData] = useState<{labels: string[]; data: number[]} | null>(null);
     const [brandData, setBrandData] = useState<{labels: string[]; data: number[]} | null>(null);
+    const [stats, setStats] = useState<{
+        total_products: number;
+        active_rentals: number;
+        active_customers: number;
+    } | null>(null);
+    const [recentBookings, setRecentBookings] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Panggil API dari Laravel
-        fetch('/dashboard-stats')
-            .then(res => res.json())
-            .then(resData => {
-                setMonthlyData(resData.monthly);
-                setBrandData(resData.brands);
-            })
-            .catch(err => {
-                console.error('Gagal ambil data dashboard:', err);
-            });
+        // Panggil API dari Laravel untuk stats dashboard
+        Promise.all([
+            fetch('/dashboard-stats').then(res => res.json()),
+            fetch('/recent-bookings').then(res => res.json())
+        ])
+        .then(([statsData, bookingsData]) => {
+            setStats(statsData.stats);
+            setMonthlyData(statsData.monthly);
+            setBrandData(statsData.brands);
+            setRecentBookings(bookingsData);
+            setLoading(false);
+        })
+        .catch(err => {
+            console.error('Gagal ambil data dashboard:', err);
+            setLoading(false);
+        });
     }, []);
 
     useEffect(() => {
@@ -66,8 +79,7 @@ const Dashboard = () => {
                     scales: {
                         y: {
                             beginAtZero: true,
-                            max: 100,
-                            ticks: { stepSize: 20, color: '#374151', font: { size: 11 } },
+                            ticks: { stepSize: 1, color: '#374151', font: { size: 11 } },
                             grid: { color: '#E5E7EB' },
                         },
                         x: {
@@ -171,31 +183,44 @@ const Dashboard = () => {
         };
     }, []);
 
+    if (loading) {
+        return (
+            <AdminLayout title="Dashboard">
+                <div className="flex justify-center items-center h-64">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                        <p className="mt-4 text-gray-600">Loading dashboard...</p>
+                    </div>
+                </div>
+            </AdminLayout>
+        );
+    }
+
     return (
         <AdminLayout title="Dashboard">
-            {/* Simplified Stat Cards */}
+            {/* Stat Cards with Real Data */}
             <section className="bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 px-6 py-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[
                         { 
                             title: 'Jumlah Barang', 
-                            value: 120, 
+                            value: stats?.total_products || 0, 
                             icon: 'fa-box',
                             gradient: 'from-blue-500 via-indigo-500 to-indigo-600',
                             iconBg: 'bg-blue-50',
                             iconColor: 'text-blue-600'
                         },
                         { 
-                            title: 'Booking Hari Ini', 
-                            value: 4, 
-                            icon: 'fa-calendar-check',
+                            title: 'Barang Sedang Disewa', 
+                            value: stats?.active_rentals || 0, 
+                            icon: 'fa-camera',
                             gradient: 'from-violet-500 via-purple-500 to-purple-600',
                             iconBg: 'bg-violet-50',
                             iconColor: 'text-violet-600'
                         },
                         { 
                             title: 'Penyewa Aktif', 
-                            value: 7, 
+                            value: stats?.active_customers || 0, 
                             icon: 'fa-users',
                             gradient: 'from-pink-500 via-rose-500 to-pink-600',
                             iconBg: 'bg-pink-50',
@@ -262,7 +287,7 @@ const Dashboard = () => {
                 </div>
             </section>
 
-            {/* Table */}
+            {/* Table with Real Data */}
             <section className="px-6 pb-12">
                 <div className="overflow-x-auto rounded-xl bg-white shadow-lg border border-gray-100">
                     <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-violet-50">
@@ -273,7 +298,7 @@ const Dashboard = () => {
                             </div>
                             <div className="flex items-center space-x-2">
                                 <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-                                <span className="text-sm text-gray-600">4 menunggu persetujuan</span>
+                                <span className="text-sm text-gray-600">{recentBookings.length} menunggu persetujuan</span>
                             </div>
                         </div>
                     </div>
@@ -290,28 +315,25 @@ const Dashboard = () => {
                                 </tr>
                             </thead>
                             <tbody className="text-[13px]">
-                                {[
-                                    { customer: 'Bima Arya', camera: 'Canon M50', duration: '24 jam', date: '25 Mei 2025' },
-                                    { customer: 'Siti Nurhaliza', camera: 'Sony A7III', duration: '48 jam', date: '26 Mei 2025' },
-                                    { customer: 'Ahmad Fauzi', camera: 'Nikon D850', duration: '12 jam', date: '27 Mei 2025' },
-                                    { customer: 'Maya Sari', camera: 'Fujifilm X-T4', duration: '36 jam', date: '28 Mei 2025' }
-                                ].map((booking, idx) => (
+                                {recentBookings.length > 0 ? recentBookings.map((booking, idx) => (
                                     <tr key={idx} className={`${idx % 2 === 0 ? 'bg-gradient-to-r from-gray-50 to-indigo-50' : 'bg-white'} rounded-lg shadow-sm hover:shadow-md transition-all duration-200`}>
                                         <td className="px-4 py-4 rounded-l-lg">
                                             <div className="flex items-center">
                                                 <div className="w-8 h-8 bg-gradient-to-r from-indigo-400 to-violet-400 rounded-full flex items-center justify-center text-white font-semibold text-xs mr-3">
-                                                    {booking.customer.split(' ').map(n => n[0]).join('')}
+                                                    {booking.customer_name.split(' ').map(n => n[0]).join('')}
                                                 </div>
-                                                <span className="font-medium">{booking.customer}</span>
+                                                <span className="font-medium">{booking.customer_name}</span>
                                             </div>
                                         </td>
-                                        <td className="px-4 py-4 font-semibold text-indigo-600">{booking.camera}</td>
+                                        <td className="px-4 py-4 font-semibold text-indigo-600">{booking.product_name}</td>
                                         <td className="px-4 py-4">
                                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-800">
-                                                {booking.duration}
+                                                {booking.duration === 'eight_hour' ? '8 jam' : '24 jam'}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-4 text-gray-600">{booking.date}</td>
+                                        <td className="px-4 py-4 text-gray-600">
+                                            {new Date(booking.order_date).toLocaleDateString('id-ID')}
+                                        </td>
                                         <td className="px-4 py-4 rounded-r-lg">
                                             <div className="flex justify-center gap-2">
                                                 <button className="w-[80px] rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 px-3 py-2 text-center text-xs text-white font-medium hover:from-emerald-600 hover:to-green-600 transition-all duration-200 shadow-sm hover:shadow-md">
@@ -323,7 +345,13 @@ const Dashboard = () => {
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
+                                )) : (
+                                    <tr>
+                                        <td colSpan="5" className="px-4 py-8 text-center text-gray-500">
+                                            Tidak ada booking yang menunggu persetujuan
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>

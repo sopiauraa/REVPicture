@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -51,5 +52,115 @@ class DashboardController extends Controller
             'monthly' => $monthly,
             'brands' => $brandsData,
         ]);
+    }
+
+    public function getDashboardStats()
+    {
+        // 1. Jumlah Barang (dari tabel products)
+        $totalProducts = DB::table('products')->count();
+
+        // 2. Barang Sedang Disewa (dari tabel orders yang statusnya 'terkonfirmasi' dan belum selesai)
+        $activerental = DB::table('orders')
+            ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
+            ->where('orders.status', 'terkonfirmasi')
+            ->where('order_details.due_on', '>=', Carbon::now()->toDateString())
+            ->sum('order_details.quantity');
+
+        // 3. Penyewa Aktif (customer yang memiliki order aktif)
+        $activeCustomers = DB::table('orders')
+            ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
+            ->where('orders.status', 'terkonfirmasi')
+            ->where('order_details.due_on', '>=', Carbon::now()->toDateString())
+            ->distinct('orders.customer_id')
+            ->count('orders.customer_id');
+
+        // Data untuk chart bulanan (contoh data penyewaan per bulan)
+        $monthlyData = $this->getMonthlyRentalData();
+
+        // Data untuk chart brand (contoh data berdasarkan brand)
+        $brandData = $this->getBrandData();
+
+        return response()->json([
+            'stats' => [
+                'total_products' => $totalProducts,
+                'active_rentals' => $activerental,
+                'active_customers' => $activeCustomers
+            ],
+            'monthly' => $monthlyData,
+            'brands' => $brandData
+        ]);
+    }
+
+    private function getMonthlyRentalData()
+    {
+        $monthlyRentals = DB::table('orders')
+            ->select(
+                DB::raw('MONTH(order_date) as month'),
+                DB::raw('COUNT(*) as total')
+            )
+            ->whereYear('order_date', Carbon::now()->year)
+            ->groupBy(DB::raw('MONTH(order_date)'))
+            ->orderBy('month')
+            ->get();
+
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $data = array_fill(0, 12, 0);
+
+        foreach ($monthlyRentals as $rental) {
+            $data[$rental->month - 1] = $rental->total;
+        }
+
+        return [
+            'labels' => $months,
+            'data' => $data
+        ];
+    }
+
+    private function getBrandData()
+    {
+        // Asumsi ada kolom 'brand' di tabel products
+        $brandData = DB::table('products')
+            ->join('order_details', 'products.product_id', '=', 'order_details.product_id')
+            ->join('orders', 'order_details.order_id', '=', 'orders.order_id')
+            ->select('products.brand', DB::raw('COUNT(*) as total'))
+            ->groupBy('products.brand')
+            ->orderBy('total', 'desc')
+            ->limit(6)
+            ->get();
+
+        $labels = $brandData->pluck('brand')->toArray();
+        $data = $brandData->pluck('total')->toArray();
+
+        // Jika tidak ada kolom brand, gunakan data contoh
+        if (empty($labels)) {
+            $labels = ['Canon', 'Sony', 'Nikon', 'Fujifilm', 'Panasonic'];
+            $data = [35, 28, 20, 12, 8];
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => $data
+        ];
+    }
+
+    public function getRecentBookings()
+    {
+        $recentBookings = DB::table('orders')
+            ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
+            ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
+            ->join('products', 'order_details.product_id', '=', 'products.product_id')
+            ->select(
+                'customers.customer_name',
+                'products.product_name',
+                'order_details.duration',
+                'orders.order_date',
+                'orders.order_id'
+            )
+            ->where('orders.status', 'pending')
+            ->orderBy('orders.order_date', 'desc')
+            ->limit(10)
+            ->get();
+
+        return response()->json($recentBookings);
     }
 }

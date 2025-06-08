@@ -43,16 +43,17 @@ Route::get('/syarat', function () {
 });
 
 
-// admin
-Route::get('/admin/dashboard', function () {
-    return Inertia::render('admin/dashboard');
-})->name('admin.dashboard');
+// admindashboard
+Route::get('/admin/dashboard', function () { return Inertia::render('admin/dashboard'); })->name('admin.dashboard');
 Route::get('/dashboard-stats', [DashboardController::class, 'stats']);
-
+Route::get('/dashboard-stats', [DashboardController::class, 'getDashboardStats']);
+Route::get('/recent-bookings', [DashboardController::class, 'getRecentBookings']);
 
 Route::prefix('admin')->group(function () {
     Route::post('/product/store', [ProductController::class, 'store'])->name('admin.product.store');
     Route::get('/databarang', [ProductController::class, 'admin'])->name('admin.databarang');
+    Route::delete('/product/delete/{product_id}', [ProductController::class, 'destroy'])->name('admin.product.destroy');
+    
 });
 
 // Route::middleware(['auth', 'admin'])->group(function () {
@@ -86,12 +87,6 @@ Route::patch('/admin/datapenyewaan/{order_id}', [SewaController::class, 'adminup
 Route::delete('/admin/datapenyewaan/{order_id}', [SewaController::class, 'admindestroy']);
 
 Route::get('/admin/history', [OrderController::class, 'historyadmin']);
-// Route::get('/admin/datastaff', function () {
-//     $staffUsers = User::where('role', 'staff')->select('user_id', 'name', 'email')->get();
-//     return Inertia::render('admin/datastaff', [
-//         'users' => $staffUsers,
-//     ]);
-// });
 
 Route::get('/admin/kalender', [KalenderController::class, 'index'])->name('kalender.index');
 // landing
@@ -110,17 +105,18 @@ Route::prefix('admin')->group(function () {
     Route::put('/users/{userId}/status', [UserManagementController::class, 'toggleStatus'])->name('admin.users.toggle-status');
     Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('products.destroy');
 });
-
-// Route untuk halaman React
-Route::get('/admin/usermanagement', function () {
-    return Inertia::render('Admin/UserManagement');
-})->name('admin.usermanagement');
+Route::get('/admin/usermanagement', function () { return Inertia::render('Admin/UserManagement'); })->name('admin.usermanagement');
 
 
 Route::prefix('staff')->group(function () {
-    Route::post('/products/store', [ProductController::class, 'store'])->name('staff.products.store');
+    // Route::post('/products/store', [ProductController::class, 'store'])->name('staff.products.store');
     Route::get('/data_barang', [ProductController::class, 'index'])->name('staff.staff_data_barang');
+    Route::put('/users/{userId}', [UserManagementController::class, 'update'])->name('staff.users.update');
+    Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('products.destroy');
 });
+Route::match(['POST', 'PUT'], '/staff/product/update/{product_id}', [ProductController::class, 'update'])
+    ->name('staff.product.update');
+
 Route::get('/staff/data_customer', function () {
     $customers = Customer::select('customer_id', 'customer_name', 'phone_number', 'address', 'social_media')->get();
     return Inertia::render('staff/staff_data_customer', [
@@ -130,18 +126,14 @@ Route::get('/staff/data_customer', function () {
 Route::get('/staff/data_booking', [OrderController::class, 'index']);
 Route::patch('/staff/data_booking/{order_id}', [OrderController::class, 'update']);
 Route::delete('/staff/data_booking/{order_id}', [OrderController::class, 'destroy']);
-
-
 Route::get('/staff/kalender', [KalenderController::class, 'staffIndex'])->name('kalender.staffIndex');
 Route::get('staff/data_sewa', [SewaController::class, 'index']);
 Route::patch('/staff/data_sewa/{rental}', [SewaController::class, 'update']);
-Route::get('/data_barang', function () {
-    return Inertia::render('StaffDataBarang');
-});
+Route::get('/data_barang', function () { return Inertia::render('StaffDataBarang'); });
+Route::get('/staff/history', [OrderController::class, 'history']);
+
 //Display Product (Landing)
 Route::get('/shop', [ProductController::class, 'index']);
-
-Route::get('/staff/history', [OrderController::class, 'history']);
 // user
 Route::get('detailproduk', function () {
     return Inertia::render('detailproduk');

@@ -222,7 +222,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
               </button>
 
               {/* User Profile */}
-              <Link href="/admin/profil" className="block">
+              <Link href="/admin/adminprofil" className="block">
                 <div className="flex items-center gap-3 pl-4 border-l border-gray-100 ml-2 hover:bg-gray-50 transition-colors duration-200 rounded-lg p-2 cursor-pointer">
                   <div className="w-9 h-9 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                     <i className="fas fa-user text-white text-xs drop-shadow-sm"></i>

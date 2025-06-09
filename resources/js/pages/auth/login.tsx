@@ -24,7 +24,22 @@ const Login = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/login'); // matches Laravel login route
+        post('/login');
+    };
+
+    // Terjemahkan pesan error ke bahasa Indonesia
+    const translatedErrors = {
+        email: errors.email ? 
+            errors.email.replace('The email field is required.', 'Email wajib diisi.')
+                       .replace('The email must be a valid email address.', 'Format email tidak valid.')
+                       .replace('The email field must be a valid email address.', 'Format email tidak valid.')
+                       .replace('These credentials do not match our records.', 'Email atau kata sandi salah.') : 
+            undefined,
+        password: errors.password ? 
+            errors.password.replace('The password field is required.', 'Kata sandi wajib diisi.')
+                          .replace('These credentials do not match our records.', 'Email atau kata sandi salah.')
+                          .replace('The provided credentials are incorrect.', 'Email atau kata sandi salah.') : 
+            undefined
     };
 
     return (
@@ -51,7 +66,7 @@ const Login = () => {
                 <form onSubmit={handleSubmit} className="form-content">
                     <div className="logo-wrapper">
                         <img
-                            src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/7Z7cWQJTXY/ek0s7xjv_expires_30_days.png"
+                            src="/images/REV Logo Htm.png"
                             alt="Login Icon"
                             className="profile-image"
                         />
@@ -63,7 +78,7 @@ const Login = () => {
                         onChange={(e: any) => setData('email', e.target.value)}
                         placeholder="Masukkan Email Anda"
                         label="Email"
-                        error={errors.email}
+                        error={translatedErrors.email}
                     />
                     <Input
                         type="password"
@@ -72,8 +87,14 @@ const Login = () => {
                         onChange={(e: any) => setData('password', e.target.value)}
                         placeholder="Masukkan Kata Sandi"
                         label="Kata Sandi"
-                        error={errors.password}
+                        error={translatedErrors.password}
                     />
+
+                    <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
+                        <Link href="#" className="text-blue-300 underline" style={{ fontSize: '0.9rem' }}>
+                            Lupa kata sandi?
+                        </Link>
+                    </div>
 
                     <Button type="submit">{processing ? 'Memproses...' : 'Masuk'}</Button>
 

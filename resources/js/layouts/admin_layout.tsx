@@ -11,6 +11,7 @@ const navItems = [
   { label: "Data Penyewaan", icon: "fa-file-alt", href: "/admin/datapenyewaan" },
   { label: "Riwayat Penyewaan", icon: "fa-history", href: "/admin/history" },
   { label: "Manajemen User", icon: "fa-id-badge", href: "/admin/usermanagement" },
+  { label: "Profil & Setting", icon: "fa-id-badge", href: "/admin/adminprofil" },
 ];
 
 interface LogoutModalProps {
@@ -202,12 +203,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
           <div className="flex items-center gap-4">
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
-              <button 
+              {/* <button 
                 className="p-2.5 rounded-xl hover:bg-gray-50 hover:shadow-sm transition-all duration-200 relative group"
                 title="Pengaturan"
               >
                 <i className="fas fa-cog text-gray-600 text-lg group-hover:text-blue-600 transition-all duration-200 group-hover:rotate-90"></i>
-              </button>
+              </button> */}
               
               <button 
                 className="p-2.5 rounded-xl hover:bg-gray-50 hover:shadow-sm transition-all duration-200 relative group"
@@ -221,15 +222,17 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
               </button>
 
               {/* User Profile */}
-              <div className="flex items-center gap-3 pl-4 border-l border-gray-100 ml-2">
-                <div className="w-9 h-9 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer">
-                  <i className="fas fa-user text-white text-xs drop-shadow-sm"></i>
+              <Link href="/admin/profil" className="block">
+                <div className="flex items-center gap-3 pl-4 border-l border-gray-100 ml-2 hover:bg-gray-50 transition-colors duration-200 rounded-lg p-2 cursor-pointer">
+                  <div className="w-9 h-9 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <i className="fas fa-user text-white text-xs drop-shadow-sm"></i>
+                  </div>
+                  <div className="hidden md:block">
+                    <div className="text-sm font-semibold text-gray-800">Admin</div>
+                    <div className="text-xs text-gray-500 font-medium">Administrator</div>
+                  </div>
                 </div>
-                <div className="hidden md:block">
-                  <div className="text-sm font-semibold text-gray-800">Admin</div>
-                  <div className="text-xs text-gray-500 font-medium">Administrator</div>
-                </div>
-              </div>
+              </Link>
             </div>
           </div>
         </header>

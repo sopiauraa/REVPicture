@@ -13,6 +13,7 @@ use App\Http\Controllers\KalenderController;
 use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\UserController;
 
 
 
@@ -85,14 +86,13 @@ Route::delete('/admin/data_booking/{order_id}', [OrderController::class, 'admind
 Route::get('/admin/datapenyewaan', [SewaController::class, 'adminindex']);
 Route::patch('/admin/datapenyewaan/{order_id}', [SewaController::class, 'adminupdate']);
 Route::delete('/admin/datapenyewaan/{order_id}', [SewaController::class, 'admindestroy']);
-
 Route::get('/admin/history', [OrderController::class, 'historyadmin']);
-
 Route::get('/admin/kalender', [KalenderController::class, 'index'])->name('kalender.index');
+Route::get('/admin/adminprofil', function () { return Inertia::render('Admin/adminprofil');
+})->name('admin.profil');
+
 // landing
-Route::get('/landing', function () {
-    return Inertia::render('landing');
-})->name('landing');
+Route::get('/landing', function () { return Inertia::render('landing'); })->name('landing');
 
 Route::prefix('admin')->group(function () {
     // API routes untuk user management

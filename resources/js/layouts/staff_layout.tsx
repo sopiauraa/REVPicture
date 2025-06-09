@@ -9,6 +9,7 @@ const staffNavItems = [
   { label: "Data Penyewa", icon: "fa-users", href: "/staff/data_customer" },
   { label: "Data Penyewaan", icon: "fa-file-alt", href: "/staff/data_sewa" },
   { label: "Riwayat Penyewaan", icon: "fa-history", href: "/staff/history" },
+  { label: "Profil & Setting", icon: "fa-id-badge", href: "/staff/profil" },
 ];
 
 interface LogoutModalProps {
@@ -200,12 +201,12 @@ const StaffLayout: React.FC<StaffLayoutProps> = ({ title, children }) => {
           <div className="flex items-center gap-4">
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
-              <button 
+              {/* <button 
                 className="p-2.5 rounded-xl hover:bg-gray-50 hover:shadow-sm transition-all duration-200 relative group"
                 title="Pengaturan"
               >
                 <i className="fas fa-cog text-gray-600 text-lg group-hover:text-blue-600 transition-all duration-200 group-hover:rotate-90"></i>
-              </button>
+              </button> */}
               
               <button 
                 className="p-2.5 rounded-xl hover:bg-gray-50 hover:shadow-sm transition-all duration-200 relative group"

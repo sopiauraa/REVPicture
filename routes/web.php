@@ -85,7 +85,7 @@ Route::delete('/admin/data_booking/{order_id}', [OrderController::class, 'admind
 
 Route::get('/admin/datapenyewaan', [SewaController::class, 'adminindex']);
 Route::patch('/admin/datapenyewaan/{order_id}', [SewaController::class, 'adminupdate']);
-Route::delete('/admin/datapenyewaan/{order_id}', [SewaController::class, 'admindestroy']);
+//Route::delete('/admin/datapenyewaan/{order_id}', [SewaController::class, 'admindestroy']);
 Route::get('/admin/history', [OrderController::class, 'historyadmin']);
 Route::get('/admin/kalender', [KalenderController::class, 'index'])->name('kalender.index');
 Route::get('/admin/adminprofil', function () { return Inertia::render('Admin/adminprofil');

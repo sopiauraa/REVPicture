@@ -129,28 +129,21 @@ class ordercontroller extends Controller
     public function history()
     {
         $history = DB::table('orders')
-            ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
-            ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
-            ->join('products', 'order_details.product_id', '=', 'products.product_id')
-            ->where('orders.status', 'selesai')
-            ->select(
-                'orders.order_id',
-                'customers.customer_name',
-                'customers.phone_number',
-                'orders.order_date',
-                'order_details.day_rent',
-                'order_details.due_on',
-                'products.product_name',
-                // Logika harga berdasarkan durasi day_rent
-                DB::raw("
-                CASE
-                    WHEN order_details.day_rent <= 0.33 THEN products.eight_hour_rent_price
-                    WHEN order_details.day_rent <= 1 THEN products.twenty_four_hour_rent_price
-                    ELSE products.twenty_four_hour_rent_price * order_details.day_rent
-                END AS price
-                ")
-            )
-            ->get();
+        ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
+        ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
+        ->join('products', 'order_details.product_id', '=', 'products.product_id')
+        ->where('orders.status', 'selesai')
+        ->select(
+            'orders.order_id',
+            'customers.customer_name',
+            'customers.phone_number',
+            'orders.order_date',
+            'order_details.day_rent',
+            'order_details.due_on',
+            'products.product_name',
+            'orders.total_price as price' // Ambil total harga langsung dari kolom orders.total_price
+        )
+        ->get();
 
         return Inertia::render('staff/history', [
             'history' => $history,

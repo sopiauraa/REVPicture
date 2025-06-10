@@ -2,16 +2,21 @@ import AdminLayout from '@/layouts/admin_layout';
 import { router } from '@inertiajs/react';
 import React, { useState } from 'react';
 
-interface Order {
-    order_id: number;
-    customer_name: string;
+interface OrderDetail {
     product_name: string;
     day_rent: string;
     due_on: string;
     duration: string;
+}
+
+interface Order {
+    order_id: number;
+    customer_name: string;
     phone_number: string;
     status: 'terkonfirmasi' | 'selesai';
+    details: OrderDetail[];
 }
+
 
 interface Props {
     orders: Order[];
@@ -36,15 +41,15 @@ const PenyewaanIndex: React.FC<Props> = ({ orders }) => {
     };
 
     // Hapus order
-    const handleDelete = (orderId: number) => {
-        if (window.confirm('Yakin ingin menolak dan menghapus order ini?')) {
-            router.delete(`/admin/datapenyewaan/${orderId}`, {
-                onSuccess: () => {
-                    setOrderList((prev) => prev.filter((order) => order.order_id !== orderId));
-                },
-            });
-        }
-    };
+    // const handleDelete = (orderId: number) => {
+    //     if (window.confirm('Yakin ingin menolak dan menghapus order ini?')) {
+    //         router.delete(`/admin/datapenyewaan/${orderId}`, {
+    //             onSuccess: () => {
+    //                 setOrderList((prev) => prev.filter((order) => order.order_id !== orderId));
+    //             },
+    //         });
+    //     }
+    // };
 
     return (
         <AdminLayout title="Penyewaan">
@@ -67,39 +72,75 @@ const PenyewaanIndex: React.FC<Props> = ({ orders }) => {
                         </thead>
                         <tbody className="text-[13px]">
                             {orderList.map((order, idx) => (
-                                <tr key={order.order_id} className={`${idx % 2 === 0 ? 'bg-[#f5f5f5]' : 'bg-white'} rounded-md`}>
-                                    <td className="px-4 py-3">{idx + 1}</td>
-                                    <td className="px-4 py-3">{order.customer_name}</td>
-                                    <td className="px-4 py-3">{order.product_name}</td>
-                                    <td className="px-4 py-3">{order.day_rent}</td>
-                                    <td className="px-4 py-3">{order.due_on}</td>
-                                    <td className="px-4 py-3">{order.duration}</td>
-                                    <td className="px-4 py-3">{order.phone_number}</td>
-                                    <td className="px-4 py-3">
-                                        {order.status === 'terkonfirmasi' ? (
-                                            <span className="font-semibold text-red-600">Belum Dikembalikan</span>
-                                        ) : (
-                                            <span className="font-semibold text-green-600">Sudah Dikembalikan</span>
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-3 text-center">
-                                        <div className="flex justify-center gap-2">
-                                            <button
-                                                className="w-[80px] rounded bg-[#0F63D4] px-3 py-1 text-center text-xs text-white hover:bg-[#0c54b3]"
-                                                onClick={() => handleStatusChange(order.order_id)}
-                                            >
-                                                Terima
-                                            </button>
-                                            <button
-                                                className="w-[80px] rounded bg-[#EF4444] px-3 py-1 text-center text-xs text-white hover:bg-[#dc2626]"
-                                                onClick={() => handleDelete(order.order_id)}
-                                            >
-                                                Tolak
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+    <tr key={order.order_id} className={`${idx % 2 === 0 ? 'bg-[#f5f5f5]' : 'bg-white'} rounded-md`}>
+        <td className="px-4 py-3">{idx + 1}</td>
+        <td className="px-4 py-3">{order.customer_name}</td>
+
+        {/* Barang Disewa */}
+        <td className="px-4 py-3">
+            <ul className="list-disc pl-4">
+                {order.details.map((detail, i) => (
+                    <li key={i}>{detail.product_name}</li>
+                ))}
+            </ul>
+        </td>
+
+        {/* Tgl Ambil */}
+        <td className="px-4 py-3">
+            <ul className="list-disc pl-4">
+                {order.details.map((detail, i) => (
+                    <li key={i}>{detail.day_rent}</li>
+                ))}
+            </ul>
+        </td>
+
+        {/* Tgl Kembali */}
+        <td className="px-4 py-3">
+            <ul className="list-disc pl-4">
+                {order.details.map((detail, i) => (
+                    <li key={i}>{detail.due_on}</li>
+                ))}
+            </ul>
+        </td>
+
+        {/* Durasi */}
+        <td className="px-4 py-3">
+            <ul className="list-disc pl-4">
+                {order.details.map((detail, i) => (
+                    <li key={i}>{detail.duration}</li>
+                ))}
+            </ul>
+        </td>
+
+        <td className="px-4 py-3">{order.phone_number}</td>
+
+        <td className="px-4 py-3">
+            {order.status === 'terkonfirmasi' ? (
+                <span className="font-semibold text-red-600">Belum Dikembalikan</span>
+            ) : (
+                <span className="font-semibold text-green-600">Sudah Dikembalikan</span>
+            )}
+        </td>
+
+        <td className="px-4 py-3 text-center">
+            <div className="flex justify-center gap-2">
+                <button
+                    className="w-[80px] rounded bg-[#0F63D4] px-3 py-1 text-center text-xs text-white hover:bg-[#0c54b3]"
+                    onClick={() => handleStatusChange(order.order_id)}
+                >
+                    Terima
+                </button>
+                {/* <button
+                    className="w-[80px] rounded bg-[#EF4444] px-3 py-1 text-center text-xs text-white hover:bg-[#dc2626]"
+                    onClick={() => handleDelete(order.order_id)}
+                >
+                    Tolak
+                </button> */}
+            </div>
+        </td>
+    </tr>
+))}
+
                         </tbody>
                     </table>
                 </div>

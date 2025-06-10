@@ -1,247 +1,623 @@
-/* RESET */
-body {
-  margin: 0;
-  font-family: 'Arial', sans-serif;
-  background-color: #000;
-  overflow: auto;
+/* ============================= */
+/*          VARIABLES           */
+/* ============================= */
+:root {
+  /* Radius dasar untuk semua elemen */
+  --radius: 12px;
+  --radius-lg: 16px;
+
+  /* Navy Blue - Warna utama */
+  --color-primary: #0f172a;
+  --color-primary-light: #475569;
+  
+  /* Gold Accent - Warna aksen emas */
+  --color-accent: #f59e0b;
+  --color-accent-light: #fcd34d;
+  
+  /* Soft Gray - Background dan secondary elements */
+  --color-bg-primary: #f8fafc;
+  --color-bg-secondary: #e2e8f0;
+  --color-text-secondary: #64748b;
+  
+  /* Background form dengan glassmorphism */
+  --bg-form: rgba(248, 250, 252, 0.95);
+  --bg-form-border: rgba(226, 232, 240, 0.8);
+  
+  /* Warna teks placeholder */
+  --placeholder-color: #64748b;
+  
+  /* Shadow dengan navy blue */
+  --shadow-primary: 0 10px 25px rgba(15, 23, 42, 0.15);
+  --shadow-hover: 0 20px 40px rgba(15, 23, 42, 0.2);
+  --shadow-accent: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
-/* MAIN CONTAINER */
+/* ============================= */
+/*            RESET             */
+/* ============================= */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden; /* Menghilangkan scroll */
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+  color: var(--color-primary);
+  line-height: 1.6;
+}
+
+/* ============================= */
+/*       MAIN CONTAINER         */
+/* ============================= */
 .form-container {
-  min-height: 100dvh;
+  height: 100vh; /* Full viewport height */
   display: flex;
   flex-direction: column;
-  background-color: #000;
-  background-image: url('/images/spotlight.jpg'); 
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
   position: relative;
+  padding: 0;
+  overflow: hidden; /* Pastikan tidak ada scroll */
 }
 
-/* NAVBAR */
-/* .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 40px;
-  background-color: rgba(217, 201, 181, 0.3);
+/* Subtle pattern overlay */
+.form-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(245, 158, 11, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(15, 23, 42, 0.03) 0%, transparent 50%);
+  pointer-events: none;
 }
 
-.nav-left {
-  display: flex;
-  align-items: center;
-}
-
-.header-logo {
-  width: 50px;
-  height: 50px;
-  margin-right: 12px;
-}
-
-.header-title {
-  color: white;
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.header-nav {
-  display: flex;
-  gap: 30px;
-}
-
-.header-nav-item {
-  color: white;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.header-nav-item:hover {
-  color: #d4af7f;
-} */
-
-/* FORM CARD */
-
+/* ============================= */
+/*          FORM CARD           */
+/* ============================= */
 .form-center-wrapper {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px 0;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .form-content {
-  background-color: rgba(212, 175, 127, 0.4);
-  padding: 50px 40px;
-  border-radius: 20px;
-  max-width: 450px;
-  width: 90%;
-  margin: 20px auto;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+  background: var(--bg-form);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--bg-form-border);
+  padding: 24px 32px;
+  border-radius: var(--radius-lg);
+  max-width: 650px; /* Diperkecil dari 800px ke 650px */
+  width: 95%;
+  max-height: 95vh; /* Perbesar sedikit area */
+  overflow: hidden; /* Hilangkan scroll internal */
+  box-shadow: var(--shadow-primary);
   text-align: center;
   position: relative;
-  z-index: 1;
-  height: auto;
+  transition: all 0.3s ease;
 }
 
+.form-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  /* background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 100%); */
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.form-content:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* ============================= */
+/*       FORM LAYOUT            */
+/* ============================= */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dua kolom untuk form yang lebih lebar */
+  gap: 16px; /* Kurangi gap */
+  margin-top: 20px; /* Kurangi margin top */
+}
+
+.form-grid-full {
+  grid-column: 1 / -1; /* Span semua kolom */
+}
+
+/* ============================= */
+/*            LOGO              */
+/* ============================= */
 .logo-wrapper {
   display: flex;
-  justify-content: center;  /* center horizontal */
-  margin-bottom: 2px;       /* jarak ke input */
+  justify-content: center;
+  margin-bottom: 16px; /* Kurangi lebih banyak */
+  position: relative;
+}
+
+.logo-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 2px;
+  /* background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 100%); */
+  border-radius: 1px;
 }
 
 .profile-image {
-  width: 130px;
-  height: 130px;
-  /* margin-bottom: 24px; */
-  border-radius: 100%;
-  object-fit: contain;
+  width: 100px; /* Sedikit diperkecil */
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--color-primary-light);
+  /* box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2); */
+  transition: all 0.3s ease;
 }
 
-/* INPUT */
+.profile-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.2);
+}
+
+/* ============================= */
+/*       FORM TITLE             */
+/* ============================= */
+.form-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 6px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.form-subtitle {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px; /* Kurangi margin lebih banyak */
+  font-weight: 400;
+}
+
+/* ============================= */
+/*            INPUT             */
+/* ============================= */
 .input-container {
-  margin-bottom: 20px;
+  margin-bottom: 14px; /* Kurangi margin lebih banyak */
   text-align: left;
 }
 
 .input-label {
   display: block;
-  margin-left: 8px;
-  /* margin-bottom: 6px; */
-  font-size: 16px;
-  color: #000;
-  font-weight: 500;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
+  letter-spacing: 0.025em;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .input-field {
   width: 100%;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: none;
-  background: rgba(255, 255, 255, 0.9);
+  padding: 12px 16px; /* Kurangi sedikit padding */
+  border-radius: var(--radius);
+  border: 2px solid var(--color-bg-secondary);
+  background: rgba(255, 255, 255, 0.8);
   font-size: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  font-weight: 400;
+  color: var(--color-primary);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
 }
 
-@media (prefers-color-scheme: dark) {
-  .input-field {
-    background-color: #1e1e1e;
-    color: #f1f1f1;
-    border: 1px solid #444;
-  }
-
-  .input-label {
-    color: #ccc;
-  }
-
-  .form-container {
-    background-color: #121212;
-    color: #f1f1f1;
-  }
+.input-field:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow-accent);
+  transform: translateY(-1px);
 }
 
-/* BUTTON */
+.input-field::placeholder {
+  color: var(--placeholder-color);
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+.input-field:hover:not(:focus) {
+  border-color: var(--color-primary-light);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* ============================= */
+/*       PASSWORD TOGGLE        */
+/* ============================= */
+.password-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--placeholder-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.password-toggle:hover {
+  color: var(--color-primary);
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
+.password-toggle:focus {
+  outline: none;
+  color: var(--color-primary);
+  background-color: rgba(245, 158, 11, 0.15);
+}
+
+/* Adjust padding untuk input field yang memiliki password toggle */
+.input-wrapper .input-field {
+  padding-right: 52px;
+}
+
+/* ============================= */
+/*            BUTTON            */
+/* ============================= */
 .button {
-  background: #000;
-  color: white;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: var(--color-bg-primary);
   width: 100%;
-  padding: 12px;
-  font-size: 18px;
-  font-weight: bold;
-  border-radius: 10px;
+  padding: 12px; /* Kurangi padding lebih banyak */
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: var(--radius);
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 10px;
+  margin-top: 16px; /* Kurangi margin */
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
+}
+
+.button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
 }
 
 .button:hover {
-  background-color: #333;
-  box-shadow: 0px 4px 12px rgba(255, 255, 255, 0.2);
-  transform: scale(1.02);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
 }
 
-/* RESPONSIVE: MOBILE */
-@media (max-width: 600px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 16px 24px;
-  }
+.button:hover::before {
+  left: 100%;
+}
 
-  .header-nav {
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 10px;
-  }
+.button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
+}
 
-  .header-logo {
-    width: 40px;
-    height: 40px;
-  }
+/* ============================= */
+/*        ADDITIONAL ELEMENTS    */
+/* ============================= */
+.form-footer {
+  margin-top: 16px; /* Kurangi margin lebih banyak */
+  padding-top: 16px;
+  border-top: 1px solid var(--color-bg-secondary);
+  text-align: center;
+}
 
-  .header-title {
-    font-size: 18px;
-  }
+.form-footer a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
 
-  .header-nav-item {
-    font-size: 16px;
-  }
+.form-footer a:hover {
+  color: var(--color-primary-light);
+  text-decoration: underline;
+}
 
+/* ============================= */
+/*        RESPONSIVE RULES       */
+/* ============================= */
+/* MOBILE */
+@media (max-width: 768px) {
+  .form-container {
+    padding: 10px;
+  }
+  
   .form-content {
-    padding: 30px 16px;
-    margin: 60px 20px;
+    padding: 20px 16px;
+    margin: 0;
     max-width: 100%;
+    width: 100%;
+    max-height: 95vh;
   }
-
-  .input-label {
+  
+  .form-grid {
+    grid-template-columns: 1fr; /* Single column pada mobile */
+    gap: 16px;
+  }
+  
+  .form-title {
+    font-size: 24px;
+  }
+  
+  .form-subtitle {
     font-size: 14px;
-  }
-
-  .input-field {
-    font-size: 14px;
-    padding: 10px 12px;
-  }
-
-  .button {
-    font-size: 16px;
-    padding: 12px;
-  }
-
-  .profile-image {
-    width: 100px;
-    height: 100px;
     margin-bottom: 16px;
   }
+  
+  .input-label {
+    font-size: 13px;
+  }
+  
+  .input-field {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 10px 14px;
+  }
+  
+  .input-wrapper .input-field {
+    padding-right: 48px;
+  }
+  
+  .password-toggle {
+    right: 12px;
+    padding: 6px;
+  }
+  
+  .button {
+    font-size: 15px;
+    padding: 12px;
+    margin-top: 16px;
+  }
+  
+  .profile-image {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .logo-wrapper {
+    margin-bottom: 16px;
+  }
+  
+  .input-container {
+    margin-bottom: 14px;
+  }
 }
 
-/* RESPONSIVE: TABLET */
-@media (min-width: 601px) and (max-width: 1024px) {
-  .form-content {
-    padding: 40px 30px;
-    margin: 70px auto;
-    max-width: 90%;
-  }
+/* Notification Styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    min-width: 320px;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: slideInRight 0.3s ease-out;
+    font-family: inherit;
+}
 
+.notification-success {
+    background-color: #10b981;
+    color: white;
+    border-left: 4px solid #059669;
+}
+
+.notification-error {
+    background-color: #ef4444;
+    color: white;
+    border-left: 4px solid #dc2626;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    gap: 12px;
+}
+
+.notification-icon {
+    flex-shrink: 0;
+}
+
+.notification-message {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: currentColor;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.notification-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Animation */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+    .notification {
+        left: 20px;
+        right: 20px;
+        min-width: auto;
+        max-width: none;
+    }
+}
+
+/* TABLET */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .form-content {
+    padding: 28px 32px;
+    max-width: 600px; /* Kurangi juga untuk tablet */
+  }
+  
+  .form-title {
+    font-size: 26px;
+  }
+  
   .input-label,
   .input-field,
   .button {
     font-size: 16px;
   }
-
-  .header-title {
-    font-size: 20px;
+  
+  .profile-image {
+    width: 90px;
+    height: 90px;
   }
+}
 
-  .header-nav-item {
-    font-size: 17px;
+/* LARGE DESKTOP */
+@media (min-width: 1025px) {
+  .form-content {
+    padding: 32px 40px;
+    max-width: 700px; /* Kurangi dari 900px ke 700px */
   }
-
+  
+  .form-title {
+    font-size: 30px;
+  }
+  
   .profile-image {
     width: 110px;
     height: 110px;
   }
+  
+  .form-grid {
+    gap: 20px; /* Sedikit lebih besar untuk desktop */
+  }
+}
+
+/* ============================= */
+/*          ANIMATIONS          */
+/* ============================= */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-content {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.input-container {
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.input-container:nth-child(1) { animation-delay: 0.1s; }
+.input-container:nth-child(2) { animation-delay: 0.2s; }
+.input-container:nth-child(3) { animation-delay: 0.3s; }
+.input-container:nth-child(4) { animation-delay: 0.4s; }
+
+.button {
+  animation: fadeInUp 0.6s ease-out 0.5s both;
+}
+
+/* ============================= */
+/*        ACCESSIBILITY         */
+/* ============================= */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visible untuk accessibility */
+.button:focus-visible,
+.input-field:focus-visible,
+.password-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ============================= */
+/*        SCROLLBAR STYLING     */
+/* ============================= */
+.form-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.form-content::-webkit-scrollbar-track {
+  background: rgba(226, 232, 240, 0.3);
+  border-radius: 3px;
+}
+
+.form-content::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 3px;
+}
+
+.form-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.5);
 }

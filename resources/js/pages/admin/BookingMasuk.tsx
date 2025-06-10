@@ -6,6 +6,7 @@ interface OrderItem {
     item_name: string;
     duration: string;
     price: number;
+    quantity: number;
 }
 
 interface Order {
@@ -83,11 +84,10 @@ const OrderIndex: React.FC<Props> = ({ orders }) => {
                                             <div key={i}>{item.duration}</div>
                                         ))}
                                     </td>
-                                    <td className="px-4 py-3">
-                                        {order.items.map((item, i) => (
-                                            <div key={i}>Rp {item.price.toLocaleString()}</div>
-                                        ))}
+                                    <td className="px-4 py-3 font-semibold text-green-700">
+                                        Rp {order.items.reduce((total, item) => total + item.price * item.quantity, 0).toLocaleString()}
                                     </td>
+
                                     <td className="px-4 py-3">{order.contact_wa}</td>
                                     <td className="px-4 py-3">
                                         {order.status_dp === 'belum_dibayar' ? (

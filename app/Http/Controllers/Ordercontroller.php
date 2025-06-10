@@ -26,20 +26,22 @@ class ordercontroller extends Controller
             $customer = $order->customer;
 
             $items = $order->orderDetail->map(function ($detail) {
-                $product = $detail->product;
-                $duration = $detail->duration ?? '-';
-                $price = match ($duration) {
-                    'eight_hour' => $product?->eight_hour_rent_price ?? 0,
-                    'twenty_four_hour' => $product?->twenty_four_hour_rent_price ?? 0,
-                    default => 0,
-                };
+    $product = $detail->product;
+    $duration = $detail->duration ?? '-';
+    $quantity = $detail->quantity ?? 1; // default 1 jika null
+    $price = match ($duration) {
+        'eight_hour' => $product?->eight_hour_rent_price ?? 0,
+        'twenty_four_hour' => $product?->twenty_four_hour_rent_price ?? 0,
+        default => 0,
+    };
 
-                return [
-                    'item_name' => $product?->product_name ?? '-',
-                    'duration' => $duration,
-                    'price' => $price,
-                ];
-            });
+    return [
+        'item_name' => $product?->product_name ?? '-',
+        'duration' => $duration,
+        'price' => $price,
+        'quantity' => $quantity,
+    ];
+});
 
             return [
                 'order_id' => $order->order_id,
@@ -67,20 +69,23 @@ class ordercontroller extends Controller
             $customer = $order->customer;
 
             $items = $order->orderDetail->map(function ($detail) {
-                $product = $detail->product;
-                $duration = $detail->duration ?? '-';
-                $price = match ($duration) {
-                    'eight_hour' => $product?->eight_hour_rent_price ?? 0,
-                    'twenty_four_hour' => $product?->twenty_four_hour_rent_price ?? 0,
-                    default => 0,
-                };
+    $product = $detail->product;
+    $duration = $detail->duration ?? '-';
+    $quantity = $detail->quantity ?? 1; // default 1 jika null
+    $price = match ($duration) {
+        'eight_hour' => $product?->eight_hour_rent_price ?? 0,
+        'twenty_four_hour' => $product?->twenty_four_hour_rent_price ?? 0,
+        default => 0,
+    };
 
-                return [
-                    'item_name' => $product?->product_name ?? '-',
-                    'duration' => $duration,
-                    'price' => $price,
-                ];
-            });
+    return [
+        'item_name' => $product?->product_name ?? '-',
+        'duration' => $duration,
+        'price' => $price,
+        'quantity' => $quantity,
+    ];
+});
+
 
             return [
                 'order_id' => $order->order_id,
@@ -99,35 +104,28 @@ class ordercontroller extends Controller
 
 
     public function historyadmin()
-    {
-        $history = DB::table('orders')
-            ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
-            ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
-            ->join('products', 'order_details.product_id', '=', 'products.product_id')
-            ->where('orders.status', 'selesai')
-            ->select(
-                'orders.order_id',
-                'customers.customer_name',
-                'customers.phone_number',
-                'orders.order_date',
-                'order_details.day_rent',
-                'order_details.due_on',
-                'products.product_name',
-                // Logika harga berdasarkan durasi day_rent
-                DB::raw("
-                CASE
-                    WHEN order_details.day_rent <= 0.33 THEN products.eight_hour_rent_price
-                    WHEN order_details.day_rent <= 1 THEN products.twenty_four_hour_rent_price
-                    ELSE products.twenty_four_hour_rent_price * order_details.day_rent
-                END AS price
-                ")
-            )
-            ->get();
+{
+    $history = DB::table('orders')
+        ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
+        ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
+        ->join('products', 'order_details.product_id', '=', 'products.product_id')
+        ->where('orders.status', 'selesai')
+        ->select(
+            'orders.order_id',
+            'customers.customer_name',
+            'customers.phone_number',
+            'orders.order_date',
+            'order_details.day_rent',
+            'order_details.due_on',
+            'products.product_name',
+            'orders.total_price as price' // Ambil total harga langsung dari kolom orders.total_price
+        )
+        ->get();
 
-        return Inertia::render('admin/history', [
-            'history' => $history,
-        ]);
-    }
+    return Inertia::render('admin/history', [
+        'history' => $history,
+    ]);
+}
     public function history()
     {
         $history = DB::table('orders')

@@ -197,31 +197,15 @@ const PenyewaanIndex: React.FC<Props> = ({ orders }) => {
         </td>
 
         {/* Tgl Ambil */}
-        <td className="px-4 py-3">
-            <ul className="list-disc pl-4">
-                {order.details.map((detail, i) => (
-                    <li key={i}>{detail.day_rent}</li>
-                ))}
-            </ul>
-        </td>
+        <td className="px-4 py-3">{order.details[0]?.day_rent ?? '-'}</td>
+
 
         {/* Tgl Kembali */}
-        <td className="px-4 py-3">
-            <ul className="list-disc pl-4">
-                {order.details.map((detail, i) => (
-                    <li key={i}>{detail.due_on}</li>
-                ))}
-            </ul>
-        </td>
+        <td className="px-4 py-3">{order.details[0]?.due_on ?? '-'}</td>
+
 
         {/* Durasi */}
-        <td className="px-4 py-3">
-            <ul className="list-disc pl-4">
-                {order.details.map((detail, i) => (
-                    <li key={i}>{detail.duration}</li>
-                ))}
-            </ul>
-        </td>
+        <td className="px-4 py-3">{order.details[0]?.duration ?? '-'}</td>
 
         <td className="px-4 py-3">{order.phone_number}</td>
 

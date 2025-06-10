@@ -167,11 +167,15 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Product $product)
+    public function show($id)
     {
-        //
+        // Cari berdasarkan product_id bukan id
+        $product = Product::where('product_id', $id)->firstOrFail();
+        
+        return Inertia::render('productdetail', [
+            'product' => $product
+        ]);
     }
-
     /**
      * Show the form for editing the specified resource.
      */

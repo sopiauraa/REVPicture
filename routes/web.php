@@ -27,21 +27,10 @@ Route::get('/', [ProductController::class, 'showLanding'])->name('home');
 
 Route::get('/login', [AuthenticatedSessionController::class, 'index']);
 Route::get('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-Route::get('/brand', function () {
-    return Inertia::render('brand');
-});
-Route::get('/kamera', function () {
-    return Inertia::render('kamera');
-});
-Route::get('/lensa', function () {
-    return Inertia::render('lensa');
-});
-Route::get('/paket', function () {
-    return Inertia::render('paket');
-});
-Route::get('/syarat', function () {
-    return Inertia::render('syarat');
-});
+Route::get('/brand', function () { return Inertia::render('brand'); });
+Route::get('/kamera', function () { return Inertia::render('kamera'); });
+Route::get('/lensa', function () { return Inertia::render('lensa'); });
+Route::get('/paket', function () { return Inertia::render('paket'); });
 
 
 // admindashboard
@@ -152,9 +141,7 @@ Route::get('/formdatadiri', function () {
 });
 Route::post('/checkout', [OrderController::class, 'store'])->middleware('auth')->name('checkout');
 
-Route::get('detailproduk', function () {
-    return Inertia::render('detailproduk');
-});
+Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.show');
 
 
 

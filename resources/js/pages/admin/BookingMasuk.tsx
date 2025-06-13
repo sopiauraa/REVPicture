@@ -50,10 +50,10 @@ const OrderIndex: React.FC<Props> = ({ orders }) => {
     };
 
     return (
-        <AdminLayout title="Data Order">
+        <AdminLayout title=" Daftar pesanan">
             <section className="mt-4 px-6 pb-12">
                 <div className="overflow-x-auto rounded-md bg-white p-6 shadow-md">
-                    <h3 className="mb-4 text-[14px] font-semibold">Daftar Order</h3>
+                    <h3 className="mb-4 text-[14px] font-semibold">Daftar Pesanan</h3>
                     <table className="w-full border-separate border-spacing-y-2 text-[13px] text-[#1f1e29]">
                         <thead>
                             <tr className="bg-[#d3d3d3] text-left">

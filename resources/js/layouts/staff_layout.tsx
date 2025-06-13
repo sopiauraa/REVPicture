@@ -4,7 +4,7 @@ import { router } from '@inertiajs/react';
 
 const staffNavItems = [
   { label: "Data Barang", icon: "fa-box", href: "/staff/data_barang" },
-  { label: "Booking Masuk", icon: "fa-envelope-open-text", href: "/staff/data_booking" },
+  { label: "Pesanan Masuk", icon: "fa-envelope-open-text", href: "/staff/data_booking" },
   { label: "Kalender Sewa", icon: "fa-calendar-alt", href: "/staff/kalender" },
   { label: "Data Penyewa", icon: "fa-users", href: "/staff/data_customer" },
   { label: "Data Penyewaan", icon: "fa-file-alt", href: "/staff/data_sewa" },

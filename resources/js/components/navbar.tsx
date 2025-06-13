@@ -244,7 +244,7 @@ const Navbar = ({
                                         onClick={() => setAkunOpen(!akunOpen)}
                                     >
                                         <User className="h-4 w-4" />
-                                        <span className="hidden xl:inline">{user?.name || 'Account'}</span>
+                                        <span className="hidden xl:inline">{user?.name || 'Akun '}</span>
                                         <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${akunOpen ? 'rotate-180' : ''}`} />
                                     </button>
 

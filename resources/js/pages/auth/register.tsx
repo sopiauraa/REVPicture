@@ -42,7 +42,7 @@ const Button = ({ type = 'button', children }: any) => (
     </button>
 );
 
-// Notification Component
+// Notification Component dengan Fixed Position
 const Notification = ({ show, message, type, onClose }: any) => {
     useEffect(() => {
         if (show) {
@@ -67,13 +67,15 @@ const Notification = ({ show, message, type, onClose }: any) => {
     const displayMessage = message || 'Notifikasi tidak tersedia.';
 
     return (
-        <div className={`notification ${type === 'success' ? 'notification-success' : 'notification-error'}`}>
-            <div className="notification-content">
-                {type === 'success' && <CheckCircle size={20} className="notification-icon" />}
-                <span className="notification-message">{displayMessage}</span>
-                <button onClick={onClose} className="notification-close">
-                    <X size={16} />
-                </button>
+        <div className="notification-overlay">
+            <div className={`notification-fixed ${type === 'success' ? 'notification-success' : 'notification-error'}`}>
+                <div className="notification-content">
+                    {type === 'success' && <CheckCircle size={20} className="notification-icon" />}
+                    <span className="notification-message">{displayMessage}</span>
+                    <button >
+                       
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -92,6 +94,16 @@ const Register = () => {
         message: '',
         type: 'success',
     });
+
+    useEffect(() => {
+        if (notification.show) {
+            const timer = setTimeout(() => {
+                setNotification(prev => ({ ...prev, show: false }));
+            }, 2000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [notification.show]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -195,25 +207,8 @@ const Register = () => {
 
     return (
         <div className="form-container">
-            {/* Notification */}
+            {/* Notification dengan Fixed Position */}
             <Notification show={notification.show} message={notification.message} type={notification.type} onClose={closeNotification} />
-
-            {/* Header / Navbar */}
-            {/* <div className="header">
-                <div className="nav-left">
-                    <img
-                        src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/7Z7cWQJTXY/12jj40if_expires_30_days.png"
-                        alt="Logo"
-                        className="header-logo"
-                    />
-                    <span className="header-title">REV PICTURE</span>
-                </div>
-                <div className="header-nav">
-                    <span className="header-nav-item">HOME</span>
-                    <span className="header-nav-item">AKUN</span>
-                    <span className="header-nav-item">KERANJANG</span>
-                </div>
-            </div> */}
 
             {/* Form Content */}
             <div className="form-center-wrapper">

@@ -171,9 +171,9 @@ const UserManagement: React.FC = () => {
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center">
                   <Users className="w-8 h-8 mr-3 text-blue-600" />
-                  User Management
+                  Manajemen Akun Pengguna
                 </h1>
-                <p className="text-gray-600 mt-1">Manage user accounts and permissions</p>
+                {/* <p className="text-gray-600 mt-1">Manage user accounts and permissions</p> */}
               </div>
             </div>
           </div>

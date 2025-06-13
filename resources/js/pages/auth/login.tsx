@@ -49,12 +49,10 @@ const Login = () => {
         <div className="form-container">
             {/* Status Notification */}
             {status && showStatus && (
-                <div className="notification notification-success" style={{ top: 20, left: '50%', right: 'auto', transform: 'translateX(-50%)', position: 'fixed', zIndex: 1000 }}>
+                <div className="notification-success" style={{ top: 20, left: '50%', right: 'auto', transform: 'translateX(-50%)', position: 'fixed', zIndex: 1000 }}>
                     <div className="notification-content">
                         <span className="notification-message">{status}</span>
-                        <button onClick={() => setShowStatus(false)} className="notification-close">
-                            <span style={{ fontWeight: 'bold', fontSize: 18 }}>&times;</span>
-                        </button>
+
                     </div>
                 </div>
             )}

@@ -41,11 +41,11 @@ const CustomerIndex: React.FC<Props> = ({ customers }) => {
   }, [searchTerm]);
 
   return (
-    <StaffLayout title="Data Pelanggan">
+    <StaffLayout title="Data Penyewa">
       <section className="mt-4 px-6 pb-12">
         {/* Header Section */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Data Pelanggan</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Data Penyewa</h1>
           <p className="text-sm text-gray-600">
             Kelola semua data pelanggan rental Anda
           </p>

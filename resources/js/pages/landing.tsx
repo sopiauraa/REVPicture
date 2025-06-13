@@ -209,7 +209,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         <ErrorBoundary>
             <div className="min-h-screen bg-slate-50">
                 {/* Custom Scrollbar Styles */}
-                <style jsx global>{`
+                <style>{`
                     .scrollbar-hide {
                         -ms-overflow-style: none;
                         scrollbar-width: none;

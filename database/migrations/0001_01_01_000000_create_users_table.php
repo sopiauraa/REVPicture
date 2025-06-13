@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role', ['customer', 'staff', 'admin'])->defaul('customer');
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP')); 
+            $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });
 

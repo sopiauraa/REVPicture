@@ -1,4 +1,4 @@
-import { Link, useForm } from '@inertiajs/react';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import React from 'react';
 import '../../../css/register-style.css';
 
@@ -21,6 +21,9 @@ const Login = () => {
         email: '',
         password: '',
     });
+    const { props } = usePage();
+    const status = props.status as string | undefined;
+    const [showStatus, setShowStatus] = React.useState(true);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -44,6 +47,18 @@ const Login = () => {
 
     return (
         <div className="form-container">
+            {/* Status Notification */}
+            {status && showStatus && (
+                <div className="notification notification-success" style={{ top: 20, left: '50%', right: 'auto', transform: 'translateX(-50%)', position: 'fixed', zIndex: 1000 }}>
+                    <div className="notification-content">
+                        <span className="notification-message">{status}</span>
+                        <button onClick={() => setShowStatus(false)} className="notification-close">
+                            <span style={{ fontWeight: 'bold', fontSize: 18 }}>&times;</span>
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             {/* <div className="header">
                 <div className="nav-left">

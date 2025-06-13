@@ -28,7 +28,7 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): \Symfony\Component\HttpFoundation\Response
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -44,8 +44,7 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        // Auth::login($user);
-
-        return redirect('/login');
+        // Always redirect to login with a flash message
+        return redirect()->route('login')->with('status', 'Pendaftaran berhasil! Silakan cek email Anda untuk verifikasi.');
     }
 }

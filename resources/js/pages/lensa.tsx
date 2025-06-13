@@ -52,10 +52,7 @@ export default function LensaPage() {
 
     return (
         <div className="flex min-h-screen flex-col bg-[#f9f1e9]">
-            <ErrorBoundary>
-                <Navbar/>
-            </ErrorBoundary>
-
+         
             <AnimatePresence>
                 {showPopup && (
                     <motion.div
@@ -108,10 +105,6 @@ export default function LensaPage() {
                     </ErrorBoundary>
                 </div>
             </main>
-
-            <ErrorBoundary>
-                <Footer />
-            </ErrorBoundary>
         </div>
     );
 }

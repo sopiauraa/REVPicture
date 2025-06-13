@@ -44,9 +44,7 @@ export default function PaketPage() {
 
     return (
         <div className="flex min-h-screen flex-col bg-[#f9f1e9]">
-            <ErrorBoundary>
-                <Navbar/>
-            </ErrorBoundary>
+ 
 
             <AnimatePresence>
                 {showPopup && (
@@ -107,9 +105,6 @@ export default function PaketPage() {
                 </div>
             </main>
 
-            <ErrorBoundary>
-                <Footer />
-            </ErrorBoundary>
         </div>
     );
 }

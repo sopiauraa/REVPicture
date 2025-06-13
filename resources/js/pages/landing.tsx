@@ -1,15 +1,20 @@
 import ErrorBoundary from '@/components/error-boundary';
 import { usePage } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { Product } from '../components/CartContext';
 import { useCart } from '../components/CartContext';
 import Footer from '../components/footer';
 import Navbar from '../components/navbar';
 
+// Update Product type to include stock information
+type ProductWithStock = Product & {
+    stock_available: number;
+};
+
 type Props = {
-    cameraProducts: Product[];
-    lensProducts: Product[];
+    cameraProducts: ProductWithStock[];
+    lensProducts: ProductWithStock[];
 };
 
 const Landing = ({ cameraProducts, lensProducts }: Props) => {
@@ -24,11 +29,42 @@ const Landing = ({ cameraProducts, lensProducts }: Props) => {
     const [conflictMsg, setConflictMsg] = useState('');
     const [brandFilter, setBrandFilter] = useState('');
     const [typeFilter, setTypeFilter] = useState<'camera' | 'lens' | ''>('');
-    // const [currentTypeFilter, setCurrentTypeFilter] = useState<'camera' | 'lens' | ''>('');
     const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
 
-const ProductCard = ({ product }: { product: Product }) => {
-    const [selectedDuration, setSelectedDuration] = useState<'8' | '24'>('8');
+    // NEW: State untuk menyimpan quantity dan duration setiap produk
+    const [productStates, setProductStates] = useState<{
+        [productId: string]: {
+            quantity: number;
+            selectedDuration: '8' | '24';
+        }
+    }>({});
+
+    // Helper function untuk mendapatkan atau membuat state produk
+    const getProductState = (productId: string) => {
+        return productStates[productId] || {
+            quantity: 1,
+            selectedDuration: '8' as const
+        };
+    };
+
+    // Helper function untuk update state produk
+    const updateProductState = (productId: string, updates: Partial<{ quantity: number; selectedDuration: '8' | '24' }>) => {
+        setProductStates(prev => ({
+            ...prev,
+            [productId]: {
+                ...getProductState(productId),
+                ...updates
+            }
+        }));
+    };
+
+const ProductCard = ({ product }: { product: ProductWithStock }) => {
+    // Ambil state dari parent component
+    const productState = getProductState(product.product_id.toString());
+    const { quantity, selectedDuration } = productState;
+
+    // Check if product is out of stock
+    const isOutOfStock = product.stock_available === 0;
 
     const handleAddToCartWithDuration = (e: React.MouseEvent) => {
         // Prevent card click when clicking add to cart button
@@ -39,9 +75,25 @@ const ProductCard = ({ product }: { product: Product }) => {
             return;
         }
 
+        if (isOutOfStock) {
+            setConflictMsg('Produk ini sedang tidak tersedia (stok kosong).');
+            setShowConflictPopup(true);
+            setTimeout(() => setShowConflictPopup(false), 2500);
+            return;
+        }
+
+        // Check if requested quantity exceeds available stock
+        if (quantity > product.stock_available) {
+            setConflictMsg(`Stok tersedia hanya ${product.stock_available} unit.`);
+            setShowConflictPopup(true);
+            setTimeout(() => setShowConflictPopup(false), 2500);
+            return;
+        }
+
         const selectedPrice = selectedDuration === '8' ? product.eight_hour_rent_price : product.twenty_four_hour_rent_price;
         const itemName = `${product.product_name} (${selectedDuration} Jam)`;
 
+        // Check for duration conflicts in cart
         const hasConflict = cart.some((item) => {
             const is8Jam = item.name.includes('(8 Jam)');
             const is24Jam = item.name.includes('(24 Jam)');
@@ -55,63 +107,103 @@ const ProductCard = ({ product }: { product: Product }) => {
             return;
         }
 
+        // Check if adding this quantity would exceed stock when combined with existing cart items
+        const existingCartItem = cart.find(item => 
+            item.product.product_id === product.product_id && 
+            item.name.includes(`(${selectedDuration} Jam)`)
+        );
+        
+        const totalQuantityInCart = existingCartItem ? existingCartItem.quantity + quantity : quantity;
+        
+        if (totalQuantityInCart > product.stock_available) {
+            setConflictMsg(`Total quantity dalam keranjang akan melebihi stok tersedia (${product.stock_available} unit).`);
+            setShowConflictPopup(true);
+            setTimeout(() => setShowConflictPopup(false), 2500);
+            return;
+        }
+
         addToCart({
             product,
             name: itemName,
             price: selectedPrice,
-            quantity: 1,
+            quantity: quantity,
         });
 
-        setPopupMsg(`${itemName} berhasil ditambahkan ke keranjang!`);
+        setPopupMsg(`${quantity}x ${itemName} berhasil ditambahkan ke keranjang!`);
         setShowPopup(true);
         setTimeout(() => setShowPopup(false), 2000);
+        
+        // Reset quantity after adding to cart
+        updateProductState(product.product_id.toString(), { quantity: 1 });
     };
 
     const handleCardClick = () => {
         // Navigate to product detail page
-        // Option 1: Using Inertia.js router (recommended for Laravel Inertia apps)
         window.location.href = `/product/${product.product_id}`;
-        
-        // Option 2: If using Inertia router, uncomment this:
-        // import { router } from '@inertiajs/react';
-        // router.visit(`/product/${product.id}`);
     };
 
     const handleDurationClick = (e: React.MouseEvent, duration: '8' | '24') => {
         // Prevent card click when clicking duration buttons
         e.stopPropagation();
-        setSelectedDuration(duration);
+        updateProductState(product.product_id.toString(), { selectedDuration: duration });
+    };
+
+    const handleQuantityChange = (e: React.MouseEvent, change: number) => {
+        e.stopPropagation();
+        const newQuantity = quantity + change;
+        if (newQuantity >= 1 && newQuantity <= product.stock_available) {
+            updateProductState(product.product_id.toString(), { quantity: newQuantity });
+        }
     };
 
     return (
         <motion.div
-            className="group relative flex w-[240px] min-w-[240px] flex-col overflow-hidden rounded-xl bg-slate-50 shadow-lg transition-all duration-300 hover:shadow-xl border border-slate-200 cursor-pointer"
-            whileTap={{ scale: 0.98 }}
-            whileHover={{ scale: 1.02, y: -4 }}
-            onClick={handleCardClick}
+            className={`group relative flex w-[240px] min-w-[240px] flex-col overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl border cursor-pointer ${
+                isOutOfStock 
+                    ? 'bg-slate-100 border-slate-300 opacity-75' 
+                    : 'bg-slate-50 border-slate-200 hover:scale-102 hover:-translate-y-1'
+            }`}
+            whileTap={!isOutOfStock ? { scale: 0.98 } : undefined}
+            whileHover={!isOutOfStock ? { scale: 1.02, y: -4 } : undefined}
+            onClick={!isOutOfStock ? handleCardClick : undefined}
         >
-            {/* Compact Image Container */}
-            <div className="relative h-40 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
-                <img 
-                    src={product.product_image} 
-                    className="h-full w-full object-contain p-3 transition-transform duration-300 group-hover:scale-105" 
-                    alt={product.product_name}
-                />
-                {/* Optional: Add "View Details" overlay on hover */}
-                <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-all duration-300 flex items-center justify-center">
-                    <span className="text-slate-800 font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/80 px-3 py-1 rounded-full text-sm">
-                        Lihat Detail
+            {/* Stock Badge */}
+            <div className="absolute top-2 right-2 z-10">
+                {isOutOfStock ? (
+                    <span className="bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                        Stok Kosong
                     </span>
-                </div>
+                ) : (
+                    <span className="bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                        Stok: {product.stock_available}
+                    </span>
+                )}
             </div>
 
-            {/* Compact Content Container */}
+            {/* Image Container */}
+            <div className={`relative h-40 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 ${isOutOfStock ? 'grayscale' : ''}`}>
+                <img 
+                    src={product.product_image} 
+                    className={`h-full w-full object-contain p-3 transition-transform duration-300 ${!isOutOfStock ? 'group-hover:scale-105' : ''}`}
+                    alt={product.product_name}
+                />
+                {/* View Details overlay - only show if not out of stock */}
+                {!isOutOfStock && (
+                    <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-all duration-300 flex items-center justify-center">
+                        <span className="text-slate-800 font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/80 px-3 py-1 rounded-full text-sm">
+                            Lihat Detail
+                        </span>
+                    </div>
+                )}
+            </div>
+
+            {/* Content Container */}
             <div className="flex flex-col p-4 space-y-3">
                 <h3 className="text-center font-semibold text-slate-800 text-sm leading-tight min-h-[2rem] flex items-center justify-center">
                     {product.product_name}
                 </h3>
 
-                {/* Compact Pricing */}
+                {/* Pricing */}
                 <div className="flex gap-2 text-xs">
                     <div className="flex-1 rounded-lg bg-slate-100 p-2 text-center border border-slate-200">
                         <div className="text-slate-600 font-medium">8 Jam</div>
@@ -123,54 +215,92 @@ const ProductCard = ({ product }: { product: Product }) => {
                     </div>
                 </div>
 
-                {/* Compact Duration Selection */}
-                <div className="flex gap-2">
-                    <button
-                        onClick={(e) => handleDurationClick(e, '8')}
-                        className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 ${
-                            selectedDuration === '8' 
-                                ? 'bg-slate-800 text-white shadow-md' 
-                                : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-                        }`}
-                    >
-                        8 Jam
-                    </button>
-                    <button
-                        onClick={(e) => handleDurationClick(e, '24')}
-                        className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 ${
-                            selectedDuration === '24' 
-                                ? 'bg-slate-800 text-white shadow-md' 
-                                : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-                        }`}
-                    >
-                        24 Jam
-                    </button>
-                </div>
+                {!isOutOfStock && (
+                    <>
+                        {/* Duration Selection */}
+                        <div className="flex gap-2">
+                            <button
+                                onClick={(e) => handleDurationClick(e, '8')}
+                                className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 ${
+                                    selectedDuration === '8' 
+                                        ? 'bg-slate-800 text-white shadow-md' 
+                                        : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                                }`}
+                            >
+                                8 Jam
+                            </button>
+                            <button
+                                onClick={(e) => handleDurationClick(e, '24')}
+                                className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 ${
+                                    selectedDuration === '24' 
+                                        ? 'bg-slate-800 text-white shadow-md' 
+                                        : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                                }`}
+                            >
+                                24 Jam
+                            </button>
+                        </div>
 
-                {/* Compact Add to Cart Button */}
-                <button
-                    onClick={handleAddToCartWithDuration}
-                    className="rounded-lg bg-slate-800 px-4 py-2.5 text-xs font-semibold text-white transition-all duration-200 hover:bg-slate-700 shadow-md hover:shadow-lg"
-                >
-                    + Tambah ke Keranjang
-                </button>
+                        {/* Quantity Selector */}
+                        <div className="flex items-center justify-center gap-3">
+                            <span className="text-xs font-medium text-slate-600">Jumlah:</span>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={(e) => handleQuantityChange(e, -1)}
+                                    disabled={quantity <= 1}
+                                    className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-bold text-sm hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                                >
+                                    -
+                                </button>
+                                <span className="w-8 text-center text-sm font-semibold text-slate-800">{quantity}</span>
+                                <button
+                                    onClick={(e) => handleQuantityChange(e, 1)}
+                                    disabled={quantity >= product.stock_available}
+                                    className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-bold text-sm hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                                >
+                                    +
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Add to Cart Button */}
+                        <button
+                            onClick={handleAddToCartWithDuration}
+                            className="rounded-lg bg-slate-800 px-4 py-2.5 text-xs font-semibold text-white transition-all duration-200 hover:bg-slate-700 shadow-md hover:shadow-lg"
+                        >
+                            + Tambah ke Keranjang
+                        </button>
+                    </>
+                )}
+
+                {/* Out of stock message */}
+                {isOutOfStock && (
+                    <div className="text-center py-4">
+                        <p className="text-red-600 font-semibold text-sm">Produk tidak tersedia</p>
+                        <p className="text-slate-500 text-xs mt-1">Stok habis</p>
+                    </div>
+                )}
             </div>
         </motion.div>
     );
 };
 
-    // Ambil 3 gambar random untuk hero
-    const randomHeroImages = [...cameraProducts, ...lensProducts]
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 3)
-        .map((product) => ({
-            src: product.product_image,
-            alt: product.product_name,
-        }));
+    // Memoize hero images untuk mencegah re-calculation yang tidak perlu
+    const randomHeroImages = useMemo(() => {
+        const availableProducts = [...cameraProducts, ...lensProducts].filter(product => product.stock_available > 0);
+        return availableProducts
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 3)
+            .map((product) => ({
+                src: product.product_image,
+                alt: product.product_name,
+            }));
+    }, [cameraProducts, lensProducts]); // Only recalculate when products change
 
     // Function untuk mendapatkan index gambar berdasarkan posisi
     const getImageIndex = (position: 'left' | 'center' | 'right') => {
         const total = randomHeroImages.length;
+        if (total === 0) return 0;
         switch (position) {
             case 'left':
                 return (currentHeroIndex - 1 + total) % total;
@@ -183,12 +313,14 @@ const ProductCard = ({ product }: { product: Product }) => {
         }
     };
 
-    // Auto-rotate setiap 4 detik
+    // Auto-rotate setiap 4 detik (hanya jika ada gambar)
     useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentHeroIndex((prev) => (prev + 1) % randomHeroImages.length);
-        }, 4000);
-        return () => clearInterval(interval);
+        if (randomHeroImages.length > 0) {
+            const interval = setInterval(() => {
+                setCurrentHeroIndex((prev) => (prev + 1) % randomHeroImages.length);
+            }, 4000);
+            return () => clearInterval(interval);
+        }
     }, [randomHeroImages.length]);
 
     const filteredCamera = cameraProducts.filter(
@@ -245,67 +377,76 @@ const ProductCard = ({ product }: { product: Product }) => {
                             transition={{ duration: 0.8 }}
                             className="relative overflow-hidden rounded-3xl h-96 bg-gradient-to-br from-slate-800 to-slate-900"
                         >
-                            <div className="flex items-center justify-center h-full relative">
-                                {/* Left Camera */}
-                                <motion.div
-                                    className="absolute left-20 z-10"
-                                    initial={{ opacity: 0, x: -50 }}
-                                    animate={{ opacity: 0.6, x: 0 }}
-                                    transition={{ duration: 0.6 }}
-                                >
-                                    <img
-                                        src={randomHeroImages[getImageIndex('left')]?.src}
-                                        alt={randomHeroImages[getImageIndex('left')]?.alt}
-                                        className="h-48 w-48 object-contain filter drop-shadow-lg"
-                                    />
-                                </motion.div>
-
-                                {/* Center Camera (Main Focus) */}
-                                <motion.div
-                                    className="z-20 relative"
-                                    key={currentHeroIndex}
-                                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-                                >
-                                    <img
-                                        src={randomHeroImages[getImageIndex('center')]?.src}
-                                        alt={randomHeroImages[getImageIndex('center')]?.alt}
-                                        className="h-64 w-64 object-contain filter drop-shadow-2xl"
-                                    />
-                                    {/* Spotlight effect */}
-                                    <div className="absolute inset-0 bg-gradient-radial pointer-events-none rounded-full" />
-                                </motion.div>
-
-                                {/* Right Camera */}
-                                <motion.div
-                                    className="absolute right-20 z-10"
-                                    initial={{ opacity: 0, x: 50 }}
-                                    animate={{ opacity: 0.6, x: 0 }}
-                                    transition={{ duration: 0.6 }}
-                                >
-                                    <img
-                                        src={randomHeroImages[getImageIndex('right')]?.src}
-                                        alt={randomHeroImages[getImageIndex('right')]?.alt}
-                                        className="h-48 w-48 object-contain filter drop-shadow-lg"
-                                    />
-                                </motion.div>
-
-                                {/* Navigation Dots */}
-                                <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                                    {randomHeroImages.map((_, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() => setCurrentHeroIndex(index)}
-                                            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                                                index === currentHeroIndex
-                                                    ? 'bg-white shadow-lg scale-110'
-                                                    : 'bg-white/40 hover:bg-white/60'
-                                            }`}
+                            {randomHeroImages.length > 0 ? (
+                                <div className="flex items-center justify-center h-full relative">
+                                    {/* Left Camera */}
+                                    <motion.div
+                                        className="absolute left-20 z-10"
+                                        initial={{ opacity: 0, x: -50 }}
+                                        animate={{ opacity: 0.6, x: 0 }}
+                                        transition={{ duration: 0.6 }}
+                                    >
+                                        <img
+                                            src={randomHeroImages[getImageIndex('left')]?.src}
+                                            alt={randomHeroImages[getImageIndex('left')]?.alt}
+                                            className="h-48 w-48 object-contain filter drop-shadow-lg"
                                         />
-                                    ))}
+                                    </motion.div>
+
+                                    {/* Center Camera (Main Focus) */}
+                                    <motion.div
+                                        className="z-20 relative"
+                                        key={currentHeroIndex}
+                                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+                                    >
+                                        <img
+                                            src={randomHeroImages[getImageIndex('center')]?.src}
+                                            alt={randomHeroImages[getImageIndex('center')]?.alt}
+                                            className="h-64 w-64 object-contain filter drop-shadow-2xl"
+                                        />
+                                        {/* Spotlight effect */}
+                                        <div className="absolute inset-0 bg-gradient-radial pointer-events-none rounded-full" />
+                                    </motion.div>
+
+                                    {/* Right Camera */}
+                                    <motion.div
+                                        className="absolute right-20 z-10"
+                                        initial={{ opacity: 0, x: 50 }}
+                                        animate={{ opacity: 0.6, x: 0 }}
+                                        transition={{ duration: 0.6 }}
+                                    >
+                                        <img
+                                            src={randomHeroImages[getImageIndex('right')]?.src}
+                                            alt={randomHeroImages[getImageIndex('right')]?.alt}
+                                            className="h-48 w-48 object-contain filter drop-shadow-lg"
+                                        />
+                                    </motion.div>
+
+                                    {/* Navigation Dots */}
+                                    <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                                        {randomHeroImages.map((_, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => setCurrentHeroIndex(index)}
+                                                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                                                    index === currentHeroIndex
+                                                        ? 'bg-white shadow-lg scale-110'
+                                                        : 'bg-white/40 hover:bg-white/60'
+                                                }`}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <div className="flex items-center justify-center h-full">
+                                    <div className="text-center text-white/70">
+                                        <h3 className="text-2xl font-bold mb-2">Produk Segera Hadir</h3>
+                                        <p>Semua produk sedang tidak tersedia</p>
+                                    </div>
+                                </div>
+                            )}
                         </motion.div>
                     </div>
                 </div>
@@ -328,7 +469,7 @@ const ProductCard = ({ product }: { product: Product }) => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 justify-items-center">
                                 {filteredCamera.map((item, i) => (
                                     <motion.div
-                                        key={i}
+                                        key={item.product_id} // Use product_id as key instead of index
                                         initial={{ opacity: 0, y: 30 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.6, delay: i * 0.1 }}
@@ -359,7 +500,7 @@ const ProductCard = ({ product }: { product: Product }) => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 justify-items-center">
                                 {filteredLens.map((item, i) => (
                                     <motion.div
-                                        key={i}
+                                        key={item.product_id} // Use product_id as key instead of index
                                         initial={{ opacity: 0, y: 30 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.6, delay: i * 0.1 }}

@@ -40,9 +40,12 @@ class ProductController extends Controller
     }
 
     public function showLanding()
-    {
-
-        $cameraProducts = Product::where('product_type', 'camera')->get()->map(function ($item) {
+{
+    // Get camera products with their stock information
+    $cameraProducts = Product::where('product_type', 'camera')
+        ->with('stock') // Eager load the stock relationship
+        ->get()
+        ->map(function ($item) {
             return [
                 'product_id' => $item->product_id,
                 'product_name' => $item->product_name,
@@ -51,10 +54,15 @@ class ProductController extends Controller
                 'brand' => $item->brand,
                 'eight_hour_rent_price' => $item->eight_hour_rent_price,
                 'twenty_four_hour_rent_price' => $item->twenty_four_hour_rent_price,
+                'stock_available' => $item->stock ? $item->stock->stock_available : 0,
             ];
         });
 
-        $lensProducts = Product::where('product_type', 'lens')->get()->map(function ($item) {
+    // Get lens products with their stock information
+    $lensProducts = Product::where('product_type', 'lens')
+        ->with('stock') // Eager load the stock relationship
+        ->get()
+        ->map(function ($item) {
             return [
                 'product_id' => $item->product_id,
                 'product_name' => $item->product_name,
@@ -63,17 +71,15 @@ class ProductController extends Controller
                 'brand' => $item->brand,
                 'eight_hour_rent_price' => $item->eight_hour_rent_price,
                 'twenty_four_hour_rent_price' => $item->twenty_four_hour_rent_price,
+                'stock_available' => $item->stock ? $item->stock->stock_available : 0,
             ];
         });
 
-        return Inertia::render('Landing', [
-            'cameraProducts' => $cameraProducts,
-            'lensProducts' => $lensProducts,
-        ]);
-
-
-    }
-
+    return Inertia::render('Landing', [
+        'cameraProducts' => $cameraProducts,
+        'lensProducts' => $lensProducts,
+    ]);
+}
     /**
      * Show the form for creating a new resource.
      */

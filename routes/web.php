@@ -200,9 +200,7 @@ Route::get('/data_barang', function () {
     return Inertia::render('StaffDataBarang');
 });
 Route::get('/staff/history', [OrderController::class, 'history']);
-Route::get('/staff/staffprofil', function () {
-    return Inertia::render('staff/staffprofil');
-})->name('staff.profil');
+Route::get('/staff/staffprofil', function () { return Inertia::render('staff/staffprofil'); })->name('staff.profil');
 
 //Display Product (Landing)
 Route::get('/shop', [ProductController::class, 'index']);
@@ -223,8 +221,10 @@ Route::get('/formdatadiri', function () {
     ]);
 });
 Route::post('/checkout', [OrderController::class, 'store'])->middleware('auth')->name('checkout');
-
 Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.show');
+Route::get('/customerprofile', function () { return Inertia::render('CustomerProfile'); });
+Route::get('/order-history', [OrderController::class, 'historycustomer'])->name('order.historycustomer');
+Route::get('/status-order', [OrderController::class, 'statusorder'])->name('status.order');
 
 
 

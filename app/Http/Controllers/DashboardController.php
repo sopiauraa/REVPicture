@@ -55,41 +55,71 @@ class DashboardController extends Controller
     }
 
 public function getDashboardStats()
-    {
-        // 1. Jumlah Barang (dari tabel products)
-        $totalProducts = DB::table('products')->count();
+{
+    // Stats cards
+    $totalProducts = DB::table('products')->count();
+    
+    $activerental = DB::table('orders')
+        ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
+        ->where('orders.status', 'terkonfirmasi')
+        ->where('order_details.due_on', '>=', Carbon::now()->toDateString())
+        ->sum('order_details.quantity');
+    
+    $activeCustomers = DB::table('orders')
+        ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
+        ->where('orders.status', 'terkonfirmasi')
+        ->where('order_details.due_on', '>=', Carbon::now()->toDateString())
+        ->distinct('orders.customer_id')
+        ->count('orders.customer_id');
 
-        // 2. Barang Sedang Disewa (dari tabel orders yang statusnya 'terkonfirmasi' dan belum selesai)
-        $activerental = DB::table('orders')
-            ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
-            ->where('orders.status', 'terkonfirmasi')
-            ->where('order_details.due_on', '>=', Carbon::now()->toDateString())
-            ->sum('order_details.quantity');
+    // Monthly data - gunakan logic dari stats() yang sudah benar
+    $monthlyData = DB::table('order_details')
+        ->select(DB::raw('MONTH(created_at) as bulan'), DB::raw('COUNT(*) as jumlah'))
+        ->whereNotNull('created_at')
+        ->groupBy(DB::raw('MONTH(created_at)'))
+        ->get();
 
-        // 3. Penyewa Aktif (customer yang memiliki order aktif)
-        $activeCustomers = DB::table('orders')
-            ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
-            ->where('orders.status', 'terkonfirmasi')
-            ->where('order_details.due_on', '>=', Carbon::now()->toDateString())
-            ->distinct('orders.customer_id')
-            ->count('orders.customer_id');
-
-        // Data untuk chart bulanan (contoh data penyewaan per bulan)
-        $monthlyData = $this->getMonthlyRentalData();
-
-        // Data untuk chart brand (contoh data berdasarkan brand)
-        $brandData = $this->getBrandData();
-
-        return response()->json([
-            'stats' => [
-                'total_products' => $totalProducts,
-                'active_rentals' => $activerental,
-                'active_customers' => $activeCustomers
-            ],
-            'monthly' => $monthlyData,
-            'brands' => $brandData
-        ]);
+    $monthlyCounts = array_fill(1, 12, 0);
+    foreach ($monthlyData as $data) {
+        $monthlyCounts[$data->bulan] = $data->jumlah;
     }
+
+    $monthly = [
+        'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        'data' => array_values($monthlyCounts),
+    ];
+
+    // Brand data - gunakan logic dari stats() yang sudah benar
+    $brandData = DB::table('order_details')
+        ->join('products', 'order_details.product_id', '=', 'products.product_id')
+        ->select('products.brand', DB::raw('COUNT(*) as count'))
+        ->groupBy('products.brand')
+        ->get();
+
+    $brands = ['Sonny', 'Fujifilm', 'Canon', 'Nikon', 'Oji Osmo Pocket 3', 'Lumix'];
+    $brandCounts = array_fill_keys($brands, 0);
+
+    foreach ($brandData as $data) {
+        if (in_array($data->brand, $brands)) {
+            $brandCounts[$data->brand] = $data->count;
+        }
+    }
+
+    $brandsData = [
+        'labels' => $brands,
+        'data' => array_values($brandCounts),
+    ];
+
+    return response()->json([
+        'stats' => [
+            'total_products' => $totalProducts,
+            'active_rentals' => $activerental,
+            'active_customers' => $activeCustomers
+        ],
+        'monthly' => $monthly,
+        'brands' => $brandsData
+    ]);
+}
 
     private function getMonthlyRentalData()
     {

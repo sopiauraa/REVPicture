@@ -149,6 +149,64 @@ class ordercontroller extends Controller
             'history' => $history,
         ]);
     }
+    public function historycustomer()
+    {
+        $history = DB::table('orders')
+        ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
+        ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
+        ->join('products', 'order_details.product_id', '=', 'products.product_id')
+        ->where('orders.status', 'selesai')
+        ->select(
+            'orders.order_id',
+            'customers.customer_name',
+            'customers.phone_number',
+            'orders.order_date',
+            'order_details.day_rent',
+            'order_details.due_on',
+            'products.product_name',
+            'orders.total_price as price' // Ambil total harga langsung dari kolom orders.total_price
+        )
+        ->get();
+
+        return Inertia::render('historycustomer', [
+            'history' => $history,
+        ]);
+    }
+
+    public function statusorder()
+    {
+        $status = DB::table('orders')
+            ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
+            ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
+            ->join('products', 'order_details.product_id', '=', 'products.product_id')
+            ->whereIn('orders.status', ['pending', 'terkonfirmasi'])
+            ->select(
+                'orders.order_id',
+                'customers.customer_name',
+                'customers.phone_number',
+                'orders.order_date',
+                DB::raw('MAX(order_details.day_rent) as day_rent'), // atau MIN/AVG tergantung logika bisnis
+                DB::raw('MAX(order_details.due_on) as due_on'),
+                DB::raw('GROUP_CONCAT(DISTINCT products.product_name SEPARATOR ", ") as product_name'), // Gabungkan semua produk
+                'orders.status',
+                'orders.total_price as price'
+            )
+            ->groupBy(
+                'orders.order_id',
+                'customers.customer_name', 
+                'customers.phone_number',
+                'orders.order_date',
+                'orders.status',
+                'orders.total_price'
+            )
+            ->get();
+
+        return Inertia::render('statusorder', [
+            'status' => $status,
+        ]);
+    }
+    
+
 
     /**
      * Show the form for creating a new resource.

@@ -106,7 +106,7 @@ const Login = () => {
                     />
 
                     <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
-                        <Link href="#" className="text-blue-300 underline" style={{ fontSize: '0.9rem' }}>
+                        <Link href="/forgot-password" className="text-blue-300 underline" style={{ fontSize: '0.9rem' }}>
                             Lupa kata sandi?
                         </Link>
                     </div>

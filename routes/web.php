@@ -14,6 +14,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 
@@ -107,9 +108,12 @@ Route::patch('/admin/datapenyewaan/{order_id}', [SewaController::class, 'adminup
 //Route::delete('/admin/datapenyewaan/{order_id}', [SewaController::class, 'admindestroy']);
 Route::get('/admin/history', [OrderController::class, 'historyadmin']);
 Route::get('/admin/kalender', [KalenderController::class, 'index'])->name('kalender.index');
-Route::get('/admin/adminprofil', function () {
-    return Inertia::render('Admin/adminprofil');
-})->name('admin.profil');
+Route::get('/admin/adminprofil', function () { return Inertia::render('Admin/adminprofil'); })->name('admin.profil');
+Route::middleware(['auth'])->group(function () {
+    // Profile routes
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+});
 
 // landing
 Route::get('/landing', function () {
@@ -138,6 +142,7 @@ Route::prefix('staff')->group(function () {
     Route::put('/users/{userId}', [UserManagementController::class, 'update'])->name('staff.users.update');
     Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('products.destroy');
 });
+
 Route::match(['POST', 'PUT'], '/staff/product/update/{product_id}', [ProductController::class, 'update'])
     ->name('staff.product.update');
 
@@ -159,6 +164,9 @@ Route::get('/data_barang', function () {
     return Inertia::render('StaffDataBarang');
 });
 Route::get('/staff/history', [OrderController::class, 'history']);
+Route::get('/staff/staffprofil', function () {
+    return Inertia::render('staff/staffprofil');
+})->name('staff.profil');
 
 //Display Product (Landing)
 Route::get('/shop', [ProductController::class, 'index']);

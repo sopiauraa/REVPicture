@@ -199,3 +199,45 @@
   display: -webkit-box;
 }
 
+
+/* Tambahkan CSS ini ke file CSS global Anda (app.css atau globals.css) */
+
+/* Blur effect untuk seluruh body ketika modal terbuka */
+body.modal-blur > * {
+    filter: blur(3px);
+    pointer-events: none;
+}
+
+/* Atau alternatif yang lebih spesifik untuk elemen AdminLayout */
+body.modal-blur > div[id="app"] > * {
+    filter: blur(3px);
+    pointer-events: none;
+}
+
+/* Pastikan modal tidak terkena blur */
+body.modal-blur .fixed[style*="z-index: 9998"],
+body.modal-blur .fixed[style*="z-index: 9999"] {
+    filter: none !important;
+    pointer-events: auto !important;
+}
+
+/* Alternatif menggunakan CSS variables untuk kontrol yang lebih baik */
+:root {
+    --modal-blur: 0px;
+}
+
+body.modal-blur {
+    --modal-blur: 3px;
+}
+
+/* Terapkan blur menggunakan CSS variable */
+.admin-layout {
+    filter: blur(var(--modal-blur));
+    transition: filter 0.2s ease-in-out;
+}
+
+/* Nonaktifkan blur untuk modal */
+.modal-overlay,
+.modal-content {
+    filter: none !important;
+}

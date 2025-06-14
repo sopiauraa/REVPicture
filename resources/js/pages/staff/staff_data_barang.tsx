@@ -37,11 +37,11 @@ const DataBarang: React.FC<Props> = ({ products, filters, flash }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     
-    // State untuk data produk yang akan dihapus
+    // Ubah ini - simpan data produk lengkap, bukan hanya ID
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false); // Tambahkan state loading
     
-    // State untuk success alert
+    // State untuk success alert tambah barang
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const [showEditSuccessAlert, setShowEditSuccessAlert] = useState(false);
     
@@ -91,17 +91,18 @@ const DataBarang: React.FC<Props> = ({ products, filters, flash }) => {
         setShowEdit(true);
     };
 
+    // Perbaiki fungsi ini - simpan data produk lengkap
     const handleDeleteClick = (product: Product) => {
         setProductToDelete(product);
         setModalOpen(true);
     };
 
+    // Perbaiki fungsi ini - terima data produk dari modal
     const handleDeleteConfirm = async (productData: { product_id: number; product_name?: string }) => {
         setIsDeleting(true);
         
         try {
-            // Sesuaikan URL untuk staff sesuai dengan route yang ada
-            const response = await fetch(`/staff/products/${productData.product_id}`, {
+            const response = await fetch(`/admin/product/delete/${productData.product_id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
@@ -131,7 +132,8 @@ const DataBarang: React.FC<Props> = ({ products, filters, flash }) => {
 
         } catch (error) {
             console.error('Error deleting product:', error);
-            throw error;
+            // Jangan tutup modal jika error, biar user bisa coba lagi
+            throw error; // Re-throw error agar modal bisa handle
         } finally {
             setIsDeleting(false);
         }
@@ -142,8 +144,9 @@ const DataBarang: React.FC<Props> = ({ products, filters, flash }) => {
         setSelectedBarang(null);
     };
 
+    // Tambahkan fungsi untuk close delete modal
     const handleCloseDeleteModal = () => {
-        if (!isDeleting) {
+        if (!isDeleting) { // Hanya bisa close jika tidak sedang loading
             setModalOpen(false);
             setProductToDelete(null);
         }
@@ -159,205 +162,207 @@ const DataBarang: React.FC<Props> = ({ products, filters, flash }) => {
     };
 
     return (
-        <StaffLayout title="Data Barang">
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-                {/* Header Section */}
-                <div className="bg-white border-b border-gray-200 shadow-sm">
-                    <div className="px-6 py-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-900">Data Barang</h1>
-                                <p className="text-sm text-gray-600 mt-1">Kelola semua data barang rental</p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <div className="bg-blue-50 px-3 py-2 rounded-lg">
-                                    <span className="text-sm font-medium text-blue-700">
-                                        Total: {filteredProducts.length} barang
-                                    </span>
+        <>
+            <StaffLayout title="Data Barang">
+                <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+                    {/* Header Section */}
+                    <div className="bg-white border-b border-gray-200 shadow-sm">
+                        <div className="px-6 py-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h1 className="text-2xl font-bold text-gray-900">Data Barang</h1>
+                                    <p className="text-sm text-gray-600 mt-1">Kelola semua data barang rental Anda</p>
                                 </div>
-                                <button
-                                    onClick={() => setShowModal(true)}
-                                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-blue-50 px-3 py-2 rounded-lg">
+                                        <span className="text-sm font-medium text-blue-700">
+                                            Total: {filteredProducts.length} barang
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowModal(true)}
+                                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+                                    >
+                                        <FaPlus size={12} />
+                                        Tambah Barang
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Content Area dengan overflow scroll */}
+                    <div className="flex-1 overflow-auto p-6">
+                        {/* Filter Section */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                            <div className="flex items-center gap-2 mb-4">
+                                <FaFilter className="text-gray-500" />
+                                <h3 className="font-semibold text-gray-800">Filter & Pencarian</h3>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                {/* Search by name */}
+                                <div className="relative">
+                                    <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={14} />
+                                    <input
+                                        type="text"
+                                        placeholder="Cari nama barang..."
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        value={filtersState.search_name}
+                                        onChange={(e) => setFiltersState({ ...filtersState, search_name: e.target.value })}
+                                    />
+                                </div>
+
+                                {/* Filter by brand */}
+                                <select
+                                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
+                                    value={filtersState.search_brand}
+                                    onChange={(e) => setFiltersState({ ...filtersState, search_brand: e.target.value })}
                                 >
-                                    <FaPlus size={12} />
-                                    Tambah Barang
+                                    <option value="">Semua Brand</option>
+                                    <option value="Sony">Sony</option>
+                                    <option value="Canon">Canon</option>
+                                    <option value="Nikon">Nikon</option>
+                                    <option value="Fujifilm">Fujifilm</option>
+                                    <option value="Lumix">Lumix</option>
+                                </select>
+
+                                {/* Filter by type */}
+                                <select
+                                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
+                                    value={filtersState.search_type}
+                                    onChange={(e) => setFiltersState({ ...filtersState, search_type: e.target.value })}
+                                >
+                                    <option value="">Semua Jenis</option>
+                                    <option value="Camera">Camera</option>
+                                    <option value="Lens">Lens</option>
+                                </select>
+
+                                {/* Reset button */}
+                                <button
+                                    onClick={resetFilters}
+                                    className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-gray-700 font-medium"
+                                >
+                                    Reset Filter
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                {/* Content Area dengan overflow scroll */}
-                <div className="flex-1 overflow-auto p-6">
-                    {/* Filter Section */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <FaFilter className="text-gray-500" />
-                            <h3 className="font-semibold text-gray-800">Filter & Pencarian</h3>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {/* Search by name */}
-                            <div className="relative">
-                                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={14} />
-                                <input
-                                    type="text"
-                                    placeholder="Cari nama barang..."
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                    value={filtersState.search_name}
-                                    onChange={(e) => setFiltersState({ ...filtersState, search_name: e.target.value })}
-                                />
-                            </div>
-
-                            {/* Filter by brand */}
-                            <select
-                                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
-                                value={filtersState.search_brand}
-                                onChange={(e) => setFiltersState({ ...filtersState, search_brand: e.target.value })}
-                            >
-                                <option value="">Semua Brand</option>
-                                <option value="Sony">Sony</option>
-                                <option value="Canon">Canon</option>
-                                <option value="Nikon">Nikon</option>
-                                <option value="Fujifilm">Fujifilm</option>
-                                <option value="Lumix">Lumix</option>
-                            </select>
-
-                            {/* Filter by type */}
-                            <select
-                                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
-                                value={filtersState.search_type}
-                                onChange={(e) => setFiltersState({ ...filtersState, search_type: e.target.value })}
-                            >
-                                <option value="">Semua Jenis</option>
-                                <option value="Camera">Camera</option>
-                                <option value="Lens">Lens</option>
-                            </select>
-
-                            {/* Reset button */}
-                            <button
-                                onClick={resetFilters}
-                                className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-gray-700 font-medium"
-                            >
-                                Reset Filter
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Table Container dengan scroll horizontal dan vertikal */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <div className="">
-                                <table className="w-full">
-                                    <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
-                                        <tr>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">ID</th>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Gambar</th>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Nama Barang</th>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Jenis</th>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Brand</th>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Stok</th>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Harga Sewa</th>
-                                            <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200">
-                                        {filteredProducts.map((prod, idx) => (
-                                            <tr 
-                                                key={prod.product_id} 
-                                                className="hover:bg-gray-50 transition-colors duration-150"
-                                            >
-                                                <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                                                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold">
-                                                        #{prod.product_id}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="relative group">
-                                                        <img 
-                                                            src={prod.product_image.startsWith('/') ? prod.product_image : `/${prod.product_image}`} 
-                                                            alt={prod.product_name} 
-                                                            className="h-16 w-16 rounded-lg object-cover shadow-sm group-hover:shadow-md transition-shadow duration-200" 
-                                                            onError={(e) => {
-                                                                const target = e.target as HTMLImageElement;
-                                                                target.src = '/images/placeholder.jpg';
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="text-sm font-medium text-gray-900">{prod.product_name}</div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                                                        prod.product_type === 'Camera' 
-                                                            ? 'bg-green-100 text-green-800' 
-                                                            : 'bg-purple-100 text-purple-800'
-                                                    }`}>
-                                                        {prod.product_type}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="text-sm font-medium text-gray-700">{prod.brand}</div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                                                        (prod.stock?.stock_available ?? 0) > 0 
-                                                            ? 'bg-green-100 text-green-800' 
-                                                            : 'bg-red-100 text-red-800'
-                                                    }`}>
-                                                        {prod.stock?.stock_available ?? 0} unit
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="text-sm text-gray-900">
-                                                        <div className="font-medium">8j: Rp {prod.eight_hour_rent_price.toLocaleString()}</div>
-                                                        <div className="text-gray-600">24j: Rp {prod.twenty_four_hour_rent_price.toLocaleString()}</div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <div className="flex items-center justify-center gap-3">
-                                                        <button 
-                                                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200" 
-                                                            onClick={() => handleEdit(prod)}
-                                                            title="Edit barang"
-                                                        >
-                                                            <FaEdit size={16} />
-                                                        </button>
-                                                        <button 
-                                                            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200" 
-                                                            onClick={() => handleDeleteClick(prod)}
-                                                            title="Hapus barang"
-                                                        >
-                                                            <FaTrash size={16} />
-                                                        </button>
-                                                    </div>
-                                                </td>
+                        {/* Table Container dengan scroll horizontal dan vertikal */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <div className="">
+                                    <table className="w-full">
+                                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
+                                            <tr>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">ID</th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Gambar</th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Nama Barang</th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Jenis</th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Brand</th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Stok</th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Harga Sewa</th>
+                                                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200">Aksi</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        
-                        {/* Empty state */}
-                        {filteredProducts.length === 0 && (
-                            <div className="text-center py-12">
-                                <div className="mx-auto h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                    <FaSearch className="h-8 w-8 text-gray-400" />
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200">
+                                            {filteredProducts.map((prod, idx) => (
+                                                <tr 
+                                                    key={prod.product_id} 
+                                                    className="hover:bg-gray-50 transition-colors duration-150"
+                                                >
+                                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold">
+                                                            #{prod.product_id}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="relative group">
+                                                            <img 
+                                                                src={prod.product_image.startsWith('/') ? prod.product_image : `/${prod.product_image}`} 
+                                                                alt={prod.product_name} 
+                                                                className="h-16 w-16 rounded-lg object-cover shadow-sm group-hover:shadow-md transition-shadow duration-200" 
+                                                                onError={(e) => {
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    target.src = '/images/placeholder.jpg';
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="text-sm font-medium text-gray-900">{prod.product_name}</div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                                                            prod.product_type === 'Camera' 
+                                                                ? 'bg-green-100 text-green-800' 
+                                                                : 'bg-purple-100 text-purple-800'
+                                                        }`}>
+                                                            {prod.product_type}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="text-sm font-medium text-gray-700">{prod.brand}</div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                                                            (prod.stock?.stock_available ?? 0) > 0 
+                                                                ? 'bg-green-100 text-green-800' 
+                                                                : 'bg-red-100 text-red-800'
+                                                        }`}>
+                                                            {prod.stock?.stock_available ?? 0} unit
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="text-sm text-gray-900">
+                                                            <div className="font-medium">8j: Rp {prod.eight_hour_rent_price.toLocaleString()}</div>
+                                                            <div className="text-gray-600">24j: Rp {prod.twenty_four_hour_rent_price.toLocaleString()}</div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <div className="flex items-center justify-center gap-3">
+                                                            <button 
+                                                                className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200" 
+                                                                onClick={() => handleEdit(prod)}
+                                                                title="Edit barang"
+                                                            >
+                                                                <FaEdit size={16} />
+                                                            </button>
+                                                            <button 
+                                                                className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200" 
+                                                                onClick={() => handleDeleteClick(prod)} // Kirim data produk lengkap
+                                                                title="Hapus barang"
+                                                            >
+                                                                <FaTrash size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
-                                <h3 className="text-lg font-medium text-gray-900 mb-2">Tidak ada data ditemukan</h3>
-                                <p className="text-gray-500">Coba ubah filter pencarian atau tambah barang baru</p>
                             </div>
-                        )}
+                            
+                            {/* Empty state */}
+                            {filteredProducts.length === 0 && (
+                                <div className="text-center py-12">
+                                    <div className="mx-auto h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                        <FaSearch className="h-8 w-8 text-gray-400" />
+                                    </div>
+                                    <h3 className="text-lg font-medium text-gray-900 mb-2">Tidak ada data ditemukan</h3>
+                                    <p className="text-gray-500">Coba ubah filter pencarian atau tambah barang baru</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Success Alerts */}
+
+            {/* Success Alerts dengan posisi fixed di tengah atas */}
             {showSuccessAlert && (
-                <div className="fixed top-20 right-6 z-50 animate-slide-in-right">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg max-w-sm">
+                <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-slide-in-down">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg max-w-sm w-max">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
                                 <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -375,8 +380,8 @@ const DataBarang: React.FC<Props> = ({ products, filters, flash }) => {
             )}
 
             {showEditSuccessAlert && (
-                <div className="fixed top-20 right-6 z-50 animate-slide-in-right">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg max-w-sm">
+                <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-slide-in-down">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg max-w-sm w-max">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
                                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -394,8 +399,8 @@ const DataBarang: React.FC<Props> = ({ products, filters, flash }) => {
             )}
 
             {showAlert && (
-                <div className="fixed top-20 right-6 z-50 animate-slide-in-right">
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg max-w-sm">
+                <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-slide-in-down">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg max-w-sm w-max">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
                                 <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
@@ -411,34 +416,42 @@ const DataBarang: React.FC<Props> = ({ products, filters, flash }) => {
                     </div>
                 </div>
             )}
+            </StaffLayout>
 
-            {/* Modals */}
-            <TambahBarangModal 
-                visible={showModal} 
-                onClose={() => setShowModal(false)} 
-                onSuccess={handleTambahSuccess}
-            />
-
-            {selectedBarang && (
-                <EditBarangModal 
-                    visible={showEdit} 
-                    onClose={handleCloseEditModal} 
-                    data={selectedBarang} 
-                    onSuccess={handleEditSuccess}
-                />
+            {/* Backdrop Blur Overlay - Akan menutupi SELURUH layar termasuk navbar dan sidebar */}
+            {(showModal || showEdit || modalOpen) && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]" />
             )}
 
-            <DeleteBarangModal 
-                isOpen={modalOpen} 
-                onClose={handleCloseDeleteModal}
-                onConfirm={handleDeleteConfirm}
-                productData={productToDelete ? {
-                    product_id: productToDelete.product_id,
-                    product_name: productToDelete.product_name
-                } : null}
-                isLoading={isDeleting}
-            />
-        </StaffLayout>
+            {/* Modals dengan z-index tertinggi */}
+            <div className="relative z-[9999]">
+                <TambahBarangModal 
+                    visible={showModal} 
+                    onClose={() => setShowModal(false)} 
+                    onSuccess={handleTambahSuccess}
+                />
+
+                {selectedBarang && (
+                    <EditBarangModal 
+                        visible={showEdit} 
+                        onClose={handleCloseEditModal} 
+                        data={selectedBarang} 
+                        onSuccess={handleEditSuccess}
+                    />
+                )}
+
+                <DeleteBarangModal 
+                    isOpen={modalOpen} 
+                    onClose={handleCloseDeleteModal}
+                    onConfirm={handleDeleteConfirm}
+                    productData={productToDelete ? {
+                        product_id: productToDelete.product_id,
+                        product_name: productToDelete.product_name
+                    } : null}
+                    isLoading={isDeleting}
+                />
+            </div>
+        </>
     );
 };
 

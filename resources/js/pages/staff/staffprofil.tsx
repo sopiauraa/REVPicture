@@ -1,4 +1,4 @@
-import AdminLayout from '@/layouts/admin_layout';
+import StaffLayout from '@/layouts/staff_layout';
 import { usePage, router } from '@inertiajs/react';
 import { Calendar, Edit3, Mail, Save, User, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -190,7 +190,7 @@ export default function AdminProfile() {
     };
 
     return (
-        <AdminLayout title="Profile">
+        <StaffLayout title="Profile">
             {/* Toast Notification - Positioned relative to AdminLayout content */}
             {toast.show && (
                 <div className="fixed inset-0 flex items-start justify-center pt-20 z-50 pointer-events-none">
@@ -236,6 +236,7 @@ export default function AdminProfile() {
                             </div>
                         </div>
                     </div>
+
                     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
                         <div className="space-y-6">
                             {/* Avatar Section */}
@@ -359,6 +360,6 @@ export default function AdminProfile() {
                         </div>
                     </div>
                 </div>
-            </AdminLayout>
+            </StaffLayout>
     );
 }

@@ -11,7 +11,7 @@ const navItems = [
   { label: "Data Penyewaan", icon: "fa-file-alt", href: "/admin/datapenyewaan" },
   { label: "Riwayat Penyewaan", icon: "fa-history", href: "/admin/history" },
   { label: "Manajemen User", icon: "fa-id-badge", href: "/admin/usermanagement" },
-  { label: "Profil & Setting", icon: "fa-id-badge", href: "/admin/adminprofil" },
+  { label: "Profil", icon: "fa-id-badge", href: "/admin/adminprofil" },
 ];
 
 interface LogoutModalProps {
@@ -210,16 +210,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => {
                 <i className="fas fa-cog text-gray-600 text-lg group-hover:text-blue-600 transition-all duration-200 group-hover:rotate-90"></i>
               </button> */}
               
-              <button 
+              {/* <button 
                 className="p-2.5 rounded-xl hover:bg-gray-50 hover:shadow-sm transition-all duration-200 relative group"
                 title="Notifikasi"
               >
                 <i className="fas fa-bell text-gray-600 text-lg group-hover:text-blue-600 transition-all duration-200 group-hover:animate-pulse"></i>
-                {/* Enhanced notification badge */}
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-red-500 to-rose-500 rounded-full flex items-center justify-center shadow-sm">
                   <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
                 </span>
-              </button>
+              </button> */}
 
               {/* User Profile */}
               <Link href="/admin/adminprofil" className="block">

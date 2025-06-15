@@ -63,6 +63,18 @@ const FormDataDiri = () => {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    // Clear cart in localStorage and in context (if available)
+    const clearCart = () => {
+        localStorage.removeItem('cart'); // if you store cart in localStorage
+        localStorage.removeItem('checkoutItems');
+        localStorage.removeItem('checkoutTotal');
+        localStorage.removeItem('checkoutRentalDate');
+        // If you use a cart context, you can also call its clear method here
+        if (window.dispatchEvent) {
+            window.dispatchEvent(new Event('cart:clear'));
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         console.log('Submitting!'); // Add this line
@@ -89,8 +101,7 @@ const FormDataDiri = () => {
 
         router.post('/checkout', payload, {
             onSuccess: () => {
-                localStorage.removeItem('checkoutItems');
-                localStorage.removeItem('checkoutTotal');
+                clearCart();
             },
         });
     };
@@ -122,6 +133,7 @@ Terima kasih!`;
         const waUrl = `https://wa.me/+6282160502890?text=${encodeURIComponent(message)}`;
         window.open(waUrl, '_blank');
         handleSubmit({ preventDefault: () => {} } as React.FormEvent);
+        clearCart();
     };
 
     const handleConfirmClick = (e: React.FormEvent) => {

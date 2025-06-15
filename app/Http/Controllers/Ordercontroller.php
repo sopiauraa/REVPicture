@@ -185,11 +185,15 @@ class ordercontroller extends Controller
                 'customers.customer_name',
                 'customers.phone_number',
                 'orders.order_date',
-                DB::raw('MAX(order_details.day_rent) as day_rent'), // atau MIN/AVG tergantung logika bisnis
+                DB::raw('MAX(order_details.day_rent) as day_rent'),
                 DB::raw('MAX(order_details.due_on) as due_on'),
-                DB::raw('GROUP_CONCAT(DISTINCT products.product_name SEPARATOR ", ") as product_name'), // Gabungkan semua produk
+                DB::raw('GROUP_CONCAT(DISTINCT products.product_name SEPARATOR ", ") as product_name'),
                 'orders.status',
-                'orders.total_price as price'
+                'orders.total_price as price',
+                // Add jatuh_tempo: for pending, order_date + 1 day; else, use due_on
+                DB::raw(
+                    "CASE WHEN orders.status = 'pending' THEN DATE_ADD(orders.order_date, INTERVAL 1 DAY) ELSE MAX(order_details.due_on) END as jatuh_tempo"
+                )
             )
             ->groupBy(
                 'orders.order_id',
@@ -232,11 +236,43 @@ class ordercontroller extends Controller
             'items.*.day_rent' => 'required|integer|min:1',
             'items.*.quantity' => 'required|integer|min:1',
             'total' => 'required|numeric',
+            'tanggalSewa' => 'required|date',
         ]);
 
         DB::beginTransaction();
         \Log::info('OrderController@store payload', $request->all());
         try {
+            // Check for stock conflicts based on rental period
+            foreach ($request->items as $item) {
+                $productId = $item['product_id'];
+                $requestedQuantity = $item['quantity'];
+                $rentalStart = $request->tanggalSewa;
+                $rentalEnd = \Carbon\Carbon::parse($rentalStart)->addDays($item['day_rent'] - 1)->toDateString();
+
+                // Get all overlapping order details for this product (not selesai/canceled)
+                $overlapping = OrderDetail::where('product_id', $productId)
+                    ->whereHas('order', function ($q) {
+                        $q->whereIn('status', ['pending', 'terkonfirmasi']);
+                    })
+                    ->where(function ($q) use ($rentalStart, $rentalEnd) {
+                        $q->where(function ($q2) use ($rentalStart, $rentalEnd) {
+                            $q2->where('due_on', '>=', $rentalStart)
+                                ->whereRaw('DATE_ADD(due_on, INTERVAL -day_rent+1 DAY) <= ?', [$rentalEnd]);
+                        });
+                    })
+                    ->sum('quantity');
+
+                $stock = Stock::where('product_id', $productId)->first();
+                if (!$stock) {
+                    DB::rollBack();
+                    return back()->withErrors(['error' => 'Stok tidak ditemukan untuk produk.']);
+                }
+                if (($overlapping + $requestedQuantity) > $stock->stock_available) {
+                    DB::rollBack();
+                    return back()->withErrors(['error' => 'Stok tidak cukup untuk produk pada tanggal yang dipilih.']);
+                }
+            }
+
             // Check for existing customer with the same details
             $customer = Customer::where('user_id', auth()->user()->user_id)
                 ->where('customer_name', $request->name)
@@ -257,7 +293,7 @@ class ordercontroller extends Controller
 
             $order = Order::create([
                 'customer_id' => $customer->customer_id,
-                'order_date' => now(),
+                'order_date' => $request->tanggalSewa,
                 'total_price' => $request->total,
                 'status' => 'pending',
                 'status_dp' => 'belum_dibayar',
@@ -270,7 +306,7 @@ class ordercontroller extends Controller
                     'duration' => $item['duration'],
                     'day_rent' => $item['day_rent'],
                     'quantity' => $item['quantity'],
-                    'due_on' => now()->addDays($item['day_rent']),
+                    'due_on' => \Carbon\Carbon::parse($request->tanggalSewa)->addDays($item['day_rent'] - 1)->toDateString(),
                 ]);
             }
 
@@ -279,7 +315,7 @@ class ordercontroller extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('OrderController@store error: ' . $e->getMessage());
-            return back()->withErrors(provider: ['error' => 'Gagal menyimpan pesanan: ' . $e->getMessage()]);
+            return back()->withErrors(['error' => 'Gagal menyimpan pesanan: ' . $e->getMessage()]);
         }
     }
 

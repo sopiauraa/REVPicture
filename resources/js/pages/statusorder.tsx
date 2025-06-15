@@ -22,6 +22,7 @@ interface StatusOrderItem {
     product_name: string;
     status: 'pending' | 'terkonfirmasi';
     price: number;
+    jatuh_tempo?: string; // add this line
 }
 
 export default function StatusOrder() {
@@ -209,7 +210,7 @@ export default function StatusOrder() {
                                         <div className="space-y-3">
                                             <div>
                                                 <label className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Jatuh Tempo</label>
-                                                <p className="text-slate-800 font-medium text-lg">{formatDate(selectedOrder.due_on)}</p>
+                                                <p className="text-slate-800 font-medium text-lg">{formatDate(selectedOrder.jatuh_tempo || selectedOrder.due_on)}</p>
                                             </div>
                                             <div>
                                                 <label className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Total Pembayaran</label>
@@ -230,12 +231,12 @@ export default function StatusOrder() {
                                         <div className="flex items-center justify-between">
                                             <div className="text-slate-600">
                                                 <p className="text-sm">Periode sewa: <span className="font-semibold">{selectedOrder.day_rent} hari</span></p>
-                                                <p className="text-sm">Tanggal kembali: <span className="font-semibold">{formatDate(selectedOrder.due_on)}</span></p>
+                                                <p className="text-sm">Tanggal kembali: <span className="font-semibold">{formatDate(selectedOrder.jatuh_tempo || selectedOrder.due_on)}</span></p>
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-sm text-slate-600 mb-1">Status Pengembalian:</p>
                                                 <div className="bg-white rounded-lg px-3 py-1">
-                                                    {getDaysUntilDue(selectedOrder.due_on)}
+                                                    {getDaysUntilDue(selectedOrder.jatuh_tempo || selectedOrder.due_on)}
                                                 </div>
                                             </div>
                                         </div>
@@ -422,10 +423,10 @@ export default function StatusOrder() {
                                                         </div>
                                                         <div className="flex items-center space-x-2">
                                                             <Calendar className="w-4 h-4" />
-                                                            <span>Jatuh tempo: {formatDate(order.due_on)}</span>
+                                                            <span>Jatuh tempo: {formatDate(order.jatuh_tempo || order.due_on)}</span>
                                                         </div>
                                                         <div className="ml-5">
-                                                            {getDaysUntilDue(order.due_on)}
+                                                            {getDaysUntilDue(order.jatuh_tempo || order.due_on)}
                                                         </div>
                                                     </div>
                                                 </div>

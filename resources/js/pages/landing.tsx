@@ -323,6 +323,20 @@ const ProductCard = ({ product }: { product: ProductWithStock }) => {
         }
     }, [randomHeroImages.length]);
 
+    // Show order success popup if redirected from order
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+            if (sessionStorage.getItem('orderSuccess') === '1') {
+                setPopupMsg('Pesanan Anda berhasil dikirim!');
+                setShowPopup(true);
+                setTimeout(() => {
+                    setShowPopup(false);
+                    sessionStorage.removeItem('orderSuccess');
+                }, 2000);
+            }
+        }
+    }, []);
+
     const filteredCamera = cameraProducts.filter(
         (p) =>
             p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) &&

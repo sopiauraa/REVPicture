@@ -75,6 +75,12 @@ const FormDataDiri = () => {
         }
     };
 
+    const handleOrderSuccess = () => {
+        // Set a flag in sessionStorage to show order success popup on landing
+        sessionStorage.setItem('orderSuccess', '1');
+        router.visit('/', { replace: true });
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         console.log('Submitting!'); // Add this line
@@ -102,6 +108,7 @@ const FormDataDiri = () => {
         router.post('/checkout', payload, {
             onSuccess: () => {
                 clearCart();
+                handleOrderSuccess();
             },
         });
     };

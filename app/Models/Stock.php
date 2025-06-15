@@ -10,7 +10,7 @@ class Stock extends Model
 
     protected $primaryKey = 'stock_id';
     
-    protected $fillable = ['product_id', 'stock_available'];
+    protected $fillable = ['product_id', 'stock_available', 'stock_on_rent'];
 
     public function product()
 {

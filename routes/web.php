@@ -144,7 +144,9 @@ Route::patch('/admin/datapenyewaan/{order_id}', [SewaController::class, 'adminup
 //Route::delete('/admin/datapenyewaan/{order_id}', [SewaController::class, 'admindestroy']);
 Route::get('/admin/history', [OrderController::class, 'historyadmin']);
 Route::get('/admin/kalender', [KalenderController::class, 'index'])->name('kalender.index');
-Route::get('/admin/adminprofil', function () { return Inertia::render('Admin/adminprofil'); })->name('admin.profil');
+Route::get('/admin/adminprofil', function () {
+    return Inertia::render('Admin/adminprofil');
+})->name('admin.profil');
 Route::middleware(['auth'])->group(function () {
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
@@ -200,7 +202,9 @@ Route::get('/data_barang', function () {
     return Inertia::render('StaffDataBarang');
 });
 Route::get('/staff/history', [OrderController::class, 'history']);
-Route::get('/staff/staffprofil', function () { return Inertia::render('staff/staffprofil'); })->name('staff.profil');
+Route::get('/staff/staffprofil', function () {
+    return Inertia::render('staff/staffprofil');
+})->name('staff.profil');
 
 //Display Product (Landing)
 Route::get('/shop', [ProductController::class, 'index']);
@@ -212,17 +216,46 @@ Route::get('/keranjang', function () {
     return Inertia::render('keranjang');
 });
 Route::get('/formdatadiri', function () {
-    return Inertia::render('formdatadiri');
-});
-Route::get('/formdatadiri', function () {
-    return Inertia::render('FormDataDiri', [
+    $user = auth()->user();
+    $userId = $user ? $user->user_id : null;
+
+    // Get the latest order for this user (if any)
+    $latestOrder = null;
+    $customer = null;
+    if ($userId) {
+        $latestOrder = \App\Models\Order::whereHas('customer', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })->latest('order_date')->first();
+        $customer = $latestOrder
+            ? $latestOrder->customer
+            : Customer::where('user_id', $userId)->latest()->first();
+    }
+
+    // Use request data if present, otherwise use latest customer data
+    $customer_id = request('customer_id') ?? ($customer?->customer_id ?? '');
+    $customer_name = request('customer_name') ?? ($customer?->customer_name ?? '');
+    $phone_number = request('phone_number') ?? ($customer?->phone_number ?? '');
+    $address = request('address') ?? ($customer?->address ?? '');
+    $social_media = request('social_media') ?? ($customer?->social_media ?? '');
+
+    return Inertia::render('formdatadiri', [
+        'customer_id' => $customer_id,
+        'customer_name' => $customer_name,
+        'phone_number' => $phone_number,
+        'address' => $address,
+        'social_media' => $social_media,
         'selectedItems' => request()->input('selectedItems', []),
         'totalHarga' => request()->input('totalHarga', 0),
     ]);
 });
+
+Route::middleware(['auth'])->get('/customers', [OrderController::class, 'getCustomer'])->name('customers.getCustomer');
+
 Route::post('/checkout', [OrderController::class, 'store'])->middleware('auth')->name('checkout');
 Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.show');
-Route::get('/customerprofile', function () { return Inertia::render('CustomerProfile'); });
+Route::get('/customerprofile', function () {
+    return Inertia::render('CustomerProfile');
+});
 Route::get('/order-history', [OrderController::class, 'historycustomer'])->name('order.historycustomer');
 Route::get('/status-order', [OrderController::class, 'statusorder'])->name('status.order');
 

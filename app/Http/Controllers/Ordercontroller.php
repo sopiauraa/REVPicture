@@ -20,130 +20,130 @@ class ordercontroller extends Controller
     public function index()
     {
         $orders = Order::with(['orderDetail.product', 'customer'])
-        ->where('status_dp', 'belum_dibayar')
-        ->get()
-        ->map(function ($order) {
-            $customer = $order->customer;
+            ->where('status_dp', 'belum_dibayar')
+            ->get()
+            ->map(function ($order) {
+                $customer = $order->customer;
 
-            $items = $order->orderDetail->map(function ($detail) {
-    $product = $detail->product;
-    $duration = $detail->duration ?? '-';
-    $quantity = $detail->quantity ?? 1; // default 1 jika null
-    $price = match ($duration) {
-        'eight_hour' => $product?->eight_hour_rent_price ?? 0,
-        'twenty_four_hour' => $product?->twenty_four_hour_rent_price ?? 0,
-        default => 0,
-    };
+                $items = $order->orderDetail->map(function ($detail) {
+                    $product = $detail->product;
+                    $duration = $detail->duration ?? '-';
+                    $quantity = $detail->quantity ?? 1; // default 1 jika null
+                    $price = match ($duration) {
+                        'eight_hour' => $product?->eight_hour_rent_price ?? 0,
+                        'twenty_four_hour' => $product?->twenty_four_hour_rent_price ?? 0,
+                        default => 0,
+                    };
 
-    return [
-        'item_name' => $product?->product_name ?? '-',
-        'duration' => $duration,
-        'price' => $price,
-        'quantity' => $quantity,
-    ];
-});
+                    return [
+                        'item_name' => $product?->product_name ?? '-',
+                        'duration' => $duration,
+                        'price' => $price,
+                        'quantity' => $quantity,
+                    ];
+                });
 
-            return [
-                'order_id' => $order->order_id,
-                'customer_name' => $customer->customer_name ?? '-',
-                'order_date' => $order->order_date,
-                'contact_wa' => $customer->phone_number ?? '-',
-                'status_dp' => $order->status_dp,
-                'items' => $items,
-            ];
-        });
+                return [
+                    'order_id' => $order->order_id,
+                    'customer_name' => $customer->customer_name ?? '-',
+                    'order_date' => $order->order_date,
+                    'contact_wa' => $customer->phone_number ?? '-',
+                    'status_dp' => $order->status_dp,
+                    'items' => $items,
+                ];
+            });
 
-    return Inertia::render('staff/staff_data_booking_masuk', [
-        'orders' => $orders,
-    ]);
+        return Inertia::render('staff/staff_data_booking_masuk', [
+            'orders' => $orders,
+        ]);
     }
 
 
 
     public function adminindex()
-{
-    $orders = Order::with(['orderDetail.product', 'customer'])
-        ->where('status_dp', 'belum_dibayar')
-        ->get()
-        ->map(function ($order) {
-            $customer = $order->customer;
+    {
+        $orders = Order::with(['orderDetail.product', 'customer'])
+            ->where('status_dp', 'belum_dibayar')
+            ->get()
+            ->map(function ($order) {
+                $customer = $order->customer;
 
-            $items = $order->orderDetail->map(function ($detail) {
-    $product = $detail->product;
-    $duration = $detail->duration ?? '-';
-    $quantity = $detail->quantity ?? 1; // default 1 jika null
-    $price = match ($duration) {
-        'eight_hour' => $product?->eight_hour_rent_price ?? 0,
-        'twenty_four_hour' => $product?->twenty_four_hour_rent_price ?? 0,
-        default => 0,
-    };
+                $items = $order->orderDetail->map(function ($detail) {
+                    $product = $detail->product;
+                    $duration = $detail->duration ?? '-';
+                    $quantity = $detail->quantity ?? 1; // default 1 jika null
+                    $price = match ($duration) {
+                        'eight_hour' => $product?->eight_hour_rent_price ?? 0,
+                        'twenty_four_hour' => $product?->twenty_four_hour_rent_price ?? 0,
+                        default => 0,
+                    };
 
-    return [
-        'item_name' => $product?->product_name ?? '-',
-        'duration' => $duration,
-        'price' => $price,
-        'quantity' => $quantity,
-    ];
-});
+                    return [
+                        'item_name' => $product?->product_name ?? '-',
+                        'duration' => $duration,
+                        'price' => $price,
+                        'quantity' => $quantity,
+                    ];
+                });
 
 
-            return [
-                'order_id' => $order->order_id,
-                'customer_name' => $customer->customer_name ?? '-',
-                'order_date' => $order->order_date,
-                'contact_wa' => $customer->phone_number ?? '-',
-                'status_dp' => $order->status_dp,
-                'items' => $items,
-            ];
-        });
+                return [
+                    'order_id' => $order->order_id,
+                    'customer_name' => $customer->customer_name ?? '-',
+                    'order_date' => $order->order_date,
+                    'contact_wa' => $customer->phone_number ?? '-',
+                    'status_dp' => $order->status_dp,
+                    'items' => $items,
+                ];
+            });
 
-    return Inertia::render('admin/bookingmasuk', [
-        'orders' => $orders,
-    ]);
-}
+        return Inertia::render('admin/bookingmasuk', [
+            'orders' => $orders,
+        ]);
+    }
 
 
     public function historyadmin()
-{
-    $history = DB::table('orders')
-        ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
-        ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
-        ->join('products', 'order_details.product_id', '=', 'products.product_id')
-        ->where('orders.status', 'selesai')
-        ->select(
-            'orders.order_id',
-            'customers.customer_name',
-            'customers.phone_number',
-            'orders.order_date',
-            'order_details.day_rent',
-            'order_details.due_on',
-            'products.product_name',
-            'orders.total_price as price' // Ambil total harga langsung dari kolom orders.total_price
-        )
-        ->get();
+    {
+        $history = DB::table('orders')
+            ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
+            ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
+            ->join('products', 'order_details.product_id', '=', 'products.product_id')
+            ->where('orders.status', 'selesai')
+            ->select(
+                'orders.order_id',
+                'customers.customer_name',
+                'customers.phone_number',
+                'orders.order_date',
+                'order_details.day_rent',
+                'order_details.due_on',
+                'products.product_name',
+                'orders.total_price as price' // Ambil total harga langsung dari kolom orders.total_price
+            )
+            ->get();
 
-    return Inertia::render('admin/history', [
-        'history' => $history,
-    ]);
-}
+        return Inertia::render('admin/history', [
+            'history' => $history,
+        ]);
+    }
     public function history()
     {
         $history = DB::table('orders')
-        ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
-        ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
-        ->join('products', 'order_details.product_id', '=', 'products.product_id')
-        ->where('orders.status', 'selesai')
-        ->select(
-            'orders.order_id',
-            'customers.customer_name',
-            'customers.phone_number',
-            'orders.order_date',
-            'order_details.day_rent',
-            'order_details.due_on',
-            'products.product_name',
-            'orders.total_price as price' // Ambil total harga langsung dari kolom orders.total_price
-        )
-        ->get();
+            ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
+            ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
+            ->join('products', 'order_details.product_id', '=', 'products.product_id')
+            ->where('orders.status', 'selesai')
+            ->select(
+                'orders.order_id',
+                'customers.customer_name',
+                'customers.phone_number',
+                'orders.order_date',
+                'order_details.day_rent',
+                'order_details.due_on',
+                'products.product_name',
+                'orders.total_price as price' // Ambil total harga langsung dari kolom orders.total_price
+            )
+            ->get();
 
         return Inertia::render('staff/history', [
             'history' => $history,
@@ -152,21 +152,21 @@ class ordercontroller extends Controller
     public function historycustomer()
     {
         $history = DB::table('orders')
-        ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
-        ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
-        ->join('products', 'order_details.product_id', '=', 'products.product_id')
-        ->where('orders.status', 'selesai')
-        ->select(
-            'orders.order_id',
-            'customers.customer_name',
-            'customers.phone_number',
-            'orders.order_date',
-            'order_details.day_rent',
-            'order_details.due_on',
-            'products.product_name',
-            'orders.total_price as price' // Ambil total harga langsung dari kolom orders.total_price
-        )
-        ->get();
+            ->join('customers', 'orders.customer_id', '=', 'customers.customer_id')
+            ->join('order_details', 'orders.order_id', '=', 'order_details.order_id')
+            ->join('products', 'order_details.product_id', '=', 'products.product_id')
+            ->where('orders.status', 'selesai')
+            ->select(
+                'orders.order_id',
+                'customers.customer_name',
+                'customers.phone_number',
+                'orders.order_date',
+                'order_details.day_rent',
+                'order_details.due_on',
+                'products.product_name',
+                'orders.total_price as price' // Ambil total harga langsung dari kolom orders.total_price
+            )
+            ->get();
 
         return Inertia::render('historycustomer', [
             'history' => $history,
@@ -193,7 +193,7 @@ class ordercontroller extends Controller
             )
             ->groupBy(
                 'orders.order_id',
-                'customers.customer_name', 
+                'customers.customer_name',
                 'customers.phone_number',
                 'orders.order_date',
                 'orders.status',
@@ -205,7 +205,7 @@ class ordercontroller extends Controller
             'status' => $status,
         ]);
     }
-    
+
 
 
     /**
@@ -237,13 +237,23 @@ class ordercontroller extends Controller
         DB::beginTransaction();
         \Log::info('OrderController@store payload', $request->all());
         try {
-            $customer = Customer::create([
-                'user_id' => auth()->user()->user_id,
-                'customer_name' => $request->name,
-                'phone_number' => $request->phone,
-                'address' => $request->address,
-                'social_media' => $request->social_media,
-            ]);
+            // Check for existing customer with the same details
+            $customer = Customer::where('user_id', auth()->user()->user_id)
+                ->where('customer_name', $request->name)
+                ->where('phone_number', $request->phone)
+                ->where('address', $request->address)
+                ->where('social_media', $request->social_media)
+                ->first();
+
+            if (!$customer) {
+                $customer = Customer::create([
+                    'user_id' => auth()->user()->user_id,
+                    'customer_name' => $request->name,
+                    'phone_number' => $request->phone,
+                    'address' => $request->address,
+                    'social_media' => $request->social_media,
+                ]);
+            }
 
             $order = Order::create([
                 'customer_id' => $customer->customer_id,
@@ -294,76 +304,76 @@ class ordercontroller extends Controller
      */
     public function update(Request $request, $order_id)
     {
-       \Log::info('adminupdate called', ['order_id' => $order_id, 'status_dp' => $request->status_dp]);
+        \Log::info('adminupdate called', ['order_id' => $order_id, 'status_dp' => $request->status_dp]);
 
-    // Ambil order beserta relasi orderDetail dan product
-    $order = Order::with('orderDetail.product')->findOrFail($order_id);
+        // Ambil order beserta relasi orderDetail dan product
+        $order = Order::with('orderDetail.product')->findOrFail($order_id);
 
-    if (strtolower($request->status_dp) === 'sudah_dibayar') {
-        $order->status_dp = 'sudah_dibayar';
-        $order->status = 'terkonfirmasi';
+        if (strtolower($request->status_dp) === 'sudah_dibayar') {
+            $order->status_dp = 'sudah_dibayar';
+            $order->status = 'terkonfirmasi';
 
-        $productCounts = [];
+            $productCounts = [];
 
-        // Hitung total quantity tiap produk dalam orderDetail
-        foreach ($order->orderDetail as $detail) {
-            $product = $detail->product;
+            // Hitung total quantity tiap produk dalam orderDetail
+            foreach ($order->orderDetail as $detail) {
+                $product = $detail->product;
 
-            if (!$product) {
-                \Log::error("Produk tidak ditemukan pada detail order ID: {$detail->order_detail_id}");
-                return redirect()->back()->with('error', "Produk tidak ditemukan pada detail order ID: {$detail->order_detail_id}");
+                if (!$product) {
+                    \Log::error("Produk tidak ditemukan pada detail order ID: {$detail->order_detail_id}");
+                    return redirect()->back()->with('error', "Produk tidak ditemukan pada detail order ID: {$detail->order_detail_id}");
+                }
+
+                $productId = $product->product_id;
+                $productName = $product->product_name ?? "Produk ID: $productId";
+
+                if (!isset($productCounts[$productId])) {
+                    $productCounts[$productId] = [
+                        'count' => 0,
+                        'name' => $productName,
+                    ];
+                }
+
+                $productCounts[$productId]['count'] += $detail->quantity;
+
+                \Log::info("Produk: {$productName}, quantity saat ini: {$productCounts[$productId]['count']}");
             }
 
-            $productId = $product->product_id;
-            $productName = $product->product_name ?? "Produk ID: $productId";
+            // Validasi stok tersedia
+            foreach ($productCounts as $productId => $data) {
+                $stock = Stock::where('product_id', $productId)->first();
 
-            if (!isset($productCounts[$productId])) {
-                $productCounts[$productId] = [
-                    'count' => 0,
-                    'name' => $productName,
-                ];
+                if (!$stock) {
+                    \Log::error("Stok tidak ditemukan untuk produk {$data['name']}");
+                    return redirect()->back()->with('error', "Stok tidak ditemukan untuk produk {$data['name']}");
+                }
+
+                if ($stock->stock_available < $data['count']) {
+                    \Log::warning("Stok tidak cukup untuk produk {$data['name']}. Dibutuhkan: {$data['count']}, Tersedia: {$stock->stock_available}");
+                    return redirect()->back()->with('error', "Stok tidak cukup untuk produk {$data['name']}. Dibutuhkan: {$data['count']}, Tersedia: {$stock->stock_available}");
+                }
             }
 
-            $productCounts[$productId]['count'] += $detail->quantity;
+            // Kurangi stok sesuai jumlah
+            foreach ($productCounts as $productId => $data) {
+                $stock = Stock::where('product_id', $productId)->first();
+                $stock->stock_available -= $data['count'];
+                $stock->save();
 
-            \Log::info("Produk: {$productName}, quantity saat ini: {$productCounts[$productId]['count']}");
+                \Log::info("Stok dikurangi untuk produk ID {$productId} ({$data['name']}), dikurangi sebanyak {$data['count']}. Sisa stok: {$stock->stock_available}");
+            }
+
+            // Simpan perubahan status order
+            $order->save();
+
+            \Log::info("Order ID {$order_id} berhasil diperbarui statusnya menjadi sudah_dibayar dan stok dikurangi.");
+
+            return redirect()->back()->with('success', 'Status pembayaran diperbarui dan stok berhasil dikurangi.');
         }
 
-        // Validasi stok tersedia
-        foreach ($productCounts as $productId => $data) {
-            $stock = Stock::where('product_id', $productId)->first();
+        \Log::info("Status DP tidak berubah, tidak ada aksi yang dilakukan.");
 
-            if (!$stock) {
-                \Log::error("Stok tidak ditemukan untuk produk {$data['name']}");
-                return redirect()->back()->with('error', "Stok tidak ditemukan untuk produk {$data['name']}");
-            }
-
-            if ($stock->stock_available < $data['count']) {
-                \Log::warning("Stok tidak cukup untuk produk {$data['name']}. Dibutuhkan: {$data['count']}, Tersedia: {$stock->stock_available}");
-                return redirect()->back()->with('error', "Stok tidak cukup untuk produk {$data['name']}. Dibutuhkan: {$data['count']}, Tersedia: {$stock->stock_available}");
-            }
-        }
-
-        // Kurangi stok sesuai jumlah
-        foreach ($productCounts as $productId => $data) {
-            $stock = Stock::where('product_id', $productId)->first();
-            $stock->stock_available -= $data['count'];
-            $stock->save();
-
-            \Log::info("Stok dikurangi untuk produk ID {$productId} ({$data['name']}), dikurangi sebanyak {$data['count']}. Sisa stok: {$stock->stock_available}");
-        }
-
-        // Simpan perubahan status order
-        $order->save();
-
-        \Log::info("Order ID {$order_id} berhasil diperbarui statusnya menjadi sudah_dibayar dan stok dikurangi.");
-
-        return redirect()->back()->with('success', 'Status pembayaran diperbarui dan stok berhasil dikurangi.');
-    }
-
-    \Log::info("Status DP tidak berubah, tidak ada aksi yang dilakukan.");
-
-    return redirect()->back()->with('info', 'Tidak ada perubahan status.');
+        return redirect()->back()->with('info', 'Tidak ada perubahan status.');
     }
 
     public function destroy($order_id)
@@ -379,78 +389,78 @@ class ordercontroller extends Controller
     }
 
     public function adminupdate(Request $request, $order_id)
-{
-    \Log::info('adminupdate called', ['order_id' => $order_id, 'status_dp' => $request->status_dp]);
+    {
+        \Log::info('adminupdate called', ['order_id' => $order_id, 'status_dp' => $request->status_dp]);
 
-    // Ambil order beserta relasi orderDetail dan product
-    $order = Order::with('orderDetail.product')->findOrFail($order_id);
+        // Ambil order beserta relasi orderDetail dan product
+        $order = Order::with('orderDetail.product')->findOrFail($order_id);
 
-    if (strtolower($request->status_dp) === 'sudah_dibayar') {
-        $order->status_dp = 'sudah_dibayar';
-        $order->status = 'terkonfirmasi';
+        if (strtolower($request->status_dp) === 'sudah_dibayar') {
+            $order->status_dp = 'sudah_dibayar';
+            $order->status = 'terkonfirmasi';
 
-        $productCounts = [];
+            $productCounts = [];
 
-        // Hitung total quantity tiap produk dalam orderDetail
-        foreach ($order->orderDetail as $detail) {
-            $product = $detail->product;
+            // Hitung total quantity tiap produk dalam orderDetail
+            foreach ($order->orderDetail as $detail) {
+                $product = $detail->product;
 
-            if (!$product) {
-                \Log::error("Produk tidak ditemukan pada detail order ID: {$detail->order_detail_id}");
-                return redirect()->back()->with('error', "Produk tidak ditemukan pada detail order ID: {$detail->order_detail_id}");
+                if (!$product) {
+                    \Log::error("Produk tidak ditemukan pada detail order ID: {$detail->order_detail_id}");
+                    return redirect()->back()->with('error', "Produk tidak ditemukan pada detail order ID: {$detail->order_detail_id}");
+                }
+
+                $productId = $product->product_id;
+                $productName = $product->product_name ?? "Produk ID: $productId";
+
+                if (!isset($productCounts[$productId])) {
+                    $productCounts[$productId] = [
+                        'count' => 0,
+                        'name' => $productName,
+                    ];
+                }
+
+                $productCounts[$productId]['count'] += $detail->quantity;
+
+                \Log::info("Produk: {$productName}, quantity saat ini: {$productCounts[$productId]['count']}");
             }
 
-            $productId = $product->product_id;
-            $productName = $product->product_name ?? "Produk ID: $productId";
+            // Validasi stok tersedia
+            foreach ($productCounts as $productId => $data) {
+                $stock = Stock::where('product_id', $productId)->first();
 
-            if (!isset($productCounts[$productId])) {
-                $productCounts[$productId] = [
-                    'count' => 0,
-                    'name' => $productName,
-                ];
+                if (!$stock) {
+                    \Log::error("Stok tidak ditemukan untuk produk {$data['name']}");
+                    return redirect()->back()->with('error', "Stok tidak ditemukan untuk produk {$data['name']}");
+                }
+
+                if ($stock->stock_available < $data['count']) {
+                    \Log::warning("Stok tidak cukup untuk produk {$data['name']}. Dibutuhkan: {$data['count']}, Tersedia: {$stock->stock_available}");
+                    return redirect()->back()->with('error', "Stok tidak cukup untuk produk {$data['name']}. Dibutuhkan: {$data['count']}, Tersedia: {$stock->stock_available}");
+                }
             }
 
-            $productCounts[$productId]['count'] += $detail->quantity;
+            // Kurangi stok sesuai jumlah
+            foreach ($productCounts as $productId => $data) {
+                $stock = Stock::where('product_id', $productId)->first();
+                $stock->stock_available -= $data['count'];
+                $stock->save();
 
-            \Log::info("Produk: {$productName}, quantity saat ini: {$productCounts[$productId]['count']}");
+                \Log::info("Stok dikurangi untuk produk ID {$productId} ({$data['name']}), dikurangi sebanyak {$data['count']}. Sisa stok: {$stock->stock_available}");
+            }
+
+            // Simpan perubahan status order
+            $order->save();
+
+            \Log::info("Order ID {$order_id} berhasil diperbarui statusnya menjadi sudah_dibayar dan stok dikurangi.");
+
+            return redirect()->back()->with('success', 'Status pembayaran diperbarui dan stok berhasil dikurangi.');
         }
 
-        // Validasi stok tersedia
-        foreach ($productCounts as $productId => $data) {
-            $stock = Stock::where('product_id', $productId)->first();
+        \Log::info("Status DP tidak berubah, tidak ada aksi yang dilakukan.");
 
-            if (!$stock) {
-                \Log::error("Stok tidak ditemukan untuk produk {$data['name']}");
-                return redirect()->back()->with('error', "Stok tidak ditemukan untuk produk {$data['name']}");
-            }
-
-            if ($stock->stock_available < $data['count']) {
-                \Log::warning("Stok tidak cukup untuk produk {$data['name']}. Dibutuhkan: {$data['count']}, Tersedia: {$stock->stock_available}");
-                return redirect()->back()->with('error', "Stok tidak cukup untuk produk {$data['name']}. Dibutuhkan: {$data['count']}, Tersedia: {$stock->stock_available}");
-            }
-        }
-
-        // Kurangi stok sesuai jumlah
-        foreach ($productCounts as $productId => $data) {
-            $stock = Stock::where('product_id', $productId)->first();
-            $stock->stock_available -= $data['count'];
-            $stock->save();
-
-            \Log::info("Stok dikurangi untuk produk ID {$productId} ({$data['name']}), dikurangi sebanyak {$data['count']}. Sisa stok: {$stock->stock_available}");
-        }
-
-        // Simpan perubahan status order
-        $order->save();
-
-        \Log::info("Order ID {$order_id} berhasil diperbarui statusnya menjadi sudah_dibayar dan stok dikurangi.");
-
-        return redirect()->back()->with('success', 'Status pembayaran diperbarui dan stok berhasil dikurangi.');
+        return redirect()->back()->with('info', 'Tidak ada perubahan status.');
     }
-
-    \Log::info("Status DP tidak berubah, tidak ada aksi yang dilakukan.");
-
-    return redirect()->back()->with('info', 'Tidak ada perubahan status.');
-}
 
 
 
@@ -467,5 +477,13 @@ class ordercontroller extends Controller
         $order->delete();
 
         return redirect()->back();
+    }
+
+    public function getCustomer(Request $request)
+    {
+        $customers = Customer::where('user_id', auth()->id())->get();
+        return Inertia::render('customerlist', [
+            'customers' => $customers,
+        ]);
     }
 }

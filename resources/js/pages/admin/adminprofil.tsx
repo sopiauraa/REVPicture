@@ -178,7 +178,8 @@ export default function AdminProfile() {
             }
         } catch (error) {
             console.error('Error updating profile:', error);
-            showToast('error', 'Terjadi kesalahan saat menghubungi server: ' + error.message);
+            const errorMessage = (error instanceof Error) ? error.message : String(error);
+            showToast('error', 'Terjadi kesalahan saat menghubungi server: ' + errorMessage);
         } finally {
             setLoading(false);
         }

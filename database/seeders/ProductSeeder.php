@@ -116,5 +116,15 @@ class ProductSeeder extends Seeder
                 'last_updated' => now(),
             ],
         ]);
+
+        // Seed stocks table: product_id 1-10, stock_available 10, stock_on_rent 0
+        foreach (range(1, 10) as $productId) {
+            DB::table('stocks')->insert([
+                'product_id' => $productId,
+                'stock_available' => 10,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 }

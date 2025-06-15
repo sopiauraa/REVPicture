@@ -10,7 +10,7 @@ use App\Models\sewa;
 use App\Models\OrderDetail;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
-
+use Carbon\Carbon;
 class ordercontroller extends Controller
 {
     /**
@@ -247,7 +247,7 @@ class ordercontroller extends Controller
                 $productId = $item['product_id'];
                 $requestedQuantity = $item['quantity'];
                 $rentalStart = $request->tanggalSewa;
-                $rentalEnd = \Carbon\Carbon::parse($rentalStart)->addDays($item['day_rent'] - 1)->toDateString();
+                $rentalEnd = Carbon::parse($rentalStart)->addDays($item['day_rent'] - 1)->toDateString();
 
                 // Get all overlapping order details for this product (not selesai/canceled)
                 $overlapping = OrderDetail::where('product_id', $productId)
@@ -306,7 +306,7 @@ class ordercontroller extends Controller
                     'duration' => $item['duration'],
                     'day_rent' => $item['day_rent'],
                     'quantity' => $item['quantity'],
-                    'due_on' => \Carbon\Carbon::parse($request->tanggalSewa)->addDays($item['day_rent'] - 1)->toDateString(),
+                    'due_on' => Carbon::parse($request->tanggalSewa)->addDays($item['day_rent'] - 1)->toDateString(),
                 ]);
             }
 

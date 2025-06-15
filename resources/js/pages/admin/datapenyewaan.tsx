@@ -62,7 +62,7 @@ const PenyewaanIndex: React.FC<Props> = ({ orders }) => {
                                 <th className="rounded-tl-md px-4 py-3">No</th>
                                 <th className="px-4 py-3">Nama Penyewa</th>
                                 <th className="px-4 py-3">Barang Disewa</th>
-                                <th className="px-4 py-3">Tgl Ambil</th>
+                                <th className="px-4 py-3">Hari Rental</th>
                                 <th className="px-4 py-3">Tgl Kembali</th>
                                 <th className="px-4 py-3">Durasi</th>
                                 <th className="px-4 py-3">Kontak WA</th>

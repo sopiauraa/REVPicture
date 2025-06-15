@@ -6,7 +6,7 @@ const navItems = [
   { label: "Dashboard", icon: "fa-home", href: "/admin/dashboard" },
   { label: "Data Barang", icon: "fa-box", href: "/admin/databarang" },
   { label: "Pesanan Masuk", icon: "fa-envelope-open-text", href: "/admin/bookingmasuk" },
-  { label: "Kalender Sewa", icon: "fa-calendar-alt", href: "/admin/kalender" },
+  // { label: "Kalender Sewa", icon: "fa-calendar-alt", href: "/admin/kalender" },
   { label: "Data Penyewa", icon: "fa-users", href: "/admin/datacustomer" },
   { label: "Data Penyewaan", icon: "fa-file-alt", href: "/admin/datapenyewaan" },
   { label: "Riwayat Penyewaan", icon: "fa-history", href: "/admin/history" },

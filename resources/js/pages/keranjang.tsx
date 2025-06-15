@@ -14,6 +14,8 @@ const Keranjang = () => {
     const [rentalDays, setRentalDays] = useState<{ [key: number]: number }>(
         () => Object.fromEntries(cart.map((_, i) => [i, 1])), // default to 1 day
     );
+    
+const [showDateAlert, setShowDateAlert] = useState(false);
 
     const today = new Date().toISOString().split('T')[0];
 
@@ -79,17 +81,21 @@ const Keranjang = () => {
 
     const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
 
-    const handleCheckout = () => {
-        if (selectedItems.length === 0) {
-            alert('Pilih minimal satu barang ya bro');
-            return;
-        }
-        if (!rentalDate) {
-            alert('Pilih tanggal sewa dulu ya bro');
-            return;
-        }
-        setShowCheckoutConfirm(true);
-    };
+const handleCheckout = () => {
+    if (selectedItems.length === 0) {
+        alert('Pilih minimal satu barang ya bro');
+        return;
+    }
+    if (!rentalDate) {
+        setShowDateAlert(true); // Ganti alert dengan modal
+        return;
+    }
+    setShowCheckoutConfirm(true);
+};
+
+const closeAlertDate = () => {
+    setShowDateAlert(false);
+};
 
     const confirmCheckout = () => {
         const selectedData = selectedItems.map((i) => ({
@@ -505,6 +511,45 @@ const Keranjang = () => {
                     </div>
                 </div>
             )}
+
+            {showDateAlert && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+        <div className="animate-in fade-in-0 zoom-in-95 w-full max-w-lg duration-200">
+            <div className="rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-slate-200 sm:p-8">
+                {/* Icon */}
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 sm:mb-6 sm:h-16 sm:w-16">
+                    <svg
+                        className="h-6 w-6 text-amber-600 sm:h-8 sm:w-8"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                </div>
+
+                {/* Content */}
+                <div className="text-center">
+                    <h3 className="mb-2 text-lg font-bold text-slate-900 sm:mb-3 sm:text-xl">Tanggal Sewa Belum Dipilih</h3>
+                    <p className="mb-6 text-sm leading-relaxed text-slate-600 sm:mb-8 sm:text-base">
+                        Pilih tanggal sewa terlebih dahulu sebelum melanjutkan ke checkout ya bro!
+                    </p>
+                </div>
+
+                {/* Button */}
+                <div className="flex justify-center">
+                    <button
+                        onClick={closeAlertDate}
+                        className="transform rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:from-amber-600 hover:to-amber-700 hover:shadow-xl focus:ring-4 focus:ring-amber-200 sm:px-8 sm:text-base"
+                    >
+                        Mengerti
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+)}
         </div>
     );
 };

@@ -230,7 +230,7 @@ export default function AdminProfile() {
                         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                             <div className="py-6 flex justify-between items-center">
                                 <div>
-                                    <h1 className="text-3xl font-bold text-gray-900">Profil Admin</h1>
+                                    <h1 className="text-3xl font-bold text-gray-900">Profil Staff</h1>
                                     <p className="mt-1 text-gray-600">Kelola informasi profil Anda</p>
                                 </div>
                             </div>

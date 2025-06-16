@@ -114,9 +114,10 @@ const StaffLayout: React.FC<StaffLayoutProps> = ({ title, children }) => {
         <div>
           {/* Logo & Brand */}
           <div className="flex items-center gap-3 mb-8 px-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+            <div></div>
+            {/* <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
               <i className="fas fa-camera text-white text-lg drop-shadow-sm"></i>
-            </div>
+            </div> */}
             {!sidebarCollapsed && (
               <div>
                 <span className="text-gray-800 font-bold text-base tracking-wide block bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text">REV PICTURE</span>

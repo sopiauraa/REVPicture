@@ -10,13 +10,13 @@ class Product extends Model
     /** @use HasFactory<\Database\Factories\ProductFactory> */
     use HasFactory;
     public $timestamps = false;
+    
     protected $primaryKey = 'product_id';
 
     protected $fillable = [
         'product_type',
         'product_name',
         'product_description',
-        'product_image',
         'product_image',
         'brand',
         'eight_hour_rent_price',

@@ -11,10 +11,10 @@ class Sewa extends Model
     public $incrementing = true;
     protected $keyType = 'int';
 
-    protected $fillable = ['order_id', 'product_id', 'day_rent', 'due_on', 'status'];
+    protected $fillable = ['order_id', 'product_id', 'day_rent', 'due_on'];
 
     public function order()
     {
-        return $this->belongsTo(Order::class);
+        return $this->belongsTo(Order::class, 'order_id', 'order_id');
     }
 }

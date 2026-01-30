@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('product_name');
             $table->text('product_description');
             $table->text('product_image');
-            $table->string('brand');
+            $table->enum('brand', ['Canon', 'Nikon', 'Sony', 'Fujifilm', 'Lumix']);
             $table->integer('eight_hour_rent_price');
             $table->integer('twenty_four_hour_rent_price');
             $table->timestamp('last_updated')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')); 

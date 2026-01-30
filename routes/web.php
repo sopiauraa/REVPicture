@@ -3,66 +3,265 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Stock;
-use App\Http\Controllers\Ordercontroller;
+use App\Models\User;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SewaController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\KalenderController;
 use Inertia\Inertia;
-    
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Support\Facades\Password;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
 
+Route::get('/', [ProductController::class, 'showLanding'])->name('home');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/customer', [ProductController::class, 'showLanding'])->name('home.after_login');
+});
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     Route::get('dashboard', function () {
 //         return Inertia::render('dashboard');
 //     })->name('dashboard');
 // });
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect('/'); // or wherever you want
+})->middleware(['auth', 'signed'])->name('verification.verify');
 
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('status', 'verification-link-sent');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 Route::get('/login', [AuthenticatedSessionController::class, 'index']);
 
-// landing
-Route::get('/landing', function () { return Inertia::render('landing');});
 
-// admin
-Route::get('/admin/dashboard', function () { return Inertia::render('admin/dashboard'); });
-//Route::get('/admin/databarang', function () { return Inertia::render('admin/databarang'); });
-Route::get('/admin/BookingMasuk', function () { return Inertia::render('admin/BookingMasuk'); });
+Route::get('/forgot-password', function () {
+    return inertia('auth/forgot-password');
+})->middleware('guest')->name('password.request');
+
+Route::post('/forgot-password', function (\Illuminate\Http\Request $request) {
+    $request->validate(['email' => 'required|email']);
+    $status = Password::sendResetLink($request->only('email'));
+    return back()->with('status', __($status));
+})->middleware('guest')->name('password.email');
+
+Route::get('/reset-password/{token}', function ($token) {
+    return inertia('auth/reset-password', ['token' => $token, 'email' => request('email')]);
+})->middleware('guest')->name('password.reset');
+
+Route::post('/reset-password', function (\Illuminate\Http\Request $request) {
+    $request->validate([
+        'token' => 'required',
+        'email' => 'required|email',
+        'password' => 'required|min:8|confirmed',
+    ]);
+    $status = Password::reset(
+        $request->only('email', 'password', 'password_confirmation', 'token'),
+        function ($user, $password) {
+            $user->forceFill([
+                'password' => \Illuminate\Support\Facades\Hash::make($password)
+            ])->save();
+            event(new \Illuminate\Auth\Events\PasswordReset($user));
+        }
+    );
+    return $status === Password::PASSWORD_RESET
+        ? redirect()->route('login')->with('status', __($status))
+        : back()->withErrors(['email' => [__($status)]]);
+})->middleware('guest')->name('password.update');
+
+Route::get('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+Route::get('/brand', function () {
+    return Inertia::render('brand');
+});
+Route::get('/kamera', function () {
+    return Inertia::render('kamera');
+});
+Route::get('/lensa', function () {
+    return Inertia::render('lensa');
+});
+Route::get('/paket', function () {
+    return Inertia::render('paket');
+});
+
+//Verifikasi Email
+Route::get('/email/verify', function () {
+    return inertia('auth/verify-email');
+})->middleware('auth')->name('verification.notice');
+
+
+// admindashboard
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/admin/dashboard', function () {
+        return Inertia::render('admin/dashboard');
+    })->name('admin.dashboard');
+});
+Route::get('/dashboard-stats', [DashboardController::class, 'stats']);
+Route::get('/dashboard-stats', [DashboardController::class, 'getDashboardStats']);
+Route::get('/recent-bookings', [DashboardController::class, 'getRecentBookings']);
 
 Route::prefix('admin')->group(function () {
-    Route::post('/products/store', [ProductController::class, 'store'])->name('admin.products.store');
+    Route::post('/product/store', [ProductController::class, 'store'])->name('admin.product.store');
     Route::get('/databarang', [ProductController::class, 'admin'])->name('admin.databarang');
+    Route::delete('/product/delete/{product_id}', [ProductController::class, 'destroy'])->name('admin.product.destroy');
+
 });
 
-Route::get('/landing', function () {
-    return Inertia::render('landing'); });
+// Route::middleware(['auth', 'admin'])->group(function () {
+//     // Perbaiki route structure
+//     Route::match(['POST', 'PUT'], '/product/update/{product_id}', [ProductController::class, 'update'])
+//         ->name('admin.product.update');
 
-Route::prefix('staff')->group(function () {
-    Route::post('/products/store', [ProductController::class, 'store'])->name('staff.products.store');
-    Route::get('/data_barang', [ProductController::class, 'index'])->name('staff.staff_data_barang');
-});
-Route::get('/staff/data_customer', function () {
+//     // Delete product
+//     Route::delete('/product/delete/{id}', [ProductController::class, 'destroy'])
+//         ->name('admin.product.delete');
+// });
+
+Route::match(['POST', 'PUT'], '/admin/product/update/{product_id}', [ProductController::class, 'update'])
+    ->name('admin.product.update');
+
+Route::get('/admin/datacustomer', function () {
     $customers = Customer::select('customer_id', 'customer_name', 'phone_number', 'address', 'social_media')->get();
-    return Inertia::render('staff/staff_data_customer', [
+    return Inertia::render('admin/datacustomer', [
         'customers' => $customers,
     ]);
 });
-Route::get('/staff/data_booking', [OrderController::class, 'index']);
-Route::patch('/staff/data_booking/{order}', [OrderController::class, 'update']);
 
+// Route::get('/admin/bookingmasuk', [OrderController::class, 'indexadmin']);
+// Route::patch('/admin/bookingmasuk/{order}', [OrderController::class, 'update']);
+Route::get('/admin/bookingmasuk', [OrderController::class, 'adminindex']);
+Route::patch('/admin/data_booking/{order_id}', [OrderController::class, 'adminupdate']);
+Route::delete('/admin/data_booking/{order_id}', [OrderController::class, 'admindestroy']);
+
+Route::get('/admin/datapenyewaan', [SewaController::class, 'adminindex']);
+Route::patch('/admin/datapenyewaan/{order_id}', [SewaController::class, 'adminupdate']);
+//Route::delete('/admin/datapenyewaan/{order_id}', [SewaController::class, 'admindestroy']);
+Route::get('/admin/history', [OrderController::class, 'historyadmin']);
+Route::get('/admin/kalender', [KalenderController::class, 'index'])->name('kalender.index');
+Route::get('/admin/adminprofil', function () {
+    return Inertia::render('Admin/adminprofil');
+})->name('admin.profil');
+Route::middleware(['auth'])->group(function () {
+    // Profile routes
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+});
+
+// landing
+Route::get('/landing', function () {
+    return Inertia::render('landing');
+})->name('landing');
+
+Route::prefix('admin')->group(function () {
+    // API routes untuk user management
+    Route::get('/users', [UserManagementController::class, 'index'])->name('admin.users.index');
+    Route::get('/users/{userId}', [UserManagementController::class, 'show'])->name('admin.users.show');
+    Route::put('/users/{userId}', [UserManagementController::class, 'update'])->name('admin.users.update');
+    Route::delete('/users/{userId}', [UserManagementController::class, 'destroy'])->name('admin.users.destroy');
+    Route::post('/users', [UserManagementController::class, 'store'])->name('admin.users.store');
+    Route::put('/users/{userId}/role', [UserManagementController::class, 'updateRole'])->name('admin.users.update-role');
+    Route::put('/users/{userId}/status', [UserManagementController::class, 'toggleStatus'])->name('admin.users.toggle-status');
+    Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('products.destroy');
+});
+Route::get('/admin/usermanagement', function () {
+    return Inertia::render('Admin/UserManagement');
+})->name('admin.usermanagement');
+
+
+Route::prefix('staff')->group(function () {
+    // Route::post('/products/store', [ProductController::class, 'store'])->name('staff.products.store');
+    Route::get('/data_barang', [ProductController::class, 'index'])->name('staff.staff_data_barang');
+    Route::put('/users/{userId}', [UserManagementController::class, 'update'])->name('staff.users.update');
+    Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('products.destroy');
+});
+
+Route::match(['POST', 'PUT'], '/staff/product/update/{product_id}', [ProductController::class, 'update'])
+    ->name('staff.product.update');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/staff/data_customer', function () {
+        $customers = Customer::select('customer_id', 'customer_name', 'phone_number', 'address', 'social_media')->get();
+        return Inertia::render('staff/staff_data_customer', [
+            'customers' => $customers,
+        ]);
+    });
+});
+Route::get('/staff/data_booking', [OrderController::class, 'index']);
+Route::patch('/staff/data_booking/{order_id}', [OrderController::class, 'update']);
+Route::delete('/staff/data_booking/{order_id}', [OrderController::class, 'destroy']);
+Route::get('/staff/kalender', [KalenderController::class, 'staffIndex'])->name('kalender.staffIndex');
 Route::get('staff/data_sewa', [SewaController::class, 'index']);
 Route::patch('/staff/data_sewa/{rental}', [SewaController::class, 'update']);
+Route::get('/data_barang', function () {
+    return Inertia::render('StaffDataBarang');
+});
+Route::get('/staff/history', [OrderController::class, 'history']);
+Route::get('/staff/staffprofil', function () {
+    return Inertia::render('staff/staffprofil');
+})->name('staff.profil');
 
-
-Route::get('/data_barang', function () { return Inertia::render('StaffDataBarang');});
 //Display Product (Landing)
 Route::get('/shop', [ProductController::class, 'index']);
+// user
+Route::get('detailproduk', function () {
+    return Inertia::render('detailproduk');
+});
+Route::get('/keranjang', function () {
+    return Inertia::render('keranjang');
+});
+Route::get('/formdatadiri', function () {
+    $user = auth()->user();
+    $userId = $user ? $user->user_id : null;
+
+    // Get the latest order for this user (if any)
+    $latestOrder = null;
+    $customer = null;
+    if ($userId) {
+        $latestOrder = \App\Models\Order::whereHas('customer', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })->latest('order_date')->first();
+        $customer = $latestOrder
+            ? $latestOrder->customer
+            : Customer::where('user_id', $userId)->latest()->first();
+    }
+
+    // Use request data if present, otherwise use latest customer data
+    $customer_id = request('customer_id') ?? ($customer?->customer_id ?? '');
+    $customer_name = request('customer_name') ?? ($customer?->customer_name ?? '');
+    $phone_number = request('phone_number') ?? ($customer?->phone_number ?? '');
+    $address = request('address') ?? ($customer?->address ?? '');
+    $social_media = request('social_media') ?? ($customer?->social_media ?? '');
+
+    return Inertia::render('formdatadiri', [
+        'customer_id' => $customer_id,
+        'customer_name' => $customer_name,
+        'phone_number' => $phone_number,
+        'address' => $address,
+        'social_media' => $social_media,
+        'selectedItems' => request()->input('selectedItems', []),
+        'totalHarga' => request()->input('totalHarga', 0),
+    ]);
+});
+
+Route::middleware(['auth'])->get('/customers', [OrderController::class, 'getCustomer'])->name('customers.getCustomer');
+
+Route::post('/checkout', [OrderController::class, 'store'])->middleware('auth')->name('checkout');
+Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.show');
+Route::get('/customerprofile', function () {
+    return Inertia::render('CustomerProfile');
+});
+Route::get('/order-history', [OrderController::class, 'historycustomer'])->name('order.historycustomer');
+Route::get('/status-order', [OrderController::class, 'statusorder'])->name('status.order');
 
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

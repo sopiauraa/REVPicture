@@ -213,64 +213,129 @@ const filteredOrders = useMemo(() => {
         const year = type === 'monthly' ? selectedMonthYear : selectedYear;
         const rekap = generateRekap(type, month, year);
         
-        const printContent = `
-            <html>
-            <head>
-                <title>Rekap Penyewaan ${type === 'monthly' ? 'Bulanan' : 'Tahunan'}</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    .header { text-align: center; margin-bottom: 30px; }
-                    .summary { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-                    .summary-item { margin: 10px 0; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                    th { background-color: #f8f9fa; }
-                    .price { color: #16a34a; font-weight: bold; }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <h1>Rekap Penyewaan ${type === 'monthly' ? 'Bulanan' : 'Tahunan'}</h1>
-                    <p>Periode: ${rekap.periode}</p>
-                    <p>Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
-                </div>
-                
-                <div class="summary">
-                    <h3>Ringkasan</h3>
-                    <div class="summary-item"><strong>Total Transaksi:</strong> ${rekap.totalTransaksi}</div>
-                    <div class="summary-item"><strong>Total Pendapatan:</strong> Rp ${rekap.totalPendapatan.toLocaleString()}</div>
-                    <div class="summary-item"><strong>Total Pelanggan:</strong> ${rekap.totalPelanggan}</div>
-                    <div class="summary-item"><strong>Item Terpopuler:</strong> ${rekap.topProduct}</div>
-                </div>
+const printContent = `
+<html>
+<head>
+  <title>Rekap Penyewaan ${type === 'monthly' ? 'Bulanan' : 'Tahunan'}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      font-size: 12px;
+      color: #333;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 20px;
+      color: #1f2937;
+    }
+    .summary {
+      background: #f0f4f8;
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 24px;
+    }
+    .summary h3 {
+      margin-top: 0;
+      font-size: 16px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 6px;
+    }
+    .summary-item {
+      margin: 6px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #d1d5db;
+      padding: 8px 10px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background-color: #f3f4f6;
+      color: #111827;
+    }
 
-                <h3>Detail Transaksi</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Tanggal</th>
-                            <th>Pelanggan</th>
-                            <th>Barang</th>
-                            <th>Durasi</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rekap.orders.map((order, idx) => `
-                            <tr>
-                                <td>${idx + 1}</td>
-                                <td>${order.order_date}</td>
-                                <td>${order.customer_name}</td>
-                                <td>${order.products.map(p => p.name).join(', ')}</td>
-                                <td>${order.day_rent} hari</td>
-                                <td class="price">Rp ${order.price.toLocaleString()}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </body>
-            </html>
-        `;
+    /* Kolom khusus */
+    td.no,
+    td.date,
+    td.customer,
+    td.duration,
+    td.price {
+      white-space: nowrap;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    td.price {
+      color: #15803d;
+      font-weight: bold;
+      text-align: right;
+    }
+
+    /* Barang bisa wrap */
+    td.products {
+      white-space: normal;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h3 style="margin-bottom: 4px;">REVPicture</h3>
+    <h1>Rekap Penyewaan ${type === 'monthly' ? 'Bulanan' : 'Tahunan'}</h1>
+    <p>Periode: ${rekap.periode}</p>
+    <p>Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
+  </div>
+
+  <div class="summary">
+    <h3>Ringkasan</h3>
+    <div class="summary-item"><strong>Total Transaksi:</strong> ${rekap.totalTransaksi}</div>
+    <div class="summary-item"><strong>Total Pendapatan:</strong> Rp ${rekap.totalPendapatan.toLocaleString()}</div>
+    <div class="summary-item"><strong>Total Pelanggan:</strong> ${rekap.totalPelanggan}</div>
+    <div class="summary-item"><strong>Item Terpopuler:</strong> ${rekap.topProduct}</div>
+  </div>
+
+  <h3 style="font-size: 16px; margin-bottom: 8px;">Detail Transaksi</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Tanggal</th>
+        <th>Pelanggan</th>
+        <th>Barang</th>
+        <th>Durasi</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rekap.orders.map((order, idx) => `
+        <tr>
+          <td class="no">${idx + 1}</td>
+          <td class="date">${order.order_date}</td>
+          <td class="customer">${order.customer_name}</td>
+          <td class="products">${order.products.map(p => p.name).join(', ')}</td>
+          <td class="duration">${order.day_rent} hari</td>
+          <td class="price">Rp ${order.price.toLocaleString()}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+</body>
+</html>
+`;
+
+
 
         const printWindow = window.open('', '_blank');
         if (printWindow) {
